@@ -1,0 +1,8 @@
+coverage==5.5
+flake8==3.9.2
+flake8-docstrings==1.6.0
+isort==5.8.0
+moto[all]==2.0.10
+mypy==0.812
+pylint==2.8.2
+pytest-cov==2.12.0

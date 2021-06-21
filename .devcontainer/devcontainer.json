@@ -1,0 +1,65 @@
+{
+	"name": "cdpctl",
+	"context": "..",
+	"runArgs": [
+		"-e",
+		"GIT_EDITOR=code --wait"
+	],
+	"mounts": [
+		"source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind",
+		"source=${env:HOME}${env:USERPROFILE}/.aws,target=/home/runner/.aws,type=bind",
+		"source=${env:HOME}${env:USERPROFILE}/.ssh,target=/home/runner/.ssh,type=bind",
+		"source=${env:HOME}${env:USERPROFILE}/.cdp,target=/home/runner/.cdp,type=bind",
+		"source=${env:HOME}${env:USERPROFILE}/.config,target=/home/runner/.config,type=bind",
+		"source=${env:HOME}${env:USERPROFILE}/.azure,target=/home/runner/.azure,type=bind",
+		"source=${env:HOME}${env:USERPROFILE}/.kube,target=/home/runner/.kube,type=bind",
+		"source=${env:HOME}${env:USERPROFILE}/.gnupg,target=/home/runner/.gnupg,type=bind"
+	],
+	"containerEnv": {
+		"ANSIBLE_LOG_PATH": "/home/runner/.config/cloudera-deploy/log/development",
+		"ANSIBLE_INVENTORY": "inventory",
+		"ANSIBLE_CALLBACK_WHITELIST": "ansible.posix.profile_tasks",
+		"ANSIBLE_GATHERING": "smart",
+		"ANSIBLE_DEPRECATION_WARNINGS": "false",
+		"ANSIBLE_HOST_KEY_CHECKING": "false",
+		"ANSIBLE_SSH_RETRIES": "10",
+		"ANSIBLE_COLLECTIONS_PATH": "/opt/cldr-runner/collections",
+		"ANSIBLE_ROLES_PATH": "/opt/cldr-runner/roles",
+		"AWS_DEFAULT_OUTPUT": "json"
+	},
+	"extensions": [
+		"ms-python.vscode-pylance",
+		"visualstudioexptteam.vscodeintellicode",
+		"ms-azure-devops.azure-pipelines",
+		"redhat.vscode-yaml",
+		"esbenp.prettier-vscode",
+		"amazonwebservices.aws-toolkit-vscode",
+		"eamodio.gitlens",
+		"psioniq.psi-header"
+	],
+	"settings": {
+		"terminal.integrated.shell.linux": "/bin/bash",
+		"python.pythonPath": "/usr/local/bin/python",
+		"python.linting.pylintEnabled": true,
+		"python.linting.enabled": true,
+		"python.formatting.provider": "black",
+		"python.testing.pytestArgs": [
+			"--no-cov",
+			"tests"
+		],
+		"python.testing.pytestEnabled": true,
+		"editor.formatOnPaste": false,
+		"editor.formatOnSave": true,
+		"editor.formatOnType": true,
+		"files.trimTrailingWhitespace": true,
+		"yaml.customTags": [
+			"!input scalar",
+			"!secret scalar",
+			"!include_dir_named scalar",
+			"!include_dir_list scalar",
+			"!include_dir_merge_list scalar",
+			"!include_dir_merge_named scalar"
+		]
+	},
+	"dockerFile": "../Dockerfile.dev"
+}

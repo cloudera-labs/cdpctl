@@ -1,0 +1,17 @@
+- hosts: all
+  remote_user: brian
+  tasks:
+    - name: This is running an ansible playbook
+      shell: /bin/sleep 2
+    - name: It would be the actual steps to setup cloud infrastructure
+      shell: /bin/sleep 2
+    - name: For example setting up the reference architecture with configurtion values
+      shell: /bin/sleep 2
+    - name: simple ping of remote host
+      ping:
+    - name: running a command and ignore the result
+      shell: /bin/true
+    - name: sleeping for effect
+      shell: /bin/sleep 5
+    - name: another sleep with command after
+      shell: /bin/sleep 5 || /bin/echo "foo bar"

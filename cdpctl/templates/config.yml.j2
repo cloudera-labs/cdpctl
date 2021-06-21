@@ -1,0 +1,127 @@
+##
+# Cloudera cdpctl config
+##
+
+## Specifies the Cloud Infrastructure provider.
+# options: aws
+# example: aws
+infra_type: {{ info['infra_type']|default("", true) }}
+
+## The network type being targeted
+# options: level0, level1
+# example: level1
+network_type:
+
+globals:
+  ssh:
+    ## The AWS SSH Public Key ID to use
+    # example: some-key-name
+    public_key_id: {{ info['globals:ssh:public_key_id']|default("", true) }}
+
+## Specify the default region you prefer for your infrastructure provider
+## It must be valid for the selected infra_type
+env:
+  ## Will Cluster Connectivity Manager (CCM) be used.
+  # options: true, false
+  # example: false
+  tunnel:
+
+  cdp:
+    cross_account:
+      ## The AWS Account ID to setup the cross account role for.
+      # AWS account ID is provided in the CDP Management Console
+      # when creating a new Environment.
+      # example:  123456789012
+      account_id:
+
+      ## The AWS external ID to setup the cross account role for.
+      # AWS external ID is provided in the CDP Management Console
+      # when creating a new Environment.
+      # example: 7d5956f8-30a7-425f-9224-724cd48b42f3
+      external_id:
+
+  aws:
+    role:
+      name:
+        ## The Cross Account Role to be used for the environment
+        # example: aws-cdp-cross-account-role
+        cross_account: {{ info['env:aws:policy:role:name:cross_account']|default("", true) }}
+
+        ## The Data Access role for the Datalake
+        # example: aws-cdp-datalake-admin-role
+        datalake_admin: {{ info['env:aws:policy:role:name:datalake_admin']|default("", true) }}
+
+        ## The Ranger Audit Role
+        # example: aws-cdp-ranger-audit-role
+        ranger_audit: {{ info['env:aws:policy:role:name:ranger_audit']|default("", true) }}
+    instance_profile:
+      name:
+        ## The Assumer Instance Profile
+        # example: aws-cdp-idbroker-assume-role-instance-profile
+        idbroker: {{ info['env:aws:policy:role:name:idbroker']|default("", true) }}
+
+        ## The Logger Instance Profile
+        # example: aws-cdp-log-role-instance-profile
+        log: {{ info['env:aws:policy:role:name:log']|default("", true) }}
+
+infra:
+  aws:
+    dynamodb:
+      ## The DynamoDB Table name for S3 Guard
+      # example: my-env-table
+      table_name:
+
+    ## AWS Profile to use
+    # The local AWS profile you are using.
+    profile: {{ info['infra:aws:profile']|default("", true) }}
+
+    ## The AWS Region for the infrastrcture
+    region: {{ info['infra:aws:region']|default("", true) }}
+
+    vpc:
+      existing:
+        ## The AWS VPC ID to use.
+        # example: vpc-000000000
+        vpc_id: {{ info["infra:aws:vpc:existing:vpc_id"]|default("", true) }} {% if info["infra:aws:vpc:existing:vpc_name"] %}# {{ info["infra:aws:vpc:existing:vpc_name"] }}{%endif%}
+
+        ## The list of Public AWS Subnet Ids
+        # example: [subnet-00000000000000000, subnet-00000000000000001]
+        public_subnet_ids:
+          {%- for subnet in info['infra:aws:vpc:existing:public_subnet_ids'] %}
+          - {{ subnet['id'] }} # {{ subnet['name'] }}
+          {%- endfor %}
+
+        ## The list of Private AWS Subnet Ids
+        # example: [subnet-00000000000000000, subnet-00000000000000001]
+        private_subnet_ids:
+          {%- for subnet in info['infra:aws:vpc:existing:private_subnet_ids'] %}
+          - {{ subnet['id'] }} # {{ subnet['name'] }}
+          {%- endfor %}
+
+        security_groups:
+
+          ## The Default Security Group information to be used on most nodes
+          # example: sg-00000000000000000
+          default_id: {{ info['infra:aws:vpc:existing:default_id']|default("", true) }}
+
+          ## The Gateway Nodes Security Group information
+          # example: sg-00000000000000000
+          knox_id:{{ info['infra:aws:vpc:existing:knox_id']|default("", true) }}
+
+        storage:
+          ## The Storage location base for the Datalake
+          # example: s3a://my-bucket/backup
+          backup: {{ info['infra:storage:path:backup']|default("", true) }}
+
+          ## The Storage location base for the Datalake
+          # example: s3a://my-bucket/data
+          data: {{ info['infra:storage:path:data']|default("", true) }}
+
+          ## The Logs location base path
+          # example: s3a://my-bucket/logs
+          logs: {{ info['infra:storage:path:logs']|default("", true) }}
+
+          ## The Ranger Audit location base path
+          # example: s3a://my-bucket/ranger/audit
+          ranger_audit: {{ info['infra:storage:path:ranger_audit']|default("", true) }}
+

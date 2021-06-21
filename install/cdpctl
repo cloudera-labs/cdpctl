@@ -1,0 +1,155 @@
+#!/usr/bin/env bash
+# -*- coding:utf-8 -*-
+###
+# CLOUDERA CDP Control (cdpctl)
+#
+# (C) Cloudera, Inc. 2021-2021
+# All rights reserved.
+#
+# Applicable Open Source License: GNU AFFERO GENERAL PUBLIC LICENSE
+#
+# NOTE: Cloudera open source products are modular software products
+# made up of hundreds of individual components, each of which was
+# individually copyrighted.  Each Cloudera open source product is a
+# collective work under U.S. Copyright Law. Your license to use the
+# collective work is as provided in your written agreement with
+# Cloudera.  Used apart from the collective work, this file is
+# licensed for your use pursuant to the open source license
+# identified above.
+#
+# This code is provided to you pursuant a written agreement with
+# (i) Cloudera, Inc. or (ii) a third-party authorized to distribute
+# this code. If you do not have a written agreement with Cloudera nor
+# with an authorized and properly licensed third party, you do not
+# have any rights to access nor to use this code.
+#
+# Absent a written agreement with Cloudera, Inc. (“Cloudera”) to the
+# contrary, A) CLOUDERA PROVIDES THIS CODE TO YOU WITHOUT WARRANTIES OF ANY
+# KIND; (B) CLOUDERA DISCLAIMS ANY AND ALL EXPRESS AND IMPLIED
+# WARRANTIES WITH RESPECT TO THIS CODE, INCLUDING BUT NOT LIMITED TO
+# IMPLIED WARRANTIES OF TITLE, NON-INFRINGEMENT, MERCHANTABILITY AND
+# FITNESS FOR A PARTICULAR PURPOSE; (C) CLOUDERA IS NOT LIABLE TO YOU,
+# AND WILL NOT DEFEND, INDEMNIFY, NOR HOLD YOU HARMLESS FOR ANY CLAIMS
+# ARISING FROM OR RELATED TO THE CODE; AND (D)WITH RESPECT TO YOUR EXERCISE
+# OF ANY RIGHTS GRANTED TO YOU FOR THE CODE, CLOUDERA IS NOT LIABLE FOR ANY
+# DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, PUNITIVE OR
+# CONSEQUENTIAL DAMAGES INCLUDING, BUT NOT LIMITED TO, DAMAGES
+# RELATED TO LOST REVENUE, LOST PROFITS, LOSS OF INCOME, LOSS OF
+# BUSINESS ADVANTAGE OR UNAVAILABILITY, OR LOSS OR CORRUPTION OF
+# DATA.
+#
+# Source File Name:  cdpctl
+set -e
+
+IMAGE_NAME="ghcr.io/cloudera-labs/cdpctl"
+IMAGE_VER=${image_ver:-latest}
+IMAGE_TAG=${IMAGE_VER}
+IMAGE_FULL_NAME=${IMAGE_NAME}:${IMAGE_TAG}
+CONTAINER_NAME=cdpctl
+
+DEFAULT_CONFIG_FILE="config.yml"
+
+# dir of script
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
+# parent dir of that dir
+PARENT_DIRECTORY="${DIR%/*}"
+
+{ docker info >/dev/null 2>&1; } || { echo "Docker is required and does not seem to be running - please start Docker and retry" ; exit 1; }
+
+# docker pull "${IMAGE_NAME}:${IMAGE_TAG}"
+
+for thisdir in ".aws" ".ssh" ".cdp" ".azure" ".kube" ".config"
+do
+  mkdir -p "${HOME}"/$thisdir
+done
+
+CONFIGPATH=$DEFAULT_CONFIG_FILE
+CONFIGDIR=$(cd "$(dirname "$CONFIGPATH")"; pwd)
+CONFIGFILE=$(basename $CONFIGPATH)
+
+DOCKER_ARGUMENTS=()
+DOCKER_MOUNTS=()
+while [[ $# -gt 0 ]]; do
+  key="$1"
+
+  case $key in
+    -c|--config_file)
+      CONFIGDIR=$(cd "$(dirname "$2")"; pwd)
+      CONFIGFILE=$(basename $2)
+      DOCKER_ARGUMENTS+=("--config_file")
+      DOCKER_ARGUMENTS+=("${CONFIGDIR}/${CONFIGFILE}")
+      shift # past argument
+      shift # past value
+      ;;
+    -o|--output_file)
+      OUTPUTDIR=$(cd "$(dirname "$2")"; pwd)
+      OUTPUTFILE=$(basename $2)
+      DOCKER_ARGUMENTS+=("--output_file")
+      if [[ "-"  != "${2}" ]]; then
+        DOCKER_ARGUMENTS+=("${OUTPUTDIR}/${OUTPUTFILE}")
+        DOCKER_MOUNTS+=("--mount|type=bind,source=${OUTPUTDIR},target=${OUTPUTDIR}")
+      else
+        DOCKER_ARGUMENTS+=("-")
+      fi
+      shift # past argument
+      shift # past value
+      ;;
+    *)    # unhandled option
+      DOCKER_ARGUMENTS+=("$1") # save it in an array for later
+      shift # past argument
+      ;;
+  esac
+done
+
+DOCKER_MOUNTS+=("--mount|type=bind,source=${CONFIGDIR},target=${CONFIGDIR}")
+
+
+# Make sure there are not duplicae mount points
+DOCKER_MOUNT_LINE=$(echo "${DOCKER_MOUNTS[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ' | tr '|' ' ')
+
+AWS_ENV_VARS=
+
+if [[ ! -z "${AWS_ACCESS_KEY_ID}" ]]; then
+  AWS_ENV_VARS="${AWS_ENV_VARS} -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}"
+fi
+
+if [[ ! -z "${AWS_SECRET_ACCESS_KEY}" ]]; then
+  AWS_ENV_VARS="${AWS_ENV_VARS} -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}"
+fi
+
+if [[ ! -z "${AWS_DEFAULT_REGION}" ]]; then
+  AWS_ENV_VARS="${AWS_ENV_VARS} -e AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}"
+fi
+if [[ ! -z "${AWS_PROFILE}" ]]; then
+  AWS_ENV_VARS="${AWS_ENV_VARS} -e AWS_PROFILE=${AWS_PROFILE}"
+fi
+
+exec docker run -ti \
+    --rm \
+    --log-driver=none -a stdin -a stdout -a stderr \
+    --detach-keys="ctrl-@" \
+    --mount type=bind,src=${SSH_AUTH_SOCK},target=/run/host-services/ssh-auth.sock \
+    -e SSH_AUTH_SOCK="/run/host-services/ssh-auth.sock" \
+    -e ANSIBLE_LOG_PATH="/home/runner/.config/cloudera-deploy/log/${CLDR_BUILD_VER:-latest}-$(date +%F_%H%M%S)" \
+    -e ANSIBLE_INVENTORY="inventory" \
+    -e ANSIBLE_CALLBACK_WHITELIST="ansible.posix.profile_tasks" \
+    -e ANSIBLE_GATHERING="smart" \
+    -e ANSIBLE_DEPRECATION_WARNINGS=false \
+    -e ANSIBLE_HOST_KEY_CHECKING=false \
+    -e ANSIBLE_SSH_RETRIES=10 \
+    -e ANSIBLE_COLLECTIONS_PATH="${ANSIBLE_COLLECTIONS_PATH}" \
+    -e ANSIBLE_ROLES_PATH="/opt/cldr-runner/roles" \
+    -e AWS_DEFAULT_OUTPUT="json" \
+    -e HOME="/home/runner" \
+    ${AWS_ENV_VARS} \
+    --mount "type=bind,source=${HOME}/.aws,target=/home/runner/.aws" \
+    --mount "type=bind,source=${HOME}/.config,target=/home/runner/.config" \
+    --mount "type=bind,source=${HOME}/.ssh,target=/home/runner/.ssh" \
+    --mount "type=bind,source=${HOME}/.cdp,target=/home/runner/.cdp" \
+    --mount "type=bind,source=${HOME}/.azure,target=/home/runner/.azure" \
+    --mount "type=bind,source=${HOME}/.kube,target=/home/runner/.kube" \
+    ${DOCKER_MOUNT_LINE} \
+    --network="host" \
+    --name "${CONTAINER_NAME}" \
+    "${IMAGE_FULL_NAME}" \
+    /usr/local/bin/cdpctl ${DOCKER_ARGUMENTS[*]}

@@ -1,0 +1,8 @@
+version: '2'
+services:
+  validation:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/workspaces

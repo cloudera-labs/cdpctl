@@ -1,0 +1,68 @@
+{
+    "environment": {
+      "environmentName": "",
+      "credentialName": "",
+      "region": "",
+      "securityAccess": {
+        "cidr": "",
+        "securityGroupIdForKnox": "",
+        "defaultSecurityGroupId": ""
+      },
+      "authentication": {
+        "publicKey": "",
+        "publicKeyId": ""
+      },
+      "logStorage": {
+        "storageLocationBase": "s3a://eng-sdx-daily-datalake/cdw-idbroker-work/logs",
+        "instanceProfile": "arn:aws:iam::308408126366:instance-profile/mow-dev"
+      },
+      "networkCidr": "",
+      "vpcId": "",
+      "subnetIds": [
+        ""
+      ],
+      "endpointAccessGatewayScheme": "",
+      "endpointAccessGatewaySubnetIds": [
+        ""
+      ],
+      "s3GuardTableName": "",
+      "description": "",
+      "enableTunnel": true,
+      "workloadAnalytics": true,
+      "reportDeploymentLogs": true,
+      "freeIpa": {
+        "instanceCountByGroup": 0
+      },
+      "image": {
+        "catalog": "",
+        "id": ""
+      },
+      "tags": [
+        {
+          "key": "",
+          "value": ""
+        }
+      ],
+      "proxyConfigName": ""
+    },
+    "datalake": {
+      "datalakeName": "",
+      "environmentName": "",
+      "cloudProviderConfiguration": {
+        "instanceProfile": "arn:aws:iam::308408126366:instance-profile/mow-dev",
+        "storageBucketLocation":  "s3a://eng-sdx-daily-datalake/cdw-idbroker-work/data"
+      },
+      "scale": "",
+      "tags": [
+        {
+          "key": "",
+          "value": ""
+        }
+      ],
+      "runtime": "",
+      "image": {
+        "id": "",
+        "catalogName": ""
+      }
+    }
+  }
