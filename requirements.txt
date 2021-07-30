@@ -9,5 +9,5 @@ progressbar2==3.53.1
 pytest==6.2.4
 pytest-dependency==0.5.1
 pytest-order==1.0.0
-PyYAML==5.3.1
+PyYAML==5.4
 validators==0.18.2
