@@ -1,7 +1,6 @@
 
 # Cloudera Data Platform Control - **cdpctl**
 
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/cloudera-labs/cdpctl/Continuous%20Integration)  
 [![License: AGPL 3.0](https://img.shields.io/badge/license-AGPL%203.0-green)](https://www.gnu.org/licenses/agpl-3.0.txt)
 
 ## What is cdpctl
