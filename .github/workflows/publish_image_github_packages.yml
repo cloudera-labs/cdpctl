@@ -27,19 +27,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Create/update text file
-        run: |
-          echo "\"\"\"Version info.\"\"\"" > cdpctl/__version__.py
-          echo "__version__ = \"${{ env.RELEASE_VERSION }}\"" >> cdpctl/__version__.py
+      # - name: Create/update text file
+      #   run: |
+      #     echo "\"\"\"Version info.\"\"\"" > cdpctl/__version__.py
+      #     echo "__version__ = \"${{ env.RELEASE_VERSION }}\"" >> cdpctl/__version__.py
 
-      - name: Commit and Push
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # use account 'github-actions[bot]' to set the git config
-          git add -A
-          git commit -m "automated update of version for release"
-          git push
+      # - name: Commit and Push
+      #   run: |
+      #     git config --global user.name "github-actions[bot]"
+      #     git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      #     # use account 'github-actions[bot]' to set the git config
+      #     git add -A
+      #     git commit -m "automated update of version for release"
+      #     git push
 
       - name: Push to GitHub Packages
         uses: docker/build-push-action@v2.3.0
