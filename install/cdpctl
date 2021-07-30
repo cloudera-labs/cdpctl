@@ -56,7 +56,7 @@ PARENT_DIRECTORY="${DIR%/*}"
 
 { docker info >/dev/null 2>&1; } || { echo "Docker is required and does not seem to be running - please start Docker and retry" ; exit 1; }
 
-# docker pull "${IMAGE_NAME}:${IMAGE_TAG}"
+docker pull -q "${IMAGE_NAME}:${IMAGE_TAG}"
 
 for thisdir in ".aws" ".ssh" ".cdp" ".azure" ".kube" ".config"
 do
