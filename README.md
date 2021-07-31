@@ -7,9 +7,9 @@
 
 The cdpctl Command Line Interface (CLI) provides the ability to check your cloud network environment and see if it is ready to be used with Cloudera Data Platform (CDP) to create a CDP environment in. The validation command will run a series of checks to indicate if your cloud resources are configured according to CDP requirements. The output will be a listing of passing and failing validations such as below:
 
-> IdBroker role has the EC2 trust policy. ✔
-> Public subnets have minimum two availability zones. ✔
-> Public subnets have adequate IP range. ❌
+    IdBroker role has the EC2 trust policy. ✔ 
+    Public subnets have minimum two availability zones. ✔
+    Public subnets have adequate IP range. ❌
 
 ## Supported Public Clouds
 Currently, **cdpctl** only supports AWS.
