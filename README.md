@@ -5,7 +5,11 @@
 
 ## What is cdpctl
 
-The cdpctl Command Line Interface (CLI) provides the ability to check your cloud network environment and see if it is ready to be used with CDP to create a CDP environment in.
+The cdpctl Command Line Interface (CLI) provides the ability to check your cloud network environment and see if it is ready to be used with Cloudera Data Platform (CDP) to create a CDP environment in. The validation command will run a series of checks to indicate if your cloud resources are configured according to CDP requirements. The output will be a listing of passing and failing validations such as below:
+
+> IdBroker role has the EC2 trust policy. ✔
+> Public subnets have minimum two availability zones. ✔
+> Public subnets have adequate IP range. ❌
 
 ## Supported Public Clouds
 Currently, **cdpctl** only supports AWS.
@@ -14,7 +18,7 @@ Currently, **cdpctl** only supports AWS.
 
 **cdpctl** has the following requirements
 * Docker running locally.
-* Access to your ~/.aws directory for you profile and credentials or have the credenitals set via environment variables.
+* Access to your ~/.aws directory for your AWS profile and credentials, or have the credenitals set via environment variables.
 
 ## Using
 
@@ -33,11 +37,12 @@ In order to validate the environment you can run the validation command as follo
 
 `./cdpctl validate infra -c config.yml`
 
+
 ## Versioning
 
-CDP is constantly improving, adding freatures, and fixing issues. So **cdpctl** is versioned with a 
+CDP is constantly improving with new features and bug fixes, so **cdpctl** is versioned with a 
 date compatability in mind. The **cdpctl** script will always try to download the latest version of 
-the applocations Docker image. These images and the wrapping script are verioing with a timestamp
-in the form of **YYYY.MM.DD.Release**. This allows us to have a quick turn around with supporting 
-Cloudera CDP changes, and you can always know when a version getting out of date.  
+the source Docker image. These images and the wrapping script are versioned with a timestamp
+in the form of **YYYY.MM.DD.Release**. This allows us to have a quick turn around for any 
+Cloudera CDP changes, and you can always know when a version is out of date.  
   
