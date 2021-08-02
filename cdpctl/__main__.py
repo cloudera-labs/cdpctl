@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding:utf-8 -*-
 ###
 # CLOUDERA CDP Control (cdpctl)
 #
@@ -40,8 +39,6 @@
 #
 # Source File Name:  __main__.py
 ###
-#!/usr/bin/env python3
-
 """CDP Control."""
 from cdpctl import cli
 

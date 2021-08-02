@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding:utf-8 -*-
 ###
 # CLOUDERA CDP Control (cdpctl)
 #
@@ -45,13 +44,10 @@
 from typing import Any, Dict, List
 
 import pytest
+from boto3_type_annotations.iam import Client as EC2Client
 
 from cdpctl.validation import get_config_value
-
-from boto3_type_annotations.iam import Client as EC2Client
-from cdpctl.validation.aws_utils import (
-    get_client,
-)
+from cdpctl.validation.aws_utils import get_client
 
 subnets_data = {}
 

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding:utf-8 -*-
 ###
 # CLOUDERA CDP Control (cdpctl)
 #
@@ -44,10 +43,10 @@
 from typing import Any, Dict, List
 
 import pytest
-
 from boto3_type_annotations.iam import Client as IAMClient
+
 from cdpctl.validation import get_config_value
-from cdpctl.validation.aws_utils import get_role, simulate_policy, get_client
+from cdpctl.validation.aws_utils import get_client, get_role, simulate_policy
 
 cross_account_role_data = {}
 

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding:utf-8 -*-
 ###
 # CLOUDERA CDP Control (cdpctl)
 #
@@ -50,10 +49,10 @@ from boto3_type_annotations.iam import Client as IAMClient
 from cdpctl.validation import get_config_value, validator
 from cdpctl.validation.aws_utils import (
     convert_s3a_to_arn,
+    get_client,
     get_instance_profile,
     parse_arn,
     simulate_policy,
-    get_client,
 )
 
 
@@ -149,7 +148,7 @@ def _aws_logger_role_has_ec2_trust_policy_validation(
 
     if not found_ec2_trust:
         pytest.fail(
-            """The logger role {} should contain a trust policy for ec2""".format(role),
+            f"""The logger role {role} should contain a trust policy for ec2""",
             False,
         )
 

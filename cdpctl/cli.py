@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding:utf-8 -*-
 ###
 # CLOUDERA CDP Control (cdpctl)
 #
@@ -49,7 +48,6 @@ from cdpctl.command import ValidateCommand
 from cdpctl.command.config import render_skeleton
 
 
-
 @click.group()
 @click.option("--debug/--no-debug", default=False)
 @click.pass_context
@@ -71,10 +69,7 @@ def _cli(ctx, debug=False) -> None:
     type=click.Path(exists=False),
 )
 def validate(ctx, target: str, config_file) -> None:  # pylint: disable=unused-argument
-    """
-    Run validation checks on provided section of the CDP from the
-    config_file
-    """
+    """Run validation checks on provided section."""
     command: ValidateCommand = ValidateCommand()
     command.run(target=target, config_file=config_file)
 

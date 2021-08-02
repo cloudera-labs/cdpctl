@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding:utf-8 -*-
 ###
 # CLOUDERA CDP Control (cdpctl)
 #
@@ -45,26 +44,26 @@
 from typing import Any, Dict, List
 
 import pytest
-
+from boto3_type_annotations.iam import Client as EC2Client
 from botocore.stub import Stubber
+
+from cdpctl.validation.aws_utils import get_client
 from cdpctl.validation.infra.validate_aws_subnets import (
-    aws_public_subnets_validation,
-    aws_public_subnets_suffix_validation,
-    aws_public_subnets_availablity_zone_validation,
-    aws_public_subnets_route_validation,
-    aws_public_subnets_range_validation,
-    aws_public_subnets_tags_validation,
-    aws_private_subnets_validation,
-    aws_private_subnets_suffix_validation,
     aws_private_subnets_availablity_zone_validation,
-    aws_private_subnets_route_validation,
     aws_private_subnets_range_validation,
+    aws_private_subnets_route_validation,
+    aws_private_subnets_suffix_validation,
     aws_private_subnets_tags_validation,
+    aws_private_subnets_validation,
+    aws_public_subnets_availablity_zone_validation,
+    aws_public_subnets_range_validation,
+    aws_public_subnets_route_validation,
+    aws_public_subnets_suffix_validation,
+    aws_public_subnets_tags_validation,
+    aws_public_subnets_validation,
     aws_vpc_subnets_validation,
 )
-from tests.validation import expect_validation_success, expect_validation_failure
-from cdpctl.validation.aws_utils import get_client
-from boto3_type_annotations.iam import Client as EC2Client
+from tests.validation import expect_validation_failure, expect_validation_success
 
 sample_public_subnets_response = {
     "Subnets": [
@@ -149,14 +148,14 @@ private_subnet_ids = [
 ]
 
 
-def get_config(
+def get_config(  # pylint: disable=dangerous-default-value
     public_subnet_ids_val: List[str] = [],
     private_subnet_ids_val: List[str] = [],
     public_suffix_val: str = "",
     private_suffix_val: str = "",
     vpc_id_val: str = "",
 ) -> Dict[str, Any]:
-    """returns a config in proper format"""
+    """Return a config in proper format."""
     return {
         "infra": {
             "aws": {

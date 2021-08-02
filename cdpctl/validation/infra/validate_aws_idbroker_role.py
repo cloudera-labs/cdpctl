@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding:utf-8 -*-
 ###
 # CLOUDERA CDP Control (cdpctl)
 #
@@ -50,11 +49,11 @@ from boto3_type_annotations.iam import Client as IAMClient
 from cdpctl.validation import get_config_value, validator
 from cdpctl.validation.aws_utils import (
     convert_s3a_to_arn,
+    get_client,
+    get_instance_profile,
+    get_role,
     parse_arn,
     simulate_policy,
-    get_instance_profile,
-    get_client,
-    get_role,
 )
 
 
@@ -87,7 +86,7 @@ def get_idbroker_instance_profile(
 def aws_idbroker_instance_profile_exists_with_role_validation(
     config: Dict[str, Any], iam_client: IAMClient
 ) -> None:  # pragma: no cover
-    """IdBroker instance profile exists with a role."""  # noqa: D401,E501
+    """IdBroker instance profile exists with a role."""  # noqa: D401,E501,D403
     _aws_idbroker_instance_profile_exists_with_role_validation(config, iam_client)
 
 
@@ -95,7 +94,7 @@ def aws_idbroker_instance_profile_exists_with_role_validation(
 def _aws_idbroker_instance_profile_exists_with_role_validation(
     config: Dict[str, Any], iam_client: IAMClient
 ) -> None:  # pragma: no cover
-    """IdBroker instance profile exists with a role."""  # noqa: D401,E501
+    """IdBroker instance profile exists with a role."""  # noqa: D401,E501,D403
     profile = get_idbroker_instance_profile(config=config, iam_client=iam_client)
 
     if not profile["InstanceProfile"]["Roles"]:
@@ -118,7 +117,7 @@ def _aws_idbroker_instance_profile_exists_with_role_validation(
 def aws_idbroker_role_has_ec2_trust_policy_validation(
     config: Dict[str, Any], iam_client: IAMClient
 ) -> None:  # pragma: no cover
-    """IdBroker role has the EC2 trust policy."""  # noqa: D401,E501
+    """IdBroker role has the EC2 trust policy."""  # noqa: D401,E501,D403
     _aws_idbroker_role_has_ec2_trust_policy_validation(config, iam_client)
 
 
@@ -169,7 +168,7 @@ def _aws_idbroker_role_has_ec2_trust_policy_validation(
 def aws_idbroker_role_has_assumerole_policy_validation(
     config: Dict[str, Any], iam_client: IAMClient
 ) -> None:  # pragma: no cover
-    """IdBroker role can assume the Ranger Audit and Datalake Admin Roles."""  # noqa: D401,E501
+    """IdBroker role can assume the Ranger Audit and Datalake Admin Roles."""  # noqa: D401,E501,D403
     _aws_idbroker_role_has_assumerole_policy_validation(config, iam_client)
 
 
@@ -222,7 +221,7 @@ def _aws_idbroker_role_has_assumerole_policy_validation(
 def aws_idbroker_role_has_necessary_s3_actions_validation(
     config: Dict[str, Any], logs_needed_actions: List[str], iam_client: IAMClient
 ) -> None:
-    """IdBroker role has the necessary S3 logs location actions."""  # noqa: D401
+    """IdBroker role has the necessary S3 logs location actions."""  # noqa: D401,D403
     _aws_idbroker_role_has_necessary_s3_actions_validation(
         config, iam_client, logs_needed_actions
     )
@@ -267,7 +266,7 @@ def _aws_idbroker_role_has_necessary_s3_actions_validation(
 def aws_idbroker_role_has_necessary_s3_bucket_actions_validation(
     config: Dict[str, Any], log_bucket_needed_actions: List[str], iam_client: IAMClient
 ) -> None:
-    """IdBroker role has the necessary S3 bucket actions."""  # noqa: D401
+    """IdBroker role has the necessary S3 bucket actions."""  # noqa: D401,D403
     _aws_idbroker_role_has_necessary_s3_bucket_actions_validation(
         config,
         iam_client,

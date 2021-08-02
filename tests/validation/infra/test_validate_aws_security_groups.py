@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding:utf-8 -*-
 ###
 # CLOUDERA CDP Control (cdpctl)
 #
@@ -41,21 +40,21 @@
 # Source File Name:  test_validate_aws_security_groups.py
 ###
 """Test of AWS Security Groups validation."""
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 import boto3
-from botocore.stub import Stubber
 from boto3_type_annotations.ec2 import Client as EC2Client
+from botocore.stub import Stubber
 from moto import mock_iam
 
-from tests.validation import expect_validation_failure, expect_validation_success
-
+from cdpctl.validation.infra.conftest import (  # noqa: F401 pylint: disable=unused-import
+    cdp_cidrs,
+)
 from cdpctl.validation.infra.validate_aws_security_groups import (
     _aws_default_security_groups_contains_cdp_cidr_validation,
     _aws_gateway_security_groups_contains_cdp_cidr_validation,
 )
-
-from cdpctl.validation.infra.conftest import cdp_cidrs  # noqa: F401
+from tests.validation import expect_validation_failure, expect_validation_success
 
 default_security_group = "test_default_111"
 gateway_security_group = "test_gateway_111"
@@ -82,7 +81,7 @@ config: Dict[str, Any] = {
 
 @mock_iam
 def test_aws_default_security_groups_contains_cdp_cidr_validation_succeeds(
-    cdp_cidrs: List[str],
+    cdp_cidrs: List[str],  # noqa : F811 pylint: disable=redefined-outer-name
 ):
     """Verify validation succeeds for cdp cidr within default security group."""
     ec2_client: EC2Client = boto3.client("ec2", "us-west-2")
@@ -121,7 +120,7 @@ def test_aws_default_security_groups_contains_cdp_cidr_validation_succeeds(
 
 @mock_iam
 def test_aws_default_security_groups_contains_cdp_cidr_validation_fails(
-    cdp_cidrs: List[str],
+    cdp_cidrs: List[str],  # noqa : F811 pylint: disable=redefined-outer-name
 ):
     """Verify validation fails for cdp cidr within default security group."""
     ec2_client: EC2Client = boto3.client("ec2", "us-west-2")
@@ -160,7 +159,7 @@ def test_aws_default_security_groups_contains_cdp_cidr_validation_fails(
 
 @mock_iam
 def test_aws_gateway_security_groups_contains_cdp_cidr_validation_succeeds(
-    cdp_cidrs: List[str],
+    cdp_cidrs: List[str],  # noqa : F811 pylint: disable=redefined-outer-name
 ):
     """Verify validation succeeds for cdp cidr within gateway security group."""
     ec2_client: EC2Client = boto3.client("ec2", "us-west-2")
@@ -208,7 +207,7 @@ def test_aws_gateway_security_groups_contains_cdp_cidr_validation_succeeds(
 
 @mock_iam
 def test_aws_gateway_security_groups_contains_cdp_cidr_validation_fails(
-    cdp_cidrs: List[str],
+    cdp_cidrs: List[str],  # noqa : F811 pylint: disable=redefined-outer-name
 ):
     """Verify validation fails for cdp cidr within gateway security group."""
     ec2_client: EC2Client = boto3.client("ec2", "us-west-2")

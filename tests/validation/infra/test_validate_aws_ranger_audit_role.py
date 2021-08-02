@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding:utf-8 -*-
 ###
 # CLOUDERA CDP Control (cdpctl)
 #
@@ -44,25 +42,24 @@
 from typing import Any, Dict, List
 
 import pytest
-from botocore.stub import Stubber
 from boto3_type_annotations.iam import Client as IAMClient
+from botocore.stub import Stubber
+
+from cdpctl.validation.aws_utils import get_client
 from cdpctl.validation.infra.validate_aws_ranger_audit_role import (
-    aws_ranger_audit_role_exists_validation,
-    aws_ranger_audit_location_needed_actions_validation,
-    aws_ranger_audit_s3_bucket_needed_actions_validation,
     aws_ranger_audit_cdp_s3_needed_actions_validation,
     aws_ranger_audit_data_location_needed_actions_validation,
     aws_ranger_audit_dynamoDB_needed_actions_validation,
     aws_ranger_audit_dynamoDB_table_needed_actions_validation,
+    aws_ranger_audit_location_needed_actions_validation,
+    aws_ranger_audit_role_exists_validation,
+    aws_ranger_audit_s3_bucket_needed_actions_validation,
     ranger_audit_data,
 )
-from cdpctl.validation.aws_utils import get_client
-
-from tests.validation import expect_validation_success, expect_validation_failure
-
+from tests.validation import expect_validation_failure, expect_validation_success
 from tests.validation.test_aws_utils import (
-    add_simulate_policy_response,
     add_get_role_response,
+    add_simulate_policy_response,
 )
 
 

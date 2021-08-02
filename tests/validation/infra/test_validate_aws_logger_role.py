@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding:utf-8 -*-
 ###
 # CLOUDERA CDP Control (cdpctl)
 #
@@ -41,7 +40,7 @@
 # Source File Name:  test_validate_aws_logger_role.py
 ###
 """Test of validate_logger_role."""
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
 import boto3
 from boto3_type_annotations.iam import Client as IAMClient
@@ -57,8 +56,8 @@ from cdpctl.validation.infra.validate_aws_logger_role import (
 )
 from tests.validation import expect_validation_failure, expect_validation_success
 from tests.validation.test_aws_utils import (
-    add_simulate_policy_response,
     add_get_profile_response,
+    add_simulate_policy_response,
 )
 
 log_location: str = "s3a://test-bucket/test-folder/logs"

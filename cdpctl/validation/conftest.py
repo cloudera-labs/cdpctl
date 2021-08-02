@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding:utf-8 -*-
 ###
 # CLOUDERA CDP Control (cdpctl)
 #
@@ -43,7 +42,6 @@
 # type: ignore[attr-defined]
 """Provide validation configs."""
 import sys
-import time
 from typing import Any, Dict, Mapping, Optional, Tuple, Union
 
 import click
@@ -64,7 +62,9 @@ this.config_file = "config.yaml"
 this.run_validations = 0
 
 
-def pytest_runtestloop(session: Session) -> Optional[object]:
+def pytest_runtestloop(
+    session: Session,  # pylint: disable=unused-argument
+) -> Optional[object]:
     """Catches the running of test."""
     pass
 

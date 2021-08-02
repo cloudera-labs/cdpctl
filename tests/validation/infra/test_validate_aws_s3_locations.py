@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding:utf-8 -*-
 ###
 # CLOUDERA CDP Control (cdpctl)
 #
@@ -44,21 +43,21 @@
 from typing import Any, Dict
 
 import pytest
-
 from boto3_type_annotations.s3 import Client as S3Client
 from botocore.stub import Stubber
+
+from cdpctl.validation.aws_utils import get_client
 from cdpctl.validation.infra.validate_aws_s3_locations import (
     aws_s3_backup_bucket_exists,
     aws_s3_data_bucket_exists,
     aws_s3_logs_bucket_exists,
 )
-
-from cdpctl.validation.aws_utils import get_client
 from tests.validation import expect_validation_failure, expect_validation_success
 
 
 @pytest.fixture(autouse=True, name="s3_client")
 def dynamodb_client_fixture() -> S3Client:
+    """Get the DynamoDB client."""
     config: Dict[str, Any] = {"infra": {"aws": {"region": "us-west-2", "profile": ""}}}
     return get_client("s3", config)
 

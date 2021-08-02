@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding:utf-8 -*-
 ###
 # CLOUDERA CDP Control (cdpctl)
 #
@@ -44,13 +43,13 @@
 from typing import Any, Dict
 
 import pytest
-
 from boto3_type_annotations.dynamodb import Client as DynamoDBClient
 from botocore.stub import Stubber
+
+from cdpctl.validation.aws_utils import get_client
 from cdpctl.validation.infra.validate_aws_dynamodb_table import (
     aws_dynamodb_table_exists,
 )
-from cdpctl.validation.aws_utils import get_client
 from tests.validation import expect_validation_failure, expect_validation_success
 
 

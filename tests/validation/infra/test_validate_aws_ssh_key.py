@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding:utf-8 -*-
 ###
 # CLOUDERA CDP Control (cdpctl)
 #
@@ -42,15 +41,15 @@
 ###
 
 """Test of AWS SSH key validation."""
-from cdpctl.validation.infra.validate_aws_ssh_key import aws_ssh_key_validation
 from typing import Any, Dict
 
 import pytest
-
-from botocore.stub import Stubber
-from tests.validation import expect_validation_success, expect_validation_failure
-from cdpctl.validation.aws_utils import get_client
 from boto3_type_annotations.iam import Client as EC2Client
+from botocore.stub import Stubber
+
+from cdpctl.validation.aws_utils import get_client
+from cdpctl.validation.infra.validate_aws_ssh_key import aws_ssh_key_validation
+from tests.validation import expect_validation_failure, expect_validation_success
 
 
 @pytest.fixture(autouse=True, name="ec2_client")

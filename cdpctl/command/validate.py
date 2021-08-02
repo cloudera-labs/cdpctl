@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding:utf-8 -*-
 ###
 # CLOUDERA CDP Control (cdpctl)
 #
@@ -48,7 +47,7 @@ import sys
 import click
 import pytest
 
-import cdpctl
+import cdpctl.validation as validation
 from cdpctl import SUPPORTED_PLATFORMS, Command
 from cdpctl.utils import load_config
 from cdpctl.validation import UnrecoverableValidationError, conftest
@@ -70,7 +69,8 @@ class ValidateCommand(Command):
             config = load_config(config_file=config_file)
         except FileExistsError:
             click.secho(
-                f"Error: the config file {click.format_filename(config_file)} does not exist.",
+                f"Error: the config file {click.format_filename(config_file)} "
+                "does not exist.",
                 fg="red",
             )
             sys.exit(1)
@@ -98,7 +98,7 @@ class ValidateCommand(Command):
 
         click.secho("Validating:", fg="blue")
 
-        validation_root_path = os.path.dirname(cdpctl.validation.__file__)
+        validation_root_path = os.path.dirname(validation.__file__)
         validation_ini_path = os.path.join(validation_root_path, "validation.ini")
         pytest.main(
             [

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding:utf-8 -*-
 ###
 # CLOUDERA CDP Control (cdpctl)
 #
@@ -38,21 +37,25 @@
 # BUSINESS ADVANTAGE OR UNAVAILABILITY, OR LOSS OR CORRUPTION OF
 # DATA.
 #
-# Source File Name:  conftest.py
+# Source File Name:  validate_aws_security_groups.py
 ###
-from cdpctl.validation.infra.conftest import (  # noqa: F401
-    ranger_audit_location_needed_actions,
-    ranger_audit_bucket_needed_actions,
-    s3_needed_actions_to_all,
+# flake8: noqa
+# pylint: disable-all
+"""Import validation fixtures."""
+from cdpctl.validation.infra.conftest import (
+    autoscaling_resources_needed_actions,
+    cdp_cidrs,
+    cdp_environment_resources_needed_actions,
+    cloud_formation_needed_actions,
     data_location_needed_actions,
     dynamodb_needed_actions_to_all,
     dynamodb_table_needed_actions,
     ec2_needed_actions,
-    autoscaling_resources_needed_actions,
-    cloud_formation_needed_actions,
-    cdp_environment_resources_needed_actions,
-    pass_role_needed_actions,
     identity_management_needed_actions,
-    logs_needed_actions,
     log_bucket_needed_actions,
+    logs_needed_actions,
+    pass_role_needed_actions,
+    ranger_audit_bucket_needed_actions,
+    ranger_audit_location_needed_actions,
+    s3_needed_actions_to_all,
 )

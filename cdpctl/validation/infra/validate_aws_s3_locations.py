@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding:utf-8 -*-
 ###
 # CLOUDERA CDP Control (cdpctl)
 #
@@ -45,14 +44,14 @@ from typing import Any, Dict
 
 import botocore
 import pytest
-
 from boto3_type_annotations.s3 import Client as S3Client
+
 from cdpctl.validation import get_config_value, validator
 from cdpctl.validation.aws_utils import (
     convert_s3a_to_arn,
+    get_client,
     is_valid_s3a_url,
     parse_arn,
-    get_client,
 )
 
 

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding:utf-8 -*-
 ###
 # CLOUDERA CDP Control (cdpctl)
 #
@@ -44,8 +43,8 @@
 from typing import Any, Dict
 
 import pytest
-
 from boto3_type_annotations.dynamodb import Client as DynamoDBClient
+
 from cdpctl.validation import get_config_value, validator
 from cdpctl.validation.aws_utils import get_client
 
@@ -61,7 +60,7 @@ def dynamodb_client_fixture(config: Dict[str, Any]) -> DynamoDBClient:
 def aws_dynamodb_table_exists_validation(
     config: Dict[str, Any], dynamodb_client: DynamoDBClient
 ) -> None:  # pragma: no cover
-    """DynamoDB table exists."""  # noqa: D401
+    """DynamoDB table exists."""  # noqa: D401, D403
     aws_dynamodb_table_exists(config, dynamodb_client)
 
 

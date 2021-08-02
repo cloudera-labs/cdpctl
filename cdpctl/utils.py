@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding:utf-8 -*-
 ###
 # CLOUDERA CDP Control (cdpctl)
 #
@@ -66,7 +65,7 @@ def load_config(config_file) -> Dict[str, Any]:
 def smart_open(filename=None):
     """Write to a file or stdout if - passed."""
     if filename and filename != "-":
-        fh = open(filename, "w")
+        fh = open(filename, "w")  # pylint: disable=consider-using-with
     else:
         fh = sys.stdout
     try:

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding:utf-8 -*-
 ###
 # CLOUDERA CDP Control (cdpctl)
 #
@@ -41,15 +40,13 @@
 # Source File Name:  validate_aws_security_groups.py
 ###
 """Validation of AWS security groups."""
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict, List, Optional
 
 import pytest
 from boto3_type_annotations.ec2 import Client as EC2Client
 
 from cdpctl.validation import get_config_value, validator
-from cdpctl.validation.aws_utils import (
-    get_client,
-)
+from cdpctl.validation.aws_utils import get_client
 
 
 @pytest.fixture(autouse=True, name="ec2_client")
@@ -108,7 +105,7 @@ def _aws_default_security_groups_contains_cdp_cidr_validation(
 
     missing_cdp_cidr_9443 = []
 
-    for cdp_cidr in cdp_cidrs:
+    for cdp_cidr in cdp_cidrs:  # pylint: disable=too-many-nested-blocks
         found_cidr_9443 = False
 
         for group in security_groups["SecurityGroups"]:
@@ -172,7 +169,7 @@ def _aws_gateway_security_groups_contains_cdp_cidr_validation(
     missing_cdp_cidr_443 = []
     missing_cdp_cidr_9443 = []
 
-    for cdp_cidr in cdp_cidrs:
+    for cdp_cidr in cdp_cidrs:  # pylint: disable=too-many-nested-blocks
         found_cidr_443 = False
         found_cidr_9443 = False
 

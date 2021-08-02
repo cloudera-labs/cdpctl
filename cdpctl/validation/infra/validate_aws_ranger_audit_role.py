@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding:utf-8 -*-
 ###
 # CLOUDERA CDP Control (cdpctl)
 #
@@ -44,18 +43,17 @@
 from typing import Any, Dict, List
 
 import pytest
-
 from boto3_type_annotations.iam import Client as IAMClient
+
 from cdpctl.validation import get_config_value
 from cdpctl.validation.aws_utils import (
     convert_dynamodb_table_to_arn,
     convert_s3a_to_arn,
+    get_client,
     get_role,
     parse_arn,
     simulate_policy,
-    get_client,
 )
-
 
 ranger_audit_data = {}
 
@@ -89,7 +87,7 @@ def aws_ranger_audit_role_exists_validation(
 @pytest.mark.aws
 @pytest.mark.infra
 def aws_ranger_audit_role_data_location_exist_validation(
-    config: Dict[str, Any], iam_client: IAMClient
+    config: Dict[str, Any]
 ) -> None:  # pragma: no cover
     """Ranger data location exists."""  # noqa: D401
     data_location: str = get_config_value(
@@ -108,7 +106,7 @@ def aws_ranger_audit_role_data_location_exist_validation(
 @pytest.mark.aws
 @pytest.mark.infra
 def aws_ranger_audit_role_audit_location_exist_validation(
-    config: Dict[str, Any], iam_client: IAMClient
+    config: Dict[str, Any]
 ) -> None:  # pragma: no cover
     """Ranger audit location exist."""  # noqa: D401
     ranger_audit_location: str = get_config_value(
@@ -132,7 +130,7 @@ def aws_ranger_audit_role_audit_location_exist_validation(
 @pytest.mark.aws
 @pytest.mark.infra
 def aws_ranger_audit_role_dynamoDB_table_exist_validation(
-    config: Dict[str, Any], iam_client: IAMClient
+    config: Dict[str, Any]
 ) -> None:  # pragma: no cover
     """Ranger DynamoDB table exists."""  # noqa: D401
     dynamodb_table: str = get_config_value(
@@ -228,11 +226,9 @@ def aws_ranger_audit_data_location_needed_actions_validation(
                 ranger_audit_data["data_location_arn"] + "/*",
             ],
             data_location_needed_actions,
-            f"""The role ({ranger_audit_data["ranger_audit_role"]}) requires the
-            following actions for the S3 data location ({ranger_audit_data["data_location_arn"]
-                + " "
-                + ranger_audit_data["data_location_arn"]
-                + "/*"}): \n {{}}""",
+            f"The role ({ranger_audit_data['ranger_audit_role']}) "
+            "requires the following actions for the S3 data location "
+            f"({ranger_audit_data['data_location_arn']}/*): \n {{}}",
         )
     except KeyError as e:
         pytest.fail(f"Validation error - missing required data : {e.args[0]}", False)

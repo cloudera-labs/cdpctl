@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding:utf-8 -*-
 ###
 # CLOUDERA CDP Control (cdpctl)
 #
@@ -41,7 +40,7 @@
 # Source File Name:  test_validate_aws_idbroker_role.py
 ###
 """Test of validate_idbroker_role."""
-from typing import List, Any, Dict
+from typing import Any, Dict, List
 
 import boto3
 from boto3_type_annotations.iam import Client as IAMClient
@@ -50,16 +49,16 @@ from botocore.stub import Stubber
 from cdpctl.validation.aws_utils import convert_s3a_to_arn, parse_arn
 from cdpctl.validation.infra.validate_aws_idbroker_role import (
     _aws_idbroker_instance_profile_exists_with_role_validation,
-    _aws_idbroker_role_has_ec2_trust_policy_validation,
     _aws_idbroker_role_has_assumerole_policy_validation,
+    _aws_idbroker_role_has_ec2_trust_policy_validation,
     _aws_idbroker_role_has_necessary_s3_actions_validation,
     _aws_idbroker_role_has_necessary_s3_bucket_actions_validation,
 )
 from tests.validation import expect_validation_failure, expect_validation_success
 from tests.validation.test_aws_utils import (
     add_get_profile_response,
-    add_simulate_policy_response,
     add_get_role_response,
+    add_simulate_policy_response,
 )
 
 log_location: str = "s3a://test-bucket/test-folder/logs"
