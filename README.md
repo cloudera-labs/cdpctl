@@ -1,8 +1,9 @@
 
 # Cloudera Data Platform Control - **cdpctl**
 
-[![License: AGPL 3.0](https://img.shields.io/badge/license-AGPL%203.0-green)](https://www.gnu.org/licenses/agpl-3.0.txt)
+![Codecov](https://img.shields.io/codecov/c/github/cloudera-libs/cdpctl)
 [![Continuous Integration](https://github.com/cloudera-labs/cdpctl/actions/workflows/ci.yml/badge.svg?branch=dev)](https://github.com/cloudera-labs/cdpctl/actions/workflows/ci.yml)
+[![License: AGPL 3.0](https://img.shields.io/badge/license-AGPL%203.0-green)](https://www.gnu.org/licenses/agpl-3.0.txt)
 
 ## What is cdpctl
 
