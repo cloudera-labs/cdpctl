@@ -41,6 +41,8 @@
 ###
 """CDP Control."""
 
+import sys
+
 import click
 
 from cdpctl import SUPPORTED_TARGETS
@@ -49,13 +51,16 @@ from cdpctl.command import ValidateCommand
 from cdpctl.command.config import render_skeleton
 
 
-@click.group()
+@click.group(invoke_without_command=True)
 @click.option("--debug/--no-debug", default=False)
+@click.option("-v", "--version", is_flag=True, default=False)
 @click.pass_context
-def _cli(ctx, debug=False) -> None:
+def _cli(ctx, debug=False, version=False) -> None:
     """Run the cli."""
     ctx.ensure_object(dict)
     ctx.obj["DEBUG"] = debug
+    if version:
+        print_version()
 
 
 @click.command()
@@ -94,16 +99,15 @@ def skeleton(output_file) -> None:
     render_skeleton(output_file=output_file)
 
 
-@click.command()
-def version() -> None:
+def print_version() -> None:
     """Print the cdpctl version."""
     click.echo(__version__)
+    sys.exit(0)
 
 
 config.add_command(skeleton)
 _cli.add_command(validate)
 _cli.add_command(config)
-_cli.add_command(version)
 
 
 def main() -> None:
