@@ -42,10 +42,12 @@
 """CDP Control."""
 
 import click
+from click.utils import echo
 
 from cdpctl import SUPPORTED_TARGETS
 from cdpctl.command import ValidateCommand
 from cdpctl.command.config import render_skeleton
+from cdpctl.__version__ import __version__
 
 
 @click.group()
@@ -93,9 +95,16 @@ def skeleton(output_file) -> None:
     render_skeleton(output_file=output_file)
 
 
+@click.command()
+def version() -> None:
+    """Print the cdpctl version."""
+    click.echo(__version__)
+
+
 config.add_command(skeleton)
 _cli.add_command(validate)
 _cli.add_command(config)
+_cli.add_command(version)
 
 
 def main() -> None:
