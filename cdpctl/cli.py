@@ -42,12 +42,11 @@
 """CDP Control."""
 
 import click
-from click.utils import echo
 
 from cdpctl import SUPPORTED_TARGETS
+from cdpctl.__version__ import __version__
 from cdpctl.command import ValidateCommand
 from cdpctl.command.config import render_skeleton
-from cdpctl.__version__ import __version__
 
 
 @click.group()
