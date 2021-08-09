@@ -90,3 +90,5 @@ jobs:
           build-args: |
             BUILD_DATE=${{ steps.date.outputs.time }}
             BUILD_TAG=${{env.APPLICATION_VERSION}}
+            APPLICATION_VERSION=${{ steps.date.outputs.time }}.dev${{github.run_number}}
+
