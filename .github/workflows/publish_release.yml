@@ -1,4 +1,4 @@
-name: Publish Docker image
+name: Publish Release
 on:
   release:
     types: [published]
@@ -13,34 +13,24 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.PKG_PAT }}
-
       - name: Get Date of Build
         id: date
         uses: nanzm/get-time-action@v1.1
         with:
           timeZone: 0
           format: 'YYYY-MM-DD'
-
       - name: Set Release Version from Tag
         run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
-
       - name: Checkout
         uses: actions/checkout@v2
-
-      # - name: Create/update text file
-      #   run: |
-      #     echo "\"\"\"Version info.\"\"\"" > cdpctl/__version__.py
-      #     echo "__version__ = \"${{ env.RELEASE_VERSION }}\"" >> cdpctl/__version__.py
-
-      # - name: Commit and Push
-      #   run: |
-      #     git config --global user.name "github-actions[bot]"
-      #     git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-      #     # use account 'github-actions[bot]' to set the git config
-      #     git add -A
-      #     git commit -m "automated update of version for release"
-      #     git push
-
+        ref: main
+      - name: Merge release tag to main
+        uses: everlytic/branch-merge@1.1.2
+          with:
+            github_token: ${{ github.token }}
+            source_ref: ref/tags/${{ env.RELEASE_VERSION }}
+            target_branch: 'main'
+            commit_message_template: '[Automated] Merged {source_ref} into target {target_branch}'
       - name: Push to GitHub Packages
         uses: docker/build-push-action@v2.3.0
         with:
@@ -51,3 +41,4 @@ jobs:
           build-args: |
             BUILD_DATE=${{ steps.date.outputs.time }}
             BUILD_TAG=${{ env.RELEASE_VERSION }}
+            APPLICATION_VERSION=${{ env.RELEASE_VERSION }}
