@@ -751,7 +751,7 @@ def test_aws_private_subnets_route_validation_success(ec2_client: EC2Client) -> 
                     "Routes": [
                         {
                             "DestinationIpv6CidrBlock": "::/0",
-                            "GatewayId": "nat-test1234566789",
+                            "NatGatewayId": "nat-test1234566789",
                             "Origin": "CreateRoute",
                             "State": "active",
                         },
