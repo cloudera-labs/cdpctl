@@ -97,9 +97,13 @@ def aws_cross_account_role_account_id_validation(
     ]:
         if "Principal" in s.keys():
             if "AWS" in s["Principal"].keys():
-                for arn in s["Principal"]["AWS"]:
-                    if str(account_id) in arn.split(":"):
+                if isinstance(s["Principal"]["AWS"], str):
+                    if str(account_id) in s["Principal"]["AWS"].split(":"):
                         found_account_id = True
+                else:
+                    for arn in s["Principal"]["AWS"]:
+                        if str(account_id) in arn.split(":"):
+                            found_account_id = True
 
     if not found_account_id:
         pytest.fail("Account id not in cross account role", False)
