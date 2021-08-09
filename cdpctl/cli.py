@@ -47,8 +47,8 @@ import click
 
 from cdpctl import SUPPORTED_TARGETS
 from cdpctl.__version__ import __version__
-from cdpctl.command import ValidateCommand
 from cdpctl.command.config import render_skeleton
+from cdpctl.command.validate import run_validation
 
 
 @click.group(invoke_without_command=True)
@@ -79,8 +79,7 @@ def _cli(ctx, debug=False, version=False) -> None:
 )
 def validate(ctx, target: str, config_file) -> None:  # pylint: disable=unused-argument
     """Run validation checks on provided section."""
-    command: ValidateCommand = ValidateCommand()
-    command.run(target=target, config_file=config_file, debug=ctx.obj["DEBUG"])
+    run_validation(target=target, config_file=config_file, debug=ctx.obj["DEBUG"])
 
 
 @click.group()
