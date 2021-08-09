@@ -87,7 +87,7 @@ __version__\s=\s\"(?P<version>v?
 def get_version() -> Any:
     """Get current version from code."""
     path = ("cdpctl", "__version__.py")
-    return re.search(VERSION_PATTERN, read(*path)).group("version")
+    return re.search(VERSION_PATTERN, read(*path), re.X).group("version")
 
 
 # determine requirements
