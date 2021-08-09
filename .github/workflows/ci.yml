@@ -77,21 +77,16 @@ jobs:
           format: 'YYYY-MM-DD'
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Create/update text file
-        env:
-          DATE: "${{ steps.date.outputs.time }}"
-        run: |
-          echo "\"\"\"Version info.\"\"\"" > cdpctl/__version__.py
-          echo "__version__ = \"${{ env.DATE }}.dev${{github.run_number}}\"" >> cdpctl/__version__.py
       - name: Push to GitHub Packages
         uses: docker/build-push-action@v2.3.0
         env:
           DATE: "${{ steps.date.outputs.time }}"
+          APPLICATION_VERSION: ${{ steps.date.outputs.time }}.dev${{github.run_number}}
         with:
           tags: |
-            ghcr.io/cloudera-labs/cdpctl:${{ env.DATE }}.dev${{github.run_number}}
+            ghcr.io/cloudera-labs/cdpctl:${{env.APPLICATION_VERSION}}
             ghcr.io/cloudera-labs/cdpctl:dev-latest
           push: true
           build-args: |
             BUILD_DATE=${{ steps.date.outputs.time }}
-            BUILD_TAG=${{ env.DATE }}.dev${{github.run_number}}
+            BUILD_TAG=${{env.APPLICATION_VERSION}}
