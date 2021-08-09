@@ -42,7 +42,7 @@
 set -e
 
 IMAGE_NAME="ghcr.io/cloudera-labs/cdpctl"
-IMAGE_VER=${image_ver:-latest}
+IMAGE_VER=${CDPCTL_VERSION:-latest}
 IMAGE_TAG=${IMAGE_VER}
 IMAGE_FULL_NAME=${IMAGE_NAME}:${IMAGE_TAG}
 CONTAINER_NAME=cdpctl
@@ -104,7 +104,7 @@ done
 DOCKER_MOUNTS+=("--mount|type=bind,source=${CONFIGDIR},target=${CONFIGDIR}")
 
 
-# Make sure there are not duplicae mount points
+# Make sure there are not duplicate mount points
 DOCKER_MOUNT_LINE=$(echo "${DOCKER_MOUNTS[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ' | tr '|' ' ')
 
 AWS_ENV_VARS=
@@ -151,5 +151,6 @@ exec docker run -ti \
     ${DOCKER_MOUNT_LINE} \
     --network="host" \
     --name "${CONTAINER_NAME}" \
+    -w ${CONFIGDIR} \
     "${IMAGE_FULL_NAME}" \
     /usr/local/bin/cdpctl ${DOCKER_ARGUMENTS[*]}

@@ -61,6 +61,9 @@ def _cli(ctx, debug=False, version=False) -> None:
     ctx.obj["DEBUG"] = debug
     if version:
         print_version()
+    if ctx.invoked_subcommand is None:
+        click.echo(_cli.get_help(ctx))
+        sys.exit(0)
 
 
 @click.command()
@@ -77,7 +80,7 @@ def _cli(ctx, debug=False, version=False) -> None:
 def validate(ctx, target: str, config_file) -> None:  # pylint: disable=unused-argument
     """Run validation checks on provided section."""
     command: ValidateCommand = ValidateCommand()
-    command.run(target=target, config_file=config_file)
+    command.run(target=target, config_file=config_file, debug=ctx.obj["DEBUG"])
 
 
 @click.group()

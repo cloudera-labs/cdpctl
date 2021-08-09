@@ -54,10 +54,10 @@ from cdpctl.validation import UnrecoverableValidationError, conftest
 from cdpctl.validation.aws_utils import validate_aws_config
 
 
-class ValidateCommand(Command):
+class ValidateCommand:
     """The Validate command."""
 
-    def run(self, target: str, config_file: str) -> None:
+    def run(self, target: str, config_file: str, debug: bool = False) -> None:
         """Run the validate command."""
         click.echo(
             f"Targeting {click.style(target, fg='blue')} section with config file "
@@ -100,17 +100,19 @@ class ValidateCommand(Command):
 
         validation_root_path = os.path.dirname(validation.__file__)
         validation_ini_path = os.path.join(validation_root_path, "validation.ini")
-        pytest.main(
-            [
-                f"{validation_root_path}",
-                "--no-header",
-                "--no-summary",
-                "-qq",
-                "-s",
-                "-m",
-                f"{infra_type} and {target}",
-                "-c",
-                f"{validation_ini_path}",
-                "--order-dependencies",
-            ]
-        )
+
+        options = [
+            f"{validation_root_path}",
+            "-m",
+            f"{infra_type} and {target}",
+            "-c",
+            f"{validation_ini_path}",
+            "--order-dependencies",
+        ]
+        if not debug:
+            options.append("--no-header")
+            options.append("--no-summary")
+            options.append("-qq")
+            options.append("-s")
+
+        pytest.main(options)
