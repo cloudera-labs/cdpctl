@@ -387,8 +387,8 @@ def aws_private_subnets_route_validation(
             for route_table in subnets_route_tables:
                 routes = route_table["Routes"]
                 for route in routes:
-                    if "GatewayId" in route:
-                        gateway_ids.append(route["GatewayId"])
+                    if "NatGatewayId" in route:
+                        gateway_ids.append(route["NatGatewayId"])
         else:
             pytest.fail(
                 f"""Provided Subnets {subnets_data["private_subnets_ids"]} and
