@@ -12,7 +12,7 @@ COPY . /tmp/src
 
 RUN cd /tmp/src \
     && echo "\"\"\"Version info.\"\"\"" > cdpctl/__version__.py \
-    && echo "__version__ = \"${{CDPCTL_APPLICATION_VERSION}}\"" >> cdpctl/__version__.py \
+    && echo "__version__ = \"${CDPCTL_APPLICATION_VERSION}\"" >> cdpctl/__version__.py \
     && python3 setup.py install \
     && cd / \
     && rm -rf /tmp/src
