@@ -48,69 +48,68 @@ import click
 import pytest
 
 import cdpctl.validation as validation
-from cdpctl import SUPPORTED_PLATFORMS, Command
+from cdpctl import SUPPORTED_PLATFORMS
 from cdpctl.utils import load_config
 from cdpctl.validation import UnrecoverableValidationError, conftest
 from cdpctl.validation.aws_utils import validate_aws_config
 
 
-class ValidateCommand(Command):
-    """The Validate command."""
+def run_validation(target: str, config_file: str, debug: bool = False) -> None:
+    """Run the validate command."""
+    click.echo(
+        f"Targeting {click.style(target, fg='blue')} section with config file "
+        f"{click.style(click.format_filename(config_file), fg='green')}\n"
+    )
 
-    def run(self, target: str, config_file: str) -> None:
-        """Run the validate command."""
-        click.echo(
-            f"Targeting {click.style(target, fg='blue')} section with config file "
-            f"{click.style(click.format_filename(config_file), fg='green')}\n"
+    conftest.config_file = config_file  # type: ignore[attr-defined]
+    try:
+        config = load_config(config_file=config_file)
+    except FileExistsError:
+        click.secho(
+            f"Error: the config file {click.format_filename(config_file)} "
+            "does not exist.",
+            fg="red",
         )
+        sys.exit(1)
 
-        conftest.config_file = config_file  # type: ignore[attr-defined]
-        try:
-            config = load_config(config_file=config_file)
-        except FileExistsError:
-            click.secho(
-                f"Error: the config file {click.format_filename(config_file)} "
-                "does not exist.",
-                fg="red",
-            )
-            sys.exit(1)
-
-        infra_type = config["infra_type"]
-        if not infra_type or infra_type not in SUPPORTED_PLATFORMS:
-            click.secho(
-                "No supported platform defined for "
-                f"{click.style('infra_type', fg='green')}",
-                fg="red",
-            )
-            click.secho(
-                "The following platforms are supported: "
-                f"{click.style(', '.join(SUPPORTED_PLATFORMS), fg='blue')}",
-                fg="red",
-            )
-            sys.exit(1)
-
-        try:
-            if infra_type == "aws":
-                validate_aws_config(config=config)
-        except UnrecoverableValidationError as e:
-            click.secho(e, fg="red")
-            sys.exit(1)
-
-        click.secho("Validating:", fg="blue")
-
-        validation_root_path = os.path.dirname(validation.__file__)
-        validation_ini_path = os.path.join(validation_root_path, "validation.ini")
-        pytest.main(
-            [
-                f"{validation_root_path}",
-                "--no-header",
-                "--no-summary",
-                "-qq",
-                "-s",
-                "-m",
-                f"{infra_type} and {target}",
-                "-c",
-                f"{validation_ini_path}",
-                "--order-dependencies",
-            ]
+    infra_type = config["infra_type"]
+    if not infra_type or infra_type not in SUPPORTED_PLATFORMS:
+        click.secho(
+            "No supported platform defined for "
+            f"{click.style('infra_type', fg='green')}",
+            fg="red",
         )
+        click.secho(
+            "The following platforms are supported: "
+            f"{click.style(', '.join(SUPPORTED_PLATFORMS), fg='blue')}",
+            fg="red",
+        )
+        sys.exit(1)
+
+    try:
+        if infra_type == "aws":
+            validate_aws_config(config=config)
+    except UnrecoverableValidationError as e:
+        click.secho(e, fg="red")
+        sys.exit(1)
+
+    click.secho("Validating:", fg="blue")
+
+    validation_root_path = os.path.dirname(validation.__file__)
+    validation_ini_path = os.path.join(validation_root_path, "validation.ini")
+
+    options = [
+        f"{validation_root_path}",
+        "-m",
+        f"{infra_type} and {target}",
+        "-c",
+        f"{validation_ini_path}",
+        "--order-dependencies",
+    ]
+    if not debug:
+        options.append("--no-header")
+        options.append("--no-summary")
+        options.append("-qq")
+        options.append("-s")
+
+    pytest.main(options)
