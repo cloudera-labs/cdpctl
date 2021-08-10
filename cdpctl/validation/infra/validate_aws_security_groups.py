@@ -212,7 +212,7 @@ def _aws_gateway_security_groups_contains_cdp_cidr_validation(
 
 
 def security_groups_contains_vpc_cidr(
-    config: Dict[str, Any], security_groups_id: str
+    config: Dict[str, Any], ec2_client: EC2Client, security_groups_id: str
 ) -> None:
     """Verify security groups contains the VPC CIDRs."""
     vpc_id: str = get_config_value(
@@ -221,8 +221,6 @@ def security_groups_contains_vpc_cidr(
         key_missing_message="No vpc id defined for " "config option: {}",
         data_expected_error_message="No vpc id provided for " "config option: {}",
     )
-
-    ec2_client: EC2Client = get_client("ec2", config)
 
     vpcs = ec2_client.describe_vpcs(VpcIds=[vpc_id])
 
@@ -240,9 +238,17 @@ def security_groups_contains_vpc_cidr(
 
     for group in security_groups["SecurityGroups"]:
         ip_permissions = group["IpPermissions"]
+
         for ip_permission in ip_permissions:
+            if "IpProtocol" in ip_permission and ip_permission["IpProtocol"] == "-1":
+                for cidr in ip_permission["IpRanges"]:
+                    if cidr["CidrIp"] == vpc_cidr:
+                        found_vpc_cidr = True
+                continue
+
             if "FromPort" not in ip_permission or "ToPort" not in ip_permission:
                 continue
+
             from_port = ip_permission["FromPort"]
             to_port = ip_permission["ToPort"]
 
@@ -260,6 +266,14 @@ def aws_default_security_groups_contains_vpc_cidr_validation(
     config: Dict[str, Any]
 ) -> None:
     """Default security groups contain the existing VPC CIDRs."""  # noqa: D401,E501
+    ec2_client: EC2Client = get_client("ec2", config)
+    _aws_default_security_groups_contains_vpc_cidr_validation(config, ec2_client)
+
+
+def _aws_default_security_groups_contains_vpc_cidr_validation(
+    config: Dict[str, Any], ec2_client: EC2Client
+) -> None:
+    """Default security groups contain the existing VPC CIDRs."""  # noqa: D401,E501
     default_security_groups_id: str = get_config_value(
         config,
         "infra:aws:vpc:existing:security_groups:default_id",
@@ -269,7 +283,9 @@ def aws_default_security_groups_contains_vpc_cidr_validation(
         "config option: {}",
     )
 
-    if not security_groups_contains_vpc_cidr(config, default_security_groups_id):
+    if not security_groups_contains_vpc_cidr(
+        config, ec2_client, default_security_groups_id
+    ):
         pytest.fail(
             "Your VPC CIDR should be allowed for port "
             " 0-65535 in default security group.",
@@ -283,6 +299,14 @@ def aws_gateway_security_groups_contains_vpc_cidr_validation(
     config: Dict[str, Any]
 ) -> None:
     """Gateway security groups contain the existing VPC CIDRs."""  # noqa: D401,E501
+    ec2_client: EC2Client = get_client("ec2", config)
+    _aws_gateway_security_groups_contains_vpc_cidr_validation(config, ec2_client)
+
+
+def _aws_gateway_security_groups_contains_vpc_cidr_validation(
+    config: Dict[str, Any], ec2_client: EC2Client
+) -> None:
+    """Gateway security groups contain the existing VPC CIDRs."""  # noqa: D401,E501
     gateway_security_groups_id: str = get_config_value(
         config,
         "infra:aws:vpc:existing:security_groups:knox_id",
@@ -292,7 +316,9 @@ def aws_gateway_security_groups_contains_vpc_cidr_validation(
         "config option: {}",
     )
 
-    if not security_groups_contains_vpc_cidr(config, gateway_security_groups_id):
+    if not security_groups_contains_vpc_cidr(
+        config, ec2_client, gateway_security_groups_id
+    ):
         pytest.fail(
             "Your VPC CIDR should be allowed for port "
             "0-65535 in gateway security group.",
