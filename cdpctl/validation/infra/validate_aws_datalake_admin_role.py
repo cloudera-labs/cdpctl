@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding:utf-8 -*-
 ###
 # CLOUDERA CDP Control (cdpctl)
 #
@@ -50,10 +49,10 @@ from cdpctl.validation import get_config_value, validator
 from cdpctl.validation.aws_utils import (
     convert_dynamodb_table_to_arn,
     convert_s3a_to_arn,
+    get_client,
     get_role,
     parse_arn,
     simulate_policy,
-    get_client,
 )
 
 
@@ -195,7 +194,7 @@ def aws_datalake_admin_role_has_bucket_access_policy(
     iam_client: IAMClient,
     bucket_access_policy_actions: List[str],
 ) -> None:
-    """Validate that the datalake_admin role has the needed access to the S3 data bucket"""
+    """Validate datalake_admin role has the needed access to the S3 data bucket."""
 
     datalake_admin_role_name: str = get_config_value(
         config,
@@ -253,7 +252,7 @@ def aws_datalake_admin_role_has_bucket_access_policy_all_resources(
     iam_client: IAMClient,
     bucket_access_policy_all_resources_actions: List[str],
 ) -> None:
-    """Validating that the datalake_admin role has the needed access to all resources"""
+    """Validate that datalake_admin role has the needed access to all resources."""
 
     datalake_admin_role_name: str = get_config_value(
         config,
@@ -302,7 +301,7 @@ def aws_datalake_admin_role_has_s3_policy(
     iam_client: IAMClient,
     datalake_admin_s3_policy_actions: List[str],
 ) -> None:
-    """Validating that the datalake_admin role has the needed access to the data location"""
+    """Validate that datalake_admin role has the needed access to the data location."""
 
     datalake_admin_role_name: str = get_config_value(
         config,
@@ -360,7 +359,7 @@ def aws_datalake_admin_role_has_dynamodb_policy(
     iam_client: IAMClient,
     dynamodb_policy_actions: List[str],
 ) -> None:
-    """Validating that the datalake_admin role has the needed to the DynamoDB table."""
+    """Validate that datalake_admin role has the needed to the DynamoDB table."""
 
     datalake_admin_role_name: str = get_config_value(
         config,

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding:utf-8 -*-
 ###
 # CLOUDERA CDP Control (cdpctl)
 #
@@ -323,5 +322,5 @@ def identity_management_needed_actions() -> List[str]:
 
 @pytest.fixture
 def cdp_cidrs() -> List[str]:
-    """CDP CIDRs"""
+    """Get the CDP control plane CIDRs."""
     return ["52.36.110.208/32", "52.40.165.49/32", "35.166.86.177/32"]

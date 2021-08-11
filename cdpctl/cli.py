@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding:utf-8 -*-
 ###
 # CLOUDERA CDP Control (cdpctl)
 #
@@ -42,21 +41,29 @@
 ###
 """CDP Control."""
 
+import sys
+
 import click
 
 from cdpctl import SUPPORTED_TARGETS
-from cdpctl.command import ValidateCommand
+from cdpctl.__version__ import __version__
 from cdpctl.command.config import render_skeleton
+from cdpctl.command.validate import run_validation
 
 
-
-@click.group()
+@click.group(invoke_without_command=True)
 @click.option("--debug/--no-debug", default=False)
+@click.option("-v", "--version", is_flag=True, default=False)
 @click.pass_context
-def _cli(ctx, debug=False) -> None:
+def _cli(ctx, debug=False, version=False) -> None:
     """Run the cli."""
     ctx.ensure_object(dict)
     ctx.obj["DEBUG"] = debug
+    if version:
+        print_version()
+    if ctx.invoked_subcommand is None:
+        click.echo(_cli.get_help(ctx))
+        sys.exit(0)
 
 
 @click.command()
@@ -71,12 +78,8 @@ def _cli(ctx, debug=False) -> None:
     type=click.Path(exists=False),
 )
 def validate(ctx, target: str, config_file) -> None:  # pylint: disable=unused-argument
-    """
-    Run validation checks on provided section of the CDP from the
-    config_file
-    """
-    command: ValidateCommand = ValidateCommand()
-    command.run(target=target, config_file=config_file)
+    """Run validation checks on provided section."""
+    run_validation(target=target, config_file=config_file, debug=ctx.obj["DEBUG"])
 
 
 @click.group()
@@ -96,6 +99,12 @@ def config() -> None:
 def skeleton(output_file) -> None:
     """Output the skeleton config."""
     render_skeleton(output_file=output_file)
+
+
+def print_version() -> None:
+    """Print the cdpctl version."""
+    click.echo(__version__)
+    sys.exit(0)
 
 
 config.add_command(skeleton)

@@ -44,7 +44,6 @@ import re
 from typing import Dict, List, Optional
 
 import boto3
-import click
 import pytest
 from boto3_type_annotations.iam import Client as IAMClient
 from botocore.exceptions import ClientError, ProfileNotFound
@@ -55,6 +54,7 @@ from cdpctl.validation import UnrecoverableValidationError, get_config_value
 def get_client(client_type: str, config):
     """
     Get an AWS client for the specified type.
+
     If a profile is defined, it will create a client using it.
     Otherwise, it will create a client using the specified region.
     If neither are defined, it will throw an exception.
@@ -112,10 +112,11 @@ def parse_arn(arn: str) -> Dict[str, str]:
 
 
 def validate_aws_config(config):
+    """Validate that the nessesary AWS configs are set."""
     try:
         get_client("ec2", config)
     except ProfileNotFound as pnf:
-        raise UnrecoverableValidationError(pnf)
+        raise UnrecoverableValidationError(pnf) from pnf
 
 
 def convert_s3a_to_arn(s3a_url: str) -> str:
@@ -168,6 +169,7 @@ def simulate_policy(
 
 
 def get_instance_profile(iam_client: IAMClient, name: str) -> Dict:
+    """Get the instance profile form AWS configs."""
     try:
         instance_profile = iam_client.get_instance_profile(InstanceProfileName=name)
     except iam_client.exceptions.NoSuchEntityException:

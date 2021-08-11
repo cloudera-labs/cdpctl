@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding:utf-8 -*-
 ###
 # CLOUDERA CDP Control (cdpctl)
 #
@@ -45,13 +44,10 @@
 from typing import Any, Dict, List
 
 import pytest
+from boto3_type_annotations.iam import Client as EC2Client
 
 from cdpctl.validation import get_config_value
-
-from boto3_type_annotations.iam import Client as EC2Client
-from cdpctl.validation.aws_utils import (
-    get_client,
-)
+from cdpctl.validation.aws_utils import get_client
 
 subnets_data = {}
 
@@ -217,7 +213,7 @@ def aws_public_subnets_route_validation(
 @pytest.mark.infra
 @pytest.mark.dependency(depends=["aws_public_subnets_validation"])
 def aws_public_subnets_range_validation() -> None:
-    """Public subnets have adequate IP range."""  # noqa: D401,E501
+    """Public subnets have adequate CIDR range."""  # noqa: D401,E501
     try:
         subnets_wo_valid_range = []
         for subnet in subnets_data["public_subnets"]:
@@ -391,8 +387,8 @@ def aws_private_subnets_route_validation(
             for route_table in subnets_route_tables:
                 routes = route_table["Routes"]
                 for route in routes:
-                    if "GatewayId" in route:
-                        gateway_ids.append(route["GatewayId"])
+                    if "NatGatewayId" in route:
+                        gateway_ids.append(route["NatGatewayId"])
         else:
             pytest.fail(
                 f"""Provided Subnets {subnets_data["private_subnets_ids"]} and
@@ -414,7 +410,7 @@ def aws_private_subnets_route_validation(
 @pytest.mark.infra
 @pytest.mark.dependency(depends=["aws_private_subnets_validation"])
 def aws_private_subnets_range_validation() -> None:
-    """Private subnets have adequate IP range."""  # noqa: D401,E501
+    """Private subnets have adequate CIDR range."""  # noqa: D401,E501
     try:
         subnets_wo_valid_range = []
         for subnet in subnets_data["private_subnets"]:

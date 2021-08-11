@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding:utf-8 -*-
 ###
 # CLOUDERA CDP Control (cdpctl)
 #
@@ -44,28 +43,27 @@
 from typing import Any, Dict, List
 
 import pytest
-
-from botocore.stub import Stubber
 from boto3_type_annotations.iam import Client as IAMClient
+from botocore.stub import Stubber
+
+from cdpctl.validation.aws_utils import get_client
 from cdpctl.validation.infra.validate_aws_cross_account_role import (
-    aws_cross_account_role_exists_validation,
-    aws_cross_account_role_account_id_validation,
-    aws_cross_account_role_external_id_validation,
-    aws_cross_account_role_ec2_needed_actions_validation,
-    aws_cross_account_role_autoscaling_resources_needed_actions_validation,
-    aws_cross_account_role_cloud_formation_needed_actions_validation,
-    aws_cross_account_role_cdp_environment_resources_needed_actions_validation,
-    aws_cross_account_role_pass_role_needed_actions_validation,
     aws_cross_account_identity_management_needed_actions_validation,
+    aws_cross_account_role_account_id_validation,
+    aws_cross_account_role_autoscaling_resources_needed_actions_validation,
+    aws_cross_account_role_cdp_environment_resources_needed_actions_validation,
+    aws_cross_account_role_cloud_formation_needed_actions_validation,
+    aws_cross_account_role_ec2_needed_actions_validation,
+    aws_cross_account_role_exists_validation,
+    aws_cross_account_role_external_id_validation,
+    aws_cross_account_role_pass_role_needed_actions_validation,
     cross_account_role_data,
 )
-from tests.validation import expect_validation_success, expect_validation_failure
-
+from tests.validation import expect_validation_failure, expect_validation_success
 from tests.validation.test_aws_utils import (
-    add_simulate_policy_response,
     add_get_role_response,
+    add_simulate_policy_response,
 )
-from cdpctl.validation.aws_utils import get_client
 
 
 @pytest.fixture(autouse=True, name="iam_client")

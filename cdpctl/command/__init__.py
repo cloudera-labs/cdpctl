@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding:utf-8 -*-
 ###
 # CLOUDERA CDP Control (cdpctl)
 #
@@ -43,9 +42,7 @@
 """Common Shared Info."""
 
 from .provision import ProvisionCommand
-from .validate import ValidateCommand
 
 __all__ = [
     "ProvisionCommand",
-    "ValidateCommand",
 ]

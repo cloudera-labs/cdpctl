@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding:utf-8 -*-
 ###
 # CLOUDERA CDP Control (cdpctl)
 #
@@ -44,30 +43,32 @@
 from typing import Any, Dict
 
 import pytest
-
 from boto3_type_annotations.iam import Client as IAMClient
-from tests.validation import expect_validation_failure, expect_validation_success
+from botocore.stub import Stubber
+
+from cdpctl.validation.aws_utils import get_client
 from cdpctl.validation.infra.validate_aws_datalake_admin_role import (
     aws_datalake_admin_role_has_bucket_access_policy,
     aws_datalake_admin_role_has_bucket_access_policy_all_resources,
-    aws_datalake_admin_role_has_s3_policy,
     aws_datalake_admin_role_has_dynamodb_policy,
+    aws_datalake_admin_role_has_s3_policy,
 )
-from botocore.stub import Stubber
-from cdpctl.validation.aws_utils import get_client
+from tests.validation import expect_validation_failure, expect_validation_success
 from tests.validation.test_aws_utils import (
-    add_simulate_policy_response,
     add_get_role_response,
+    add_simulate_policy_response,
 )
 
 
 @pytest.fixture(autouse=True, name="iam_client")
 def iam_stubber_fixture() -> IAMClient:
+    """Provide the IAM client."""
     config: Dict[str, Any] = {"infra": {"aws": {"region": "us-west-2", "profile": ""}}}
     return get_client("iam", config)
 
 
 def test_has_bucket_access_policy_with_missing_actions(iam_client: IAMClient) -> None:
+    """Test for bucket policy with missing actions."""
     config: Dict[str, Any] = {
         "env": {
             "aws": {

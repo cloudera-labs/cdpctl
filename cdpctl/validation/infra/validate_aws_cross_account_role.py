@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding:utf-8 -*-
 ###
 # CLOUDERA CDP Control (cdpctl)
 #
@@ -44,10 +43,10 @@
 from typing import Any, Dict, List
 
 import pytest
-
 from boto3_type_annotations.iam import Client as IAMClient
+
 from cdpctl.validation import get_config_value
-from cdpctl.validation.aws_utils import get_role, simulate_policy, get_client
+from cdpctl.validation.aws_utils import get_client, get_role, simulate_policy
 
 cross_account_role_data = {}
 
@@ -96,8 +95,11 @@ def aws_cross_account_role_account_id_validation(
     for s in cross_account_role_data["role"]["Role"]["AssumeRolePolicyDocument"][
         "Statement"
     ]:
-        if "Principal" in s.keys():
-            if "AWS" in s["Principal"].keys():
+        if "Principal" in s and "AWS" in s["Principal"]:
+            if isinstance(s["Principal"]["AWS"], str):
+                if str(account_id) in s["Principal"]["AWS"].split(":"):
+                    found_account_id = True
+            else:
                 for arn in s["Principal"]["AWS"]:
                     if str(account_id) in arn.split(":"):
                         found_account_id = True
