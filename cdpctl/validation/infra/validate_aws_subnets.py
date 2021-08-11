@@ -213,7 +213,7 @@ def aws_public_subnets_route_validation(
 @pytest.mark.infra
 @pytest.mark.dependency(depends=["aws_public_subnets_validation"])
 def aws_public_subnets_range_validation() -> None:
-    """Public subnets have adequate IP range."""  # noqa: D401,E501
+    """Public subnets have adequate CIDR range."""  # noqa: D401,E501
     try:
         subnets_wo_valid_range = []
         for subnet in subnets_data["public_subnets"]:
@@ -410,7 +410,7 @@ def aws_private_subnets_route_validation(
 @pytest.mark.infra
 @pytest.mark.dependency(depends=["aws_private_subnets_validation"])
 def aws_private_subnets_range_validation() -> None:
-    """Private subnets have adequate IP range."""  # noqa: D401,E501
+    """Private subnets have adequate CIDR range."""  # noqa: D401,E501
     try:
         subnets_wo_valid_range = []
         for subnet in subnets_data["private_subnets"]:
