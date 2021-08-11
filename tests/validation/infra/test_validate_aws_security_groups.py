@@ -52,8 +52,8 @@ from cdpctl.validation.infra.conftest import (  # noqa: F401 pylint: disable=unu
 )
 from cdpctl.validation.infra.validate_aws_security_groups import (
     _aws_default_security_groups_contains_cdp_cidr_validation,
-    _aws_gateway_security_groups_contains_cdp_cidr_validation,
     _aws_default_security_groups_contains_vpc_cidr_validation,
+    _aws_gateway_security_groups_contains_cdp_cidr_validation,
     _aws_gateway_security_groups_contains_vpc_cidr_validation,
 )
 from tests.validation import expect_validation_failure, expect_validation_success
