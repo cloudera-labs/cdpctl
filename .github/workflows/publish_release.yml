@@ -26,12 +26,12 @@ jobs:
         with:
           ref: main
       - name: Merge release tag to main
-        uses: everlytic/branch-merge@1.1.2
+        uses: devmasx/merge-branch@v1.3.1
         with:
+          type: now
+          from_branch: ref/tags/${{ env.RELEASE_VERSION }}
+          target_branch: main
           github_token: ${{ github.token }}
-          source_ref: ref/tags/${{ env.RELEASE_VERSION }}
-          target_branch: refs/heads/main
-          commit_message_template: '[Automated] Merged {source_ref} into target {target_branch}'
       - name: Push to GitHub Packages
         uses: docker/build-push-action@v2.3.0
         with:
