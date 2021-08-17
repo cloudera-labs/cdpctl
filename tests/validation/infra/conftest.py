@@ -48,8 +48,6 @@ from cdpctl.validation.infra.conftest import (
     cdp_environment_resources_needed_actions,
     cloud_formation_needed_actions,
     data_location_needed_actions,
-    dynamodb_needed_actions_to_all,
-    dynamodb_table_needed_actions,
     ec2_needed_actions,
     identity_management_needed_actions,
     log_bucket_needed_actions,
