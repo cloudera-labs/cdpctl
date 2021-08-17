@@ -50,7 +50,6 @@ from cdpctl.validation.aws_utils import get_client
 from cdpctl.validation.infra.validate_aws_datalake_admin_role import (
     aws_datalake_admin_role_has_bucket_access_policy,
     aws_datalake_admin_role_has_bucket_access_policy_all_resources,
-    aws_datalake_admin_role_has_dynamodb_policy,
     aws_datalake_admin_role_has_s3_policy,
 )
 from tests.validation import expect_validation_failure, expect_validation_success
@@ -281,72 +280,4 @@ def test_has_bucket_access_policy_all_resources_with_valid_actions(
         func = expect_validation_success(
             aws_datalake_admin_role_has_bucket_access_policy_all_resources
         )
-        func(config, iam_client, ["ListBucket"])
-
-
-def test_has_dynamodb_policy_with_missing_actions(
-    iam_client: IAMClient,
-) -> None:
-    config: Dict[str, Any] = {
-        "env": {
-            "aws": {
-                "role": {
-                    "name": {
-                        "datalake_admin": "arn:aws:iam::214178861886:role/datalake_admin_role"
-                    }
-                }
-            }
-        },
-        "infra": {"aws": {"dynamodb": {"table_name": "table_name"}}},
-    }
-
-    stubber = Stubber(iam_client)
-
-    add_get_role_response(
-        stubber, "arn:aws:iam::214178861886:role/datalake_admin_role", False
-    )
-    add_simulate_policy_response(
-        stubber,
-        "arn:aws:iam::214178861886:role/datalake_admin_role",
-        ["arn:aws:dynamodb:::table/table_name"],
-        ["ListBucket"],
-        failSimulatePolicy=True,
-    )
-
-    with stubber:
-        func = expect_validation_failure(aws_datalake_admin_role_has_dynamodb_policy)
-        func(config, iam_client, ["ListBucket"])
-
-
-def test_has_dynamodb_policy_with_valid_actions(
-    iam_client: IAMClient,
-) -> None:
-    config: Dict[str, Any] = {
-        "env": {
-            "aws": {
-                "role": {
-                    "name": {
-                        "datalake_admin": "arn:aws:iam::214178861886:role/datalake_admin_role"
-                    }
-                }
-            }
-        },
-        "infra": {"aws": {"dynamodb": {"table_name": "table_name"}}},
-    }
-
-    stubber = Stubber(iam_client)
-
-    add_get_role_response(
-        stubber, "arn:aws:iam::214178861886:role/datalake_admin_role", False
-    )
-    add_simulate_policy_response(
-        stubber,
-        "arn:aws:iam::214178861886:role/datalake_admin_role",
-        ["arn:aws:dynamodb:::table/table_name"],
-        ["ListBucket"],
-        failSimulatePolicy=False,
-    )
-
-    with stubber:
-        func = expect_validation_success(aws_datalake_admin_role_has_dynamodb_policy)
         func(config, iam_client, ["ListBucket"])

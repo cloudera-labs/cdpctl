@@ -124,11 +124,6 @@ def convert_s3a_to_arn(s3a_url: str) -> str:
     return f"arn:aws:s3:::{s3a_url.replace('s3a://', '')}"
 
 
-def convert_dynamodb_table_to_arn(dynamodb_table: str) -> str:
-    """Convert a dynamodb table name to an AWS ARN."""
-    return f"arn:aws:dynamodb:::table/{dynamodb_table}"
-
-
 def is_valid_s3a_url(s3a_url: str) -> bool:
     """Validate an S3A URL."""
     return bool(re.match("^s3a://([^/]+).*", s3a_url))

@@ -49,8 +49,6 @@ from cdpctl.validation.aws_utils import get_client
 from cdpctl.validation.infra.validate_aws_ranger_audit_role import (
     aws_ranger_audit_cdp_s3_needed_actions_validation,
     aws_ranger_audit_data_location_needed_actions_validation,
-    aws_ranger_audit_dynamoDB_needed_actions_validation,
-    aws_ranger_audit_dynamoDB_table_needed_actions_validation,
     aws_ranger_audit_location_needed_actions_validation,
     aws_ranger_audit_role_exists_validation,
     aws_ranger_audit_s3_bucket_needed_actions_validation,
@@ -312,97 +310,3 @@ def test_aws_ranger_audit_data_location_needed_actions_validation_failure(
             aws_ranger_audit_data_location_needed_actions_validation
         )
         func(data_location_needed_actions, iam_client)
-
-
-def test_aws_ranger_audit_dynamodb_needed_actions_validation_success(
-    dynamodb_needed_actions_to_all: List[str],
-    iam_client: IAMClient,
-) -> None:
-    """Unit test Ranger role audit dynamodb needed actions validation success."""
-    ranger_audit_data["role_arn"] = "arn:aws:iam::1234:role/ranger_audit_role"
-
-    stubber = Stubber(iam_client)
-
-    add_simulate_policy_response(
-        stubber=stubber,
-        role_arn=ranger_audit_data["role_arn"],
-        resource_arns=["*"],
-        actions=dynamodb_needed_actions_to_all,
-        failSimulatePolicy=False,
-    )
-    with stubber:
-        func = expect_validation_success(
-            aws_ranger_audit_dynamoDB_needed_actions_validation
-        )
-        func(dynamodb_needed_actions_to_all, iam_client)
-
-
-def test_aws_ranger_audit_dynamodb_needed_actions_validation_failure(
-    dynamodb_needed_actions_to_all: List[str],
-    iam_client: IAMClient,
-) -> None:
-    """Unit test Ranger role audit dynamodb needed actions validation failure."""
-    ranger_audit_data["role_arn"] = "arn:aws:iam::1234:role/ranger_audit_role"
-
-    stubber = Stubber(iam_client)
-
-    add_simulate_policy_response(
-        stubber=stubber,
-        role_arn=ranger_audit_data["role_arn"],
-        resource_arns=["*"],
-        actions=dynamodb_needed_actions_to_all,
-        failSimulatePolicy=True,
-    )
-    with stubber:
-        func = expect_validation_failure(
-            aws_ranger_audit_dynamoDB_needed_actions_validation
-        )
-        func(dynamodb_needed_actions_to_all, iam_client)
-
-
-def test_aws_ranger_audit_dynamodb_table_needed_actions_validation_success(
-    dynamodb_table_needed_actions: List[str],
-    iam_client: IAMClient,
-) -> None:
-    """Unit test Ranger role audit dynamodb table needed actions validation success."""
-    ranger_audit_data["role_arn"] = "arn:aws:iam::1234:role/ranger_audit_role"
-    ranger_audit_data["dynamodb_table_arn"] = "arn:aws:dynamodb:::table/test-cdp-db"
-
-    stubber = Stubber(iam_client)
-
-    add_simulate_policy_response(
-        stubber=stubber,
-        role_arn=ranger_audit_data["role_arn"],
-        resource_arns=[ranger_audit_data["dynamodb_table_arn"]],
-        actions=dynamodb_table_needed_actions,
-        failSimulatePolicy=False,
-    )
-    with stubber:
-        func = expect_validation_success(
-            aws_ranger_audit_dynamoDB_table_needed_actions_validation
-        )
-        func(dynamodb_table_needed_actions, iam_client)
-
-
-def test_aws_ranger_audit_dynamodb_table_needed_actions_validation_failure(
-    dynamodb_table_needed_actions: List[str],
-    iam_client: IAMClient,
-) -> None:
-    """Unit test Ranger role audit dynamodb table needed actions validation failure."""
-    ranger_audit_data["role_arn"] = "arn:aws:iam::1234:role/ranger_audit_role"
-    ranger_audit_data["dynamodb_table_arn"] = "arn:aws:dynamodb:::table/test-cdp-db"
-
-    stubber = Stubber(iam_client)
-
-    add_simulate_policy_response(
-        stubber=stubber,
-        role_arn=ranger_audit_data["role_arn"],
-        resource_arns=[ranger_audit_data["dynamodb_table_arn"]],
-        actions=dynamodb_table_needed_actions,
-        failSimulatePolicy=True,
-    )
-    with stubber:
-        func = expect_validation_failure(
-            aws_ranger_audit_dynamoDB_table_needed_actions_validation
-        )
-        func(dynamodb_table_needed_actions, iam_client)

@@ -47,7 +47,6 @@ from boto3_type_annotations.iam import Client as IAMClient
 
 from cdpctl.validation import get_config_value
 from cdpctl.validation.aws_utils import (
-    convert_dynamodb_table_to_arn,
     convert_s3a_to_arn,
     get_client,
     get_role,
@@ -125,23 +124,6 @@ def aws_ranger_audit_role_audit_location_exist_validation(
     ranger_audit_data["ranger_audit_location"] = ranger_audit_location
     ranger_audit_data["ranger_audit_bucket_arn"] = ranger_audit_bucket_arn
     ranger_audit_data["ranger_audit_location_arn"] = ranger_audit_location_arn
-
-
-@pytest.mark.aws
-@pytest.mark.infra
-def aws_ranger_audit_role_dynamoDB_table_exist_validation(
-    config: Dict[str, Any]
-) -> None:  # pragma: no cover
-    """Ranger DynamoDB table exists."""  # noqa: D401
-    dynamodb_table: str = get_config_value(
-        config,
-        "infra:aws:dynamodb:table_name",
-        key_missing_message="No table name was defined for config option: {0}",
-        data_expected_error_message="No table name was provided for config option: {0}",
-    )
-    # dynamoDB table arn
-    dynamodb_table_arn = convert_dynamodb_table_to_arn(dynamodb_table)
-    ranger_audit_data["dynamodb_table_arn"] = dynamodb_table_arn
 
 
 @pytest.mark.aws
@@ -229,53 +211,6 @@ def aws_ranger_audit_data_location_needed_actions_validation(
             f"The role ({ranger_audit_data['ranger_audit_role']}) "
             "requires the following actions for the S3 data location "
             f"({ranger_audit_data['data_location_arn']}/*): \n {{}}",
-        )
-    except KeyError as e:
-        pytest.fail(f"Validation error - missing required data : {e.args[0]}", False)
-
-
-@pytest.mark.aws
-@pytest.mark.infra
-@pytest.mark.dependency(depends=["aws_ranger_audit_role_exists_validation"])
-def aws_ranger_audit_dynamoDB_needed_actions_validation(
-    dynamodb_needed_actions_to_all: List[str], iam_client: IAMClient
-) -> None:
-    """Ranger audit role has the needed actions for DynamoDB."""  # noqa: D401
-    try:
-        # aws-cdp-dynamodb-policy
-        simulate_policy(
-            iam_client,
-            ranger_audit_data["role_arn"],
-            ["*"],
-            dynamodb_needed_actions_to_all,
-            f"""The role ({ranger_audit_data["ranger_audit_role"]}) requires the
-            following actions for all Dynamodb resources ([*]) : \n {{}}""",
-        )
-    except KeyError as e:
-        pytest.fail(f"Validation error - missing required data : {e.args[0]}", False)
-
-
-@pytest.mark.aws
-@pytest.mark.infra
-@pytest.mark.dependency(
-    depends=[
-        "aws_ranger_audit_role_exists_validation",
-        "aws_ranger_audit_role_dynamoDB_table_exist_validation",
-    ],
-)
-def aws_ranger_audit_dynamoDB_table_needed_actions_validation(
-    dynamodb_table_needed_actions: List[str], iam_client: IAMClient
-) -> None:
-    """Ranger audit role has the needed actions for the DynamoDB table."""  # noqa: D401, E501
-    try:
-        simulate_policy(
-            iam_client,
-            ranger_audit_data["role_arn"],
-            [ranger_audit_data["dynamodb_table_arn"]],
-            dynamodb_table_needed_actions,
-            f"""The role ({ranger_audit_data["ranger_audit_role"]}) requires the
-            following actions for the DynamoDB table
-            ({ranger_audit_data["dynamodb_table_arn"]}) : \n {{}}""",
         )
     except KeyError as e:
         pytest.fail(f"Validation error - missing required data : {e.args[0]}", False)
