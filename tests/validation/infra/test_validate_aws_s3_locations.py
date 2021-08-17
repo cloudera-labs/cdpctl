@@ -57,7 +57,7 @@ from tests.validation import expect_validation_failure, expect_validation_succes
 
 @pytest.fixture(autouse=True, name="s3_client")
 def s3_client_fixture() -> S3Client:
-    """Get the DynamoDB client."""
+    """Get the S3 client."""
     config: Dict[str, Any] = {"infra": {"aws": {"region": "us-west-2", "profile": ""}}}
     return get_client("s3", config)
 
