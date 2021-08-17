@@ -47,7 +47,6 @@ from boto3_type_annotations.iam import Client as IAMClient
 
 from cdpctl.validation import get_config_value, validator
 from cdpctl.validation.aws_utils import (
-    convert_dynamodb_table_to_arn,
     convert_s3a_to_arn,
     get_client,
     get_role,
@@ -141,25 +140,6 @@ def datalake_admin_s3_policy_actions_fixture() -> List[str]:
         "s3:ListBucketVersions",
         "s3:ListMultipartUploadParts",
         "s3:PutObject",
-    ]
-
-
-@pytest.fixture(scope="module", name="dynamodb_policy_actions")
-def dynamodb_policy_actions_fixture() -> List[str]:
-    """Actions that must be allowed against the dynamodb table."""
-    return [
-        "dynamodb:BatchGetItem",
-        "dynamodb:BatchWriteItem",
-        "dynamodb:CreateTable",
-        "dynamodb:DeleteItem",
-        "dynamodb:DescribeTable",
-        "dynamodb:GetItem",
-        "dynamodb:PutItem",
-        "dynamodb:Query",
-        "dynamodb:UpdateItem",
-        "dynamodb:Scan",
-        "dynamodb:TagResource",
-        "dynamodb:UntagResource",
     ]
 
 
@@ -329,62 +309,4 @@ def aws_datalake_admin_role_has_s3_policy(
         datalake_admin_s3_policy_actions,
         missing_actions_message=f"The role ({datalake_admin_role_name}) requires the following actions for the \
             S3 data location ({data_location}):\n{{0}}",
-    )
-
-
-@pytest.mark.aws
-@pytest.mark.infra
-@pytest.mark.dependency(
-    depends=[
-        "infra/validate_aws_dynamodb_table.py::aws_dynamodb_table_exists_validation",
-    ],
-    scope="session",
-)
-def aws_datalake_admin_role_has_dynamodb_policy_validation(
-    config: Dict[str, Any],
-    iam_client: IAMClient,
-    dynamodb_policy_actions: List[str],
-) -> None:  # pragma: no cover
-    """Datalake Admin role has the needed to the DynamoDB table."""  # noqa: D401,E501
-    aws_datalake_admin_role_has_dynamodb_policy(
-        config,
-        iam_client,
-        dynamodb_policy_actions,
-    )
-
-
-@validator
-def aws_datalake_admin_role_has_dynamodb_policy(
-    config: Dict[str, Any],
-    iam_client: IAMClient,
-    dynamodb_policy_actions: List[str],
-) -> None:
-    """Validate that datalake_admin role has the needed to the DynamoDB table."""
-
-    datalake_admin_role_name: str = get_config_value(
-        config,
-        "env:aws:role:name:datalake_admin",
-        key_missing_message="No role defined for config option: {0}",
-        data_expected_error_message="No role was provided for config option: {0}",
-    )
-
-    dynamodb_table_name: str = get_config_value(
-        config,
-        "infra:aws:dynamodb:table_name",
-        key_missing_message="No table name was defined for config option: {0}",
-        data_expected_error_message="No table name was provided for config option: {0}",
-    )
-
-    dynamodb_table_arn = convert_dynamodb_table_to_arn(dynamodb_table_name)
-
-    datalake_admin_role = get_role(iam_client, datalake_admin_role_name)
-    datalake_admin_role_arn = datalake_admin_role["Role"]["Arn"]
-
-    simulate_policy(
-        iam_client,
-        datalake_admin_role_arn,
-        [dynamodb_table_arn],
-        dynamodb_policy_actions,
-        missing_actions_message=f"The role ({datalake_admin_role_name}) requires the following actions for the \
-            DynamoDB table ({dynamodb_table_name}):\n{{0}}",
     )
