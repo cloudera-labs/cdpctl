@@ -238,7 +238,7 @@ def test_idbroker_role_with_valid_s3_policies(
     add_simulate_policy_response(
         stubber=stubber,
         role_arn=idbroker_instance_profile,
-        resource_arns=[log_location_arn, f"{log_location_arn}/*"],
+        resource_arns=[f"{log_location_arn}/*"],
         actions=logs_needed_actions,
         failSimulatePolicy=False,
     )
@@ -266,7 +266,7 @@ def test_idbroker_role_with_invalid_s3_policies(
     add_simulate_policy_response(
         stubber=stubber,
         role_arn=idbroker_instance_profile,
-        resource_arns=[log_location_arn, f"{log_location_arn}/*"],
+        resource_arns=[f"{log_location_arn}/*"],
         actions=logs_needed_actions,
         failSimulatePolicy=True,
     )
@@ -294,7 +294,7 @@ def test_idbroker_role_with_valid_s3_bucket_policies(
     add_simulate_policy_response(
         stubber=stubber,
         role_arn=idbroker_instance_profile,
-        resource_arns=[log_bucket_arn, f"{log_bucket_arn}/*"],
+        resource_arns=[log_bucket_arn],
         actions=log_bucket_needed_actions,
         failSimulatePolicy=False,
     )
@@ -322,7 +322,7 @@ def test_idbroker_role_with_invalid_s3_bucket_policies(
     add_simulate_policy_response(
         stubber=stubber,
         role_arn=idbroker_instance_profile,
-        resource_arns=[log_bucket_arn, f"{log_bucket_arn}/*"],
+        resource_arns=[log_bucket_arn],
         actions=log_bucket_needed_actions,
         failSimulatePolicy=True,
     )
