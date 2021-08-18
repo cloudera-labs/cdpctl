@@ -78,3 +78,5 @@ def aws_ssh_key_validation(
             pytest.fail(f"SSH key id ({ssh_key_id}) do not exist.", False)
     except KeyError as e:
         pytest.fail(f"Validation error - missing required data : {e.args[0]}", False)
+    except ec2_client.exceptions.ClientError as ce:
+        pytest.fail(f"Validation error - invalid ssh key id : {ce.args[0]}", False)
