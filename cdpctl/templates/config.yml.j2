@@ -15,7 +15,7 @@ network_type:
 globals:
   ssh:
     ## The AWS SSH Public Key ID to use
-    # example: some-key-name
+    # example: some-key-id
     public_key_id: {{ info['globals:ssh:public_key_id']|default("", true) }}
 
 ## Specify the default region you prefer for your infrastructure provider
