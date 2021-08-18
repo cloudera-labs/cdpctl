@@ -249,7 +249,7 @@ def _aws_idbroker_role_has_necessary_s3_actions_validation(
     simulate_policy(
         iam_client,
         role_arn,
-        [log_location_arn, f"{log_location_arn}/*"],
+        [f"{log_location_arn}/*"],
         logs_needed_actions,
         f"""The role ({role_arn}) requires the following actions
          for the log storage path ({log_location}):\n{{}}""",
@@ -299,7 +299,7 @@ def _aws_idbroker_role_has_necessary_s3_bucket_actions_validation(
     simulate_policy(
         iam_client,
         role_arn,
-        [log_bucket_arn, f"{log_bucket_arn}/*"],
+        [log_bucket_arn],
         log_bucket_needed_actions,
         f"""The role ({role_arn}) requires the following actions
          for the log storage bucket ({log_bucket_arn}):\n{{}}""",
