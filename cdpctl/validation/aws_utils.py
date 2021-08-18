@@ -158,7 +158,7 @@ def simulate_policy(
 
     if len(missing_actions) > 0:
         pytest.fail(
-            missing_actions_message.format(missing_actions),
+            missing_actions_message.format(set(missing_actions)),
             False,
         )
 
