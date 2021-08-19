@@ -222,7 +222,7 @@ def aws_public_subnets_range_validation() -> None:
         subnets_wo_valid_range = []
         for subnet in subnets_data["public_subnets"]:
             cidrblock_range = subnet["CidrBlock"].split("/")[1]
-            if int(cidrblock_range) < 24:
+            if int(cidrblock_range) > 24:
                 subnets_wo_valid_range.append(subnet["SubnetId"])
 
         if len(subnets_wo_valid_range) > 0:
@@ -423,7 +423,7 @@ def aws_private_subnets_range_validation() -> None:
         subnets_wo_valid_range = []
         for subnet in subnets_data["private_subnets"]:
             cidrblock_range = subnet["CidrBlock"].split("/")[1]
-            if int(cidrblock_range) < 19:
+            if int(cidrblock_range) > 19:
                 subnets_wo_valid_range.append(subnet["SubnetId"])
 
         if len(subnets_wo_valid_range) > 0:

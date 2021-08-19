@@ -79,7 +79,7 @@ sample_public_subnets_response = {
         },
         {
             "AvailabilityZone": "us-west-2c",
-            "CidrBlock": "10.1.238.0/24",
+            "CidrBlock": "10.1.238.0/14",
             "SubnetId": "subnet-pubtest2-cdp",
             "VpcId": "vpc-testcdp12345",
             "Tags": [
@@ -89,7 +89,7 @@ sample_public_subnets_response = {
         },
         {
             "AvailabilityZone": "us-west-2a",
-            "CidrBlock": "10.2.236.0/24",
+            "CidrBlock": "10.2.236.0/22",
             "SubnetId": "subnet-pubtest3-cdp",
             "VpcId": "vpc-testcdp12345",
             "Tags": [
@@ -104,7 +104,7 @@ sample_private_subnets_response = {
     "Subnets": [
         {
             "AvailabilityZone": "us-west-2b",
-            "CidrBlock": "20.0.237.0/24",
+            "CidrBlock": "20.0.237.0/14",
             "SubnetId": "subnet-prvtest1-cdp",
             "VpcId": "vpc-testcdp12345",
             "Tags": [
@@ -114,7 +114,7 @@ sample_private_subnets_response = {
         },
         {
             "AvailabilityZone": "us-west-2c",
-            "CidrBlock": "20.1.238.0/24",
+            "CidrBlock": "20.1.238.0/19",
             "SubnetId": "subnet-prvtest2-cdp",
             "VpcId": "vpc-testcdp12345",
             "Tags": [
@@ -124,7 +124,7 @@ sample_private_subnets_response = {
         },
         {
             "AvailabilityZone": "us-west-2a",
-            "CidrBlock": "20.2.236.0/24",
+            "CidrBlock": "20.2.236.0/18",
             "SubnetId": "subnet-prvtest3-cdp",
             "VpcId": "vpc-testcdp12345",
             "Tags": [
@@ -520,7 +520,7 @@ def test_aws_public_subnets_range_validation_failure(ec2_client: EC2Client) -> N
         {
             "Subnets": [
                 {
-                    "CidrBlock": "10.0.237.0/14",
+                    "CidrBlock": "10.0.237.0/25",
                     "SubnetId": "subnet-pubtest1-cdp",
                 },
                 {"CidrBlock": "10.1.238.0/24", "SubnetId": "subnet-pubtest2-cdp"},
@@ -935,12 +935,12 @@ def test_aws_private_subnets_range_validation_failure(ec2_client: EC2Client) -> 
         {
             "Subnets": [
                 {
-                    "CidrBlock": "10.0.237.0/18",
+                    "CidrBlock": "10.0.237.0/12",
                     "SubnetId": "subnet-prvtest1-cdp",
                 },
                 {"CidrBlock": "10.1.238.0/24", "SubnetId": "subnet-prvtest2-cdp"},
                 {
-                    "CidrBlock": "10.2.236.0/14",
+                    "CidrBlock": "10.2.236.0/24",
                     "SubnetId": "subnet-prvtest3-cdp",
                 },
             ],
