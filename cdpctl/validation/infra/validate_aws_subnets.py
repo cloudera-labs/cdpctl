@@ -92,6 +92,8 @@ def aws_public_subnets_validation(
         subnets_data["public_subnets_ids"] = public_subnets
     except KeyError as e:
         pytest.fail(f"Validation error - missing required data : {e.args[0]}", False)
+    except ec2_client.exceptions.ClientError as ce:
+        pytest.fail(f"Validation error - invalid subnetId : {ce.args[0]}", False)
 
 
 @pytest.mark.aws
@@ -207,6 +209,8 @@ def aws_public_subnets_route_validation(
 
     except KeyError as e:
         pytest.fail(f"Validation error - missing required data : {e.args[0]}", False)
+    except ec2_client.exceptions.ClientError as ce:
+        pytest.fail(f"Validation error - invalid data : {ce.args[0]}", False)
 
 
 @pytest.mark.aws
@@ -274,9 +278,9 @@ def aws_private_subnets_validation(
     if not len(private_subnets) > 2:
         pytest.fail("Not enough subnets provided, at least 3 subnets required.", False)
 
-    # query subnets
-    subnets = ec2_client.describe_subnets(SubnetIds=private_subnets)
     try:
+        # query subnets
+        subnets = ec2_client.describe_subnets(SubnetIds=private_subnets)
         missing_subnets = []
         for pvt_id in private_subnets:
             missing_subnets.append(pvt_id)
@@ -292,6 +296,8 @@ def aws_private_subnets_validation(
         subnets_data["private_subnets_ids"] = private_subnets
     except KeyError as e:
         pytest.fail(f"Validation error - missing required data : {e.args[0]}", False)
+    except ec2_client.exceptions.ClientError as ce:
+        pytest.fail(f"Validation error - invalid subnetId : {ce.args[0]}", False)
 
 
 @pytest.mark.aws
@@ -404,6 +410,8 @@ def aws_private_subnets_route_validation(
 
     except KeyError as e:
         pytest.fail(f"Validation error - missing required data : {e.args[0]}", False)
+    except ec2_client.exceptions.ClientError as ce:
+        pytest.fail(f"Validation error - invalid data : {ce.args[0]}", False)
 
 
 @pytest.mark.aws
@@ -505,3 +513,5 @@ def aws_vpc_subnets_validation(
             pytest.fail("DNS support not enabled for provided vpc.", False)
     except KeyError as e:
         pytest.fail(f"Validation error - missing required data : {e.args[0]}", False)
+    except ec2_client.exceptions.ClientError as ce:
+        pytest.fail(f"Validation error - invalid data : {ce.args[0]}", False)
