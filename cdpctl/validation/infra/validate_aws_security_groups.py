@@ -73,6 +73,7 @@ def tunnel_enabled(config: Dict[str, Any]):
 
 @pytest.mark.aws
 @pytest.mark.infra
+@pytest.mark.config_value(path="env:tunnel", value=False)
 def aws_default_security_groups_contains_cdp_cidr_validation(
     config: Dict[str, Any],
     cdp_cidrs: List[str],
@@ -134,6 +135,7 @@ def _aws_default_security_groups_contains_cdp_cidr_validation(
 
 @pytest.mark.aws
 @pytest.mark.infra
+@pytest.mark.config_value(path="env:tunnel", value=False)
 def aws_gateway_security_groups_contains_cdp_cidr_validation(
     config: Dict[str, Any],
     cdp_cidrs: List[str],
