@@ -187,7 +187,9 @@ def pytest_runtest_setup(item):
             and requested_config_value is not None
         ):
             config_value = get_config_value(
-                config=configuration, key=requested_config_value_path
+                config=configuration,
+                key=requested_config_value_path,
+                key_value_expected=False,
             )
             if config_value is not None and config_value != requested_config_value:
                 pytest.skip(

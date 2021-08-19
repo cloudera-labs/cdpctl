@@ -108,6 +108,11 @@ def parse_arn(arn: str) -> Dict[str, str]:
         result["resource_type"], result["resource"] = result["resource"].split("/", 1)
     elif ":" in result["resource"]:
         result["resource_type"], result["resource"] = result["resource"].split(":", 1)
+    else:
+        result["resource_type"], result["resource"] = (
+            result["resource"],
+            result["resource"],
+        )
     return result
 
 
@@ -122,11 +127,6 @@ def validate_aws_config(config):
 def convert_s3a_to_arn(s3a_url: str) -> str:
     """Convert a S3A url to a AWS ARN format."""
     return f"arn:aws:s3:::{s3a_url.replace('s3a://', '')}"
-
-
-def convert_dynamodb_table_to_arn(dynamodb_table: str) -> str:
-    """Convert a dynamodb table name to an AWS ARN."""
-    return f"arn:aws:dynamodb:::table/{dynamodb_table}"
 
 
 def is_valid_s3a_url(s3a_url: str) -> bool:
@@ -163,7 +163,7 @@ def simulate_policy(
 
     if len(missing_actions) > 0:
         pytest.fail(
-            missing_actions_message.format(missing_actions),
+            missing_actions_message.format(set(missing_actions)),
             False,
         )
 

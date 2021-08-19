@@ -58,36 +58,6 @@ def log_bucket_needed_actions() -> List[str]:
 
 
 @pytest.fixture
-def dynamodb_table_needed_actions() -> List[str]:
-    """Dynamodb needed actions for ranger audit role."""
-    return [
-        "dynamodb:BatchGetItem",
-        "dynamodb:BatchWriteItem",
-        "dynamodb:CreateTable",
-        "dynamodb:DeleteItem",
-        "dynamodb:DescribeTable",
-        "dynamodb:GetItem",
-        "dynamodb:PutItem",
-        "dynamodb:Query",
-        "dynamodb:UpdateItem",
-        "dynamodb:Scan",
-        "dynamodb:TagResource",
-        "dynamodb:UntagResource",
-    ]
-
-
-@pytest.fixture
-def dynamodb_needed_actions_to_all() -> List[str]:
-    """Dynamodb needed actions for ranger audit role."""
-    return [
-        "dynamodb:List*",
-        "dynamodb:DescribeReservedCapacity*",
-        "dynamodb:DescribeLimits",
-        "dynamodb:DescribeTimeToLive",
-    ]
-
-
-@pytest.fixture
 def ranger_audit_bucket_needed_actions() -> List[str]:
     """S3 location needed actions for ranger audit role."""
     return [
