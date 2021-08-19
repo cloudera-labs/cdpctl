@@ -108,6 +108,11 @@ def parse_arn(arn: str) -> Dict[str, str]:
         result["resource_type"], result["resource"] = result["resource"].split("/", 1)
     elif ":" in result["resource"]:
         result["resource_type"], result["resource"] = result["resource"].split(":", 1)
+    else:
+        result["resource_type"], result["resource"] = (
+            result["resource"],
+            result["resource"],
+        )
     return result
 
 
