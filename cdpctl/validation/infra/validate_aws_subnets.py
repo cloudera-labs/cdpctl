@@ -71,6 +71,16 @@ def aws_public_subnets_validation(
         key_missing_message="No public subnets defined for config option: {0}",
         data_expected_error_message="No public subnets were provided for config option: {0}",  # noqa: E501
     )
+
+    if not isinstance(public_subnets, List):
+        pytest.fail(
+            """Invalid syntax, config data expected in following format
+                                public_subnet_ids:
+                                    - subnetId-1
+                                    - subnetId-2
+                                    - subnetId-3""",
+            False,
+        )
     if not len(public_subnets) > 2:
         pytest.fail("Not enough subnets provided, at least 3 subnets required.", False)
 
@@ -275,6 +285,15 @@ def aws_private_subnets_validation(
         data_expected_error_message="No private subnets were provided for config "
         "option: {0}",
     )
+    if not isinstance(private_subnets, List):
+        pytest.fail(
+            """Invalid syntax, config data expected in following format
+                                private_subnet_ids:
+                                    - subnetId-1
+                                    - subnetId-2
+                                    - subnetId-3""",
+            False,
+        )
     if not len(private_subnets) > 2:
         pytest.fail("Not enough subnets provided, at least 3 subnets required.", False)
 
