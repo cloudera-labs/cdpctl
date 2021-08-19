@@ -128,6 +128,7 @@ def aws_ranger_audit_role_audit_location_exist_validation(
 
 @pytest.mark.aws
 @pytest.mark.infra
+@pytest.mark.dependency(depends=["aws_ranger_audit_role_exists_validation"])
 def aws_ranger_audit_location_needed_actions_validation(
     ranger_audit_location_needed_actions: List[str], iam_client: IAMClient
 ) -> None:
@@ -175,6 +176,7 @@ def aws_ranger_audit_s3_bucket_needed_actions_validation(
 
 @pytest.mark.aws
 @pytest.mark.infra
+@pytest.mark.dependency(depends=["aws_ranger_audit_role_exists_validation"])
 def aws_ranger_audit_cdp_s3_needed_actions_validation(
     s3_needed_actions_to_all: List[str], iam_client: IAMClient
 ) -> None:
@@ -195,6 +197,7 @@ def aws_ranger_audit_cdp_s3_needed_actions_validation(
 
 @pytest.mark.aws
 @pytest.mark.infra
+@pytest.mark.dependency(depends=["aws_ranger_audit_role_exists_validation"])
 def aws_ranger_audit_data_location_needed_actions_validation(
     data_location_needed_actions: List[str], iam_client: IAMClient
 ) -> None:
