@@ -486,6 +486,27 @@ def aws_private_subnets_tags_validation() -> None:
 
 @pytest.mark.aws
 @pytest.mark.infra
+@pytest.mark.dependency(depends=["aws_private_subnets_validation"])
+def aws_private_subnets_auto_assign_ip_validation() -> None:
+    """Private subnets have auto-assign public IPs disabled."""  # noqa: D401,E501
+    try:
+        subnets_w_public_ips_enabled = []
+        for subnet in subnets_data["private_subnets"]:
+            if subnet["MapPublicIpOnLaunch"]:
+                subnets_w_public_ips_enabled.append(subnet["SubnetId"])
+
+        if len(subnets_w_public_ips_enabled) > 0:
+            pytest.fail(
+                f"""Private subnet(s) {subnets_w_public_ips_enabled} have
+                'Auto-assign Public IPs' enabled.""",
+                False,
+            )
+    except KeyError as e:
+        pytest.fail(f"Validation error - missing required data : {e.args[0]}", False)
+
+
+@pytest.mark.aws
+@pytest.mark.infra
 @pytest.mark.dependency(
     depends=["aws_private_subnets_validation", "aws_public_subnets_validation"]
 )
