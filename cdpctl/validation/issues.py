@@ -39,6 +39,8 @@
 #
 # Source File Name: issues.py
 ###
+# flake8: noqa
+# pylint: skip-file
 
 # THIS FILE IS GENERATED. DO NOT UPDATE BY HAND.
 # Use the update_issue_templates.py script

@@ -69,7 +69,7 @@ id: AWS_S3_BUCKET_FORBIDDEN_ACCESS
 summary: "S3 bucket {0} has forbidden access."
 ---
 id: AWS_NON_CCM_DEFAULT_SG_NEEDS_TO_ALLOW_CDP_CIDRS
-summary: "When not using CCM (tunnel = false), the default security group {0} is missing TCP port 9443 to be allowed access from the following Cloudera CDP CIDRs"
+summary: "The default security group {0} is missing TCP port 9443 for the following Cloudera CDP CIDRs when not using CCM (env:tunnel = false)."
 render_type: list
 ---
 id: AWS_NON_CCM_GATEWAY_SG_MISSING_CIDRS
@@ -83,7 +83,7 @@ id: AWS_GATEWAY_SG_NEEDS_ALLOW_ACCESS_INTERNAL_TO_VPC
 summary: "Your Gateway Security Group {0} should allow access to all TCP and UDP ports (0-65535) internal to the VPC"
 ---
 id: AWS_SSH_KEY_ID_DOES_NOT_EXIST
-summary: "SSH key id ({0}) do not exist."
+summary: "SSH key id ({0}) does not exist."
 ---
 id: AWS_SSH_IS_INVALID
 summary: "SSH Key ID ({0}) is not valid."

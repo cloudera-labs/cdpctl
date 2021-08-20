@@ -199,7 +199,7 @@ def get_role(
     except iam_client.exceptions.ServiceFailureException as e:
         raise UnrecoverableValidationError(service_failure_message) from e
     # handling stub client error
-    except ClientError as ce:
-        fail(missing_issue, ce.args[0])
+    except ClientError:
+        fail(missing_issue, role_name)
 
     return role

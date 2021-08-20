@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 ###
 # CLOUDERA CDP Control (cdpctl)
 #
@@ -39,21 +38,26 @@
 #
 # Source File Name:  __init__.py
 ###
+"""Base Renderer Module."""
 import json
 
 from jinja2 import Environment, PackageLoader, select_autoescape
 
 from cdpctl.utils import smart_open
-from cdpctl.validation import Issue, UnrecoverableValidationError
+from cdpctl.validation import UnrecoverableValidationError
 
 
 class ValidationRenderer:
+    """Base renderer class."""
+
     def render(self, issues, output_file):
         """Render the issues found."""
         pass
 
 
 class TextValidationRenderer(ValidationRenderer):
+    """Text renderer class."""
+
     def render(self, issues, output_file):
         """Render the issues found as a text format."""
         env = Environment(
@@ -68,6 +72,8 @@ class TextValidationRenderer(ValidationRenderer):
 
 
 class JsonValidationRenderer(ValidationRenderer):
+    """Json renderer class."""
+
     def render(self, issues, output_file):
         """Render the issues found as a json format."""
 
@@ -99,6 +105,7 @@ class JsonValidationRenderer(ValidationRenderer):
 
 
 def get_renderer(output_format: str) -> ValidationRenderer:
+    """Get the correct renderer for the output format."""
     if output_format == "text":
         return TextValidationRenderer()
     if output_format == "json":

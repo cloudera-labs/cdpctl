@@ -134,12 +134,6 @@ def pytest_sessionfinish(
     """Finish the validation session."""
     if session.exitstatus != ExitCode.INTERRUPTED:
         click.echo("")
-        # env = Environment(
-        #     loader=PackageLoader(package_name="cdpctl", package_path="templates"),
-        #     autoescape=select_autoescape(),
-        # )
-        # template = env.get_template("console.j2")
-        # click.echo(template.render(issues=get_issues()))
 
 
 def pytest_report_teststatus(

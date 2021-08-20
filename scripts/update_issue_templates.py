@@ -39,16 +39,24 @@
 #
 # Source File Name:  update_issue_templates.py
 ###
+# flake8: noqa
+# pylint: skip-file
 """Update the issue templates."""
-
 import os
 import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from jinja2 import Environment, FileSystemLoader, select_autoescape
+from cdpctl.validation import (
+    ISSUE_TEMPLATES_FILE,
+    load_issue_templates,
+)
+from jinja2 import (
+    Environment,
+    FileSystemLoader,
+    select_autoescape,
+)
 
-from cdpctl.validation import ISSUE_TEMPLATES_FILE, load_issue_templates
 
 VALIDATIONS_ROOT = "cdpctl/validation"
 ISSUE_OUTPUT_FILE = "issues.py"
