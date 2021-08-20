@@ -5,6 +5,7 @@ boto3_type_annotations==0.3.1
 click==8.0.1
 emoji==1.2.0
 Jinja2==2.11.3
+marshmallow==3.13.0
 progressbar2==3.53.1
 pytest==6.2.4
 pytest-dependency==0.5.1

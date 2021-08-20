@@ -45,8 +45,17 @@ from typing import Any, Dict, List
 import pytest
 from boto3_type_annotations.iam import Client as IAMClient
 
-from cdpctl.validation import get_config_value
+from cdpctl.validation import fail, get_config_value
 from cdpctl.validation.aws_utils import get_client, get_role, simulate_policy
+from cdpctl.validation.infra.issues import (
+    AWS_ACCOUNT_ID_NOT_IN_CROSS_ACCOUNT_ROLE,
+    AWS_CROSS_ACCOUNT_ROLE_MISSING,
+    AWS_EXTERNAL_ID_NOT_IN_CROSS_ACCOUNT_ROLE,
+    AWS_REQUIRED_DATA_MISSING,
+    AWS_ROLE_REQUIRES_ACTIONS_FOR_ALL_EC2_RESOURCES,
+    AWS_ROLE_REQUIRES_ACTIONS_FOR_ALL_RESOURCES,
+    AWS_ROLE_REQUIRES_ACTIONS_FOR_SERVICE_ROLL_RESOURCES,
+)
 
 cross_account_role_data = {}
 
@@ -67,11 +76,8 @@ def aws_cross_account_role_exists_validation(
     cross_account_role: str = get_config_value(
         config,
         "env:aws:role:name:cross_account",
-        key_missing_message="No role defined for config option: {0}",
-        data_expected_error_message="No role was provided for config option: {0}",
     )
-
-    role = get_role(iam_client, cross_account_role)
+    role = get_role(iam_client, cross_account_role, AWS_CROSS_ACCOUNT_ROLE_MISSING)
     role_arn = role["Role"]["Arn"]
     cross_account_role_data["role_arn"] = role_arn
     cross_account_role_data["cross_account_role"] = cross_account_role
@@ -88,8 +94,6 @@ def aws_cross_account_role_account_id_validation(
     account_id: str = get_config_value(
         config,
         "env:cdp:cross_account:account_id",
-        key_missing_message="No account id defined for config option: {0}",
-        data_expected_error_message="No account id was provided for config option: {0}",
     )
     found_account_id = False
     for s in cross_account_role_data["role"]["Role"]["AssumeRolePolicyDocument"][
@@ -105,7 +109,10 @@ def aws_cross_account_role_account_id_validation(
                         found_account_id = True
 
     if not found_account_id:
-        pytest.fail("Account id not in cross account role", False)
+        fail(
+            template=AWS_ACCOUNT_ID_NOT_IN_CROSS_ACCOUNT_ROLE,
+            subjects=[account_id, cross_account_role_data["cross_account_role"]],
+        )
 
 
 @pytest.mark.aws
@@ -118,8 +125,6 @@ def aws_cross_account_role_external_id_validation(
     external_id: str = get_config_value(
         config,
         "env:cdp:cross_account:external_id",
-        key_missing_message="No external id defined for config option: {0}",
-        data_expected_error_message="No external was provided for config option: {0}",
     )
     for s in cross_account_role_data["role"]["Role"]["AssumeRolePolicyDocument"][
         "Statement"
@@ -127,7 +132,13 @@ def aws_cross_account_role_external_id_validation(
         if "Condition" in s.keys():
             if s["Condition"]["StringEquals"]["sts:ExternalId"]:
                 if external_id not in s["Condition"]["StringEquals"]["sts:ExternalId"]:
-                    pytest.fail("External id not in cross account role", False)
+                    fail(
+                        template=AWS_EXTERNAL_ID_NOT_IN_CROSS_ACCOUNT_ROLE,
+                        subjects=[
+                            external_id,
+                            cross_account_role_data["cross_account_role"],
+                        ],
+                    )
 
 
 @pytest.mark.aws
@@ -140,17 +151,15 @@ def aws_cross_account_role_ec2_needed_actions_validation(
     """Cross Account role has the needed actions for EC2."""  # noqa: D401
     try:
         simulate_policy(
-            iam_client,
-            cross_account_role_data["role_arn"],
-            ["*"],
-            ec2_needed_actions,
-            f"""The role ({0}) requires the following actions for all ec2
-            resources ([*]) : \n {{}}""".format(
-                cross_account_role_data["cross_account_role"]
-            ),
+            iam_client=iam_client,
+            policy_source_arn=cross_account_role_data["role_arn"],
+            resource_arns=["*"],
+            needed_actions=ec2_needed_actions,
+            subjects=cross_account_role_data["cross_account_role"],
+            missing_actions_issue=AWS_ROLE_REQUIRES_ACTIONS_FOR_ALL_EC2_RESOURCES,
         )
     except KeyError as e:
-        pytest.fail(f"Validation error - missing required data : {e.args[0]}", False)
+        fail(AWS_REQUIRED_DATA_MISSING, e.args[0])
 
 
 @pytest.mark.aws
@@ -163,17 +172,15 @@ def aws_cross_account_role_autoscaling_resources_needed_actions_validation(
     """Cross Account role has the needed actions for autoscaling resources."""  # noqa: D401,E501
     try:
         simulate_policy(
-            iam_client,
-            cross_account_role_data["role_arn"],
-            ["*"],
-            autoscaling_resources_needed_actions,
-            f"""The role ({0}) requires the following actions for all resources
-            ([*]) : \n {{}}""".format(
-                cross_account_role_data["cross_account_role"]
-            ),
+            iam_client=iam_client,
+            policy_source_arn=cross_account_role_data["role_arn"],
+            resource_arns=["*"],
+            needed_actions=autoscaling_resources_needed_actions,
+            subjects=cross_account_role_data["cross_account_role"],
+            missing_actions_issue=AWS_ROLE_REQUIRES_ACTIONS_FOR_ALL_RESOURCES,
         )
     except KeyError as e:
-        pytest.fail(f"Validation error - missing required data : {e.args[0]}", False)
+        fail(AWS_REQUIRED_DATA_MISSING, e.args[0])
 
 
 @pytest.mark.aws
@@ -186,17 +193,15 @@ def aws_cross_account_role_cloud_formation_needed_actions_validation(
     """Cross Account role has the needed actions for CloudFormation."""  # noqa: D401,E501
     try:
         simulate_policy(
-            iam_client,
-            cross_account_role_data["role_arn"],
-            ["*"],
-            cloud_formation_needed_actions,
-            f"""The role ({0}) requires the following actions for all resources
-            ([*]) : \n {{}}""".format(
-                cross_account_role_data["cross_account_role"]
-            ),
+            iam_client=iam_client,
+            policy_source_arn=cross_account_role_data["role_arn"],
+            resource_arns=["*"],
+            needed_actions=cloud_formation_needed_actions,
+            subjects=cross_account_role_data["cross_account_role"],
+            missing_actions_issue=AWS_ROLE_REQUIRES_ACTIONS_FOR_ALL_RESOURCES,
         )
     except KeyError as e:
-        pytest.fail(f"Validation error - missing required data : {e.args[0]}", False)
+        fail(AWS_REQUIRED_DATA_MISSING, e.args[0])
 
 
 @pytest.mark.aws
@@ -209,17 +214,15 @@ def aws_cross_account_role_cdp_environment_resources_needed_actions_validation(
     """Cross Account role has the needed actions for CDP environment resources."""  # noqa: D401,E501
     try:
         simulate_policy(
-            iam_client,
-            cross_account_role_data["role_arn"],
-            ["*"],
-            cdp_environment_resources_needed_actions,
-            f"""The role ({0}) requires the following actions for all resources
-            ([*]) : \n {{}}""".format(
-                cross_account_role_data["cross_account_role"]
-            ),
+            iam_client=iam_client,
+            policy_source_arn=cross_account_role_data["role_arn"],
+            resource_arns=["*"],
+            needed_actions=cdp_environment_resources_needed_actions,
+            subjects=cross_account_role_data["cross_account_role"],
+            missing_actions_issue=AWS_ROLE_REQUIRES_ACTIONS_FOR_ALL_RESOURCES,
         )
     except KeyError as e:
-        pytest.fail(f"Validation error - missing required data : {e.args[0]}", False)
+        fail(AWS_REQUIRED_DATA_MISSING, e.args[0])
 
 
 @pytest.mark.aws
@@ -232,17 +235,15 @@ def aws_cross_account_role_pass_role_needed_actions_validation(
     """Cross Account role has the needed actions for the pass role."""  # noqa: D401,E501
     try:
         simulate_policy(
-            iam_client,
-            cross_account_role_data["role_arn"],
-            ["*"],
-            pass_role_needed_actions,
-            f"""The role ({0}) requires the following actions for all resources
-            ([*]) : \n {{}}""".format(
-                cross_account_role_data["cross_account_role"]
-            ),
+            iam_client=iam_client,
+            policy_source_arn=cross_account_role_data["role_arn"],
+            resource_arns=["*"],
+            needed_actions=pass_role_needed_actions,
+            subjects=cross_account_role_data["cross_account_role"],
+            missing_actions_issue=AWS_ROLE_REQUIRES_ACTIONS_FOR_ALL_RESOURCES,
         )
     except KeyError as e:
-        pytest.fail(f"Validation error - missing required data : {e.args[0]}", False)
+        fail(AWS_REQUIRED_DATA_MISSING, e.args[0])
 
 
 @pytest.mark.aws
@@ -255,14 +256,12 @@ def aws_cross_account_identity_management_needed_actions_validation(
     """Cross Account role has the needed actions for identity management."""  # noqa: D401,E501
     try:
         simulate_policy(
-            iam_client,
-            cross_account_role_data["role_arn"],
-            ["arn:aws:iam::*:role/aws-service-role/*"],
-            identity_management_needed_actions,
-            f"""The role ({0}) requires the following actions for all resources
-            ("arn:aws:iam::*:role/aws-service-role/*") : \n {{}}""".format(
-                cross_account_role_data["cross_account_role"]
-            ),
+            iam_client=iam_client,
+            policy_source_arn=cross_account_role_data["role_arn"],
+            resource_arns=["arn:aws:iam::*:role/aws-service-role/*"],
+            needed_actions=identity_management_needed_actions,
+            subjects=cross_account_role_data["cross_account_role"],
+            missing_actions_issue=AWS_ROLE_REQUIRES_ACTIONS_FOR_SERVICE_ROLL_RESOURCES,
         )
     except KeyError as e:
-        pytest.fail(f"Validation error - missing required data : {e.args[0]}", False)
+        fail(AWS_REQUIRED_DATA_MISSING, e.args[0])

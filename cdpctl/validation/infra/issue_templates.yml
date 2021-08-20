@@ -1,0 +1,137 @@
+---
+id: AWS_CROSS_ACCOUNT_ROLE_MISSING
+summary: "Unable to find the Cross-account access IAM role {0}"
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-aws/topics/mc-aws-req-credential.html
+---
+id: AWS_ACCOUNT_ID_NOT_IN_CROSS_ACCOUNT_ROLE
+summary: Account ID {0} not in Cross-account access IAM role {1}
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-aws/topics/mc-create-credentialrole.html
+---
+id: AWS_EXTERNAL_ID_NOT_IN_CROSS_ACCOUNT_ROLE
+summary: External ID {0} not in Cross-account access IAM role {1}
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-aws/topics/mc-create-credentialrole.html
+---
+id: AWS_IDBROKER_INSTANCE_PROLFILE_NEEDS_ROLE
+summary: "IDBroker instance profile {0} should contain an IDBroker role."
+---
+id: AWS_IDBROKER_ROLE_NEED_EC2_TRUST_POLICY
+summary: "The IDBroker role {0} should contain a trust policy for EC2"
+---
+id: AWS_ROLE_FOR_DL_BUCKET_MISSING_ACTIONS
+summary: "The role ({0}) requires the following actions for the Datalake S3 bucket ({1})."
+render_type: list
+---
+id: AWS_ROLE_REQUIRES_ACTIONS_FOR_ALL_S3_RESOURCES
+summary: "The role ({0}) requires the following actions for all S3 resources"
+render_type: list
+---
+id: AWS_ROLE_FOR_DATA_BUCKET_MISSING_ACTIONS
+summary: "The role ({0}) requires the following actions for the S3 data location ({1})."
+render_type: list
+---
+id: AWS_IDBROKER_ROLE_REQUIRES_ACTIONS_FOR_ALL_RESOURCES
+summary: "The role ({0}) requires the following actions for resource wildcard (*)."
+render_type: list
+---
+id: AWS_ROLE_REQUIRES_ACTIONS_FOR_ALL_EC2_RESOURCES
+summary: "The role ({0}) requires the following actions for all EC2 resources ([*])"
+render_type: list
+---
+id: AWS_ROLE_REQUIRES_ACTIONS_FOR_ALL_RESOURCES
+summary: "The role ({0}) requires the following actions for all resources ([*])"
+render_type: list
+---
+id: AWS_ROLE_REQUIRES_ACTIONS_FOR_SERVICE_ROLL_RESOURCES
+summary: "The role ({0}) requires the following actions for all resources (\"arn:aws:iam::*:role/aws-service-role/*\")"
+render_type: list
+---
+id: AWS_ROLE_REQUIRES_ACTIONS_FOR_LOG_PATH
+summary: "The role ({0}) requires the following actions for the log storage path ({1}):"
+render_type: list
+---
+id: AWS_ROLE_REQUIRES_ACTIONS_FOR_LOG_BUCKET
+summary: "The role ({0}) requires the following actions for the log storage bucket ({1}):"
+render_type: list
+---
+id: AWS_LOGGER_INSTANCE_PROFILE_SHOULD_CONTAIN_LOGGER_ROLE
+summary: "The logger instance profile {0} set in config {1} should contain a logger role."
+---
+id: AWS_LOGGER_ROLE_SHOULD_HAVE_EC2_TRUST
+summary: "The logger role {0} should contain a trust policy for EC2"
+---
+id: AWS_S3_BUCKET_INVALID
+summary: "The s3a url {0} is invalid."
+---
+id: AWS_S3_BUCKET_DOES_NOT_EXIST
+summary: "S3 bucket {0} does not exist."
+---
+id: AWS_S3_BUCKET_FORBIDDEN_ACCESS
+summary: "S3 bucket {0} has forbidden access."
+---
+id: AWS_NON_CCM_DEFAULT_SG_NEEDS_TO_ALLOW_CDP_CIDRS
+summary: "When not using CCM (tunnel = false), the default security group {0} is missing TCP port 9443 to be allowed access from the following Cloudera CDP CIDRs"
+render_type: list
+---
+id: AWS_NON_CCM_GATEWAY_SG_MISSING_CIDRS
+summary: "When not using CCM (tunnel = false), the gateway security group {0} is missing the following access:"
+render_type: list
+---
+id: AWS_DEFAULT_SG_NEEDS_ALLOW_ACCESS_INTERNAL_TO_VPC
+summary: "Your Default Security Group {0} should allow access to all TCP and UDP ports (0-65535) internal to the VPC"
+---
+id: AWS_GATEWAY_SG_NEEDS_ALLOW_ACCESS_INTERNAL_TO_VPC
+summary: "Your Gateway Security Group {0} should allow access to all TCP and UDP ports (0-65535) internal to the VPC"
+---
+id: AWS_SSH_KEY_ID_DOES_NOT_EXIST
+summary: "SSH key id ({0}) do not exist."
+---
+id: AWS_SSH_IS_INVALID
+summary: "SSH Key ID ({0}) is not valid."
+---
+id: AWS_NOT_ENOUGH_SUBNETS_PROVIDED
+summary: "Not enough {0} Subnets provided, at least 3 subnets required."
+---
+id: AWS_INVALID_SUBNET_ID
+summary: The {0} Subnet ID {1} is invalid.
+---
+id: AWS_REQUIRED_DATA_MISSING
+summary: "Missing required data: {0}"
+---
+id: AWS_INVALID_DATA
+summary: "Validation Error - invalid data : {0}"
+---
+id: AWS_SUBNETS_DO_NOT_EXIST
+summary: "The following {0} Subnets do not exist."
+render_type: list
+---
+id: AWS_NOT_ENOUGH_AZ_FOR_SUBNETS
+summary: "Not enough availability zones, {0} subnets should spread across at least 2 availability zones."
+---
+id: AWS_SUBNETS_WITHOUT_INTERNET_GATEWAY
+summary: "These {0} Subnets do not have an internet gateway(s)"
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-aws/topics/mc-aws-req-vpc.html
+render_type: list
+---
+id: AWS_SUBNETS_OR_VPC_WITHOUT_INTERNET_GATEWAY
+summary: "These {0} Subnets or the VPC {1} do not have an internet gateway(s)"
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-aws/topics/mc-aws-req-vpc.html
+render_type: list
+---
+id: AWS_SUBNETS_WITHOUT_VALID_RANGE
+summary: "These {0} Subnets do not have the valid required ranges"
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-aws/topics/mc-aws-req-vpc.html
+render_type: list
+---
+id: AWS_SUBNETS_MISSING_K8S_LB_TAG
+summary: "These {0} Subnets do not have the nessesary 'kubernetes.io/role/elb' tag."
+render_type: list
+---
+id: AWS_SUBNETS_NOT_PART_OF_VPC
+summary: "The following subnets are not associated with the provided VPC {0}:"
+render_type: list
+---
+id: AWS_DNS_SUPPORT_NOT_ENABLED_FOR_VPC
+summary: "DNS support is not enabled for VPC id {0}"
+---
+id: AWS_VPC_NOT_FOUND_IN_ACCOUNT
+summary: "VPC ID {0} set in infra:aws:vpc:existing:vpc_id was not found in the AWS account."
