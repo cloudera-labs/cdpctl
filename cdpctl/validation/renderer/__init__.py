@@ -84,15 +84,13 @@ class JsonValidationRenderer(ValidationRenderer):
             json_rep["problems"] = []
             json_rep["warnings"] = []
             for problem in value["problem"]:
-                json_prob = {}
-                json_prob["message"] = problem.message
-                json_prob["resources"] = problem.resources
-                json_rep["problems"].append(json_prob)
+                json_rep["problems"].append(
+                    {"message": problem.message, "resources": problem.resources}
+                )
             for warning in value["warning"]:
-                json_warn = {}
-                json_warn["message"] = warning.message
-                json_warn["resources"] = warning.resources
-                json_rep["warnings"].append(json_warn)
+                json_rep["warnings"].append(
+                    {"message": warning.message, "resources": warning.resources}
+                )
             json_issues.append(json_rep)
 
         with smart_open(output_file) as f:
