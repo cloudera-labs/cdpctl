@@ -46,7 +46,7 @@ from typing import Any, Dict, List
 import pytest
 from boto3_type_annotations.iam import Client as EC2Client
 
-from cdpctl.validation import fail, get_config_value
+from cdpctl.validation import fail, get_config_value, warn
 from cdpctl.validation.aws_utils import get_client
 from cdpctl.validation.infra.issues import (
     AWS_DNS_SUPPORT_NOT_ENABLED_FOR_VPC,
@@ -233,7 +233,7 @@ def aws_public_subnets_tags_validation() -> None:
         subnet_missing_tags = [k for k, v in subnets_w_valid_tag.items() if not v]
 
         if len(subnet_missing_tags) > 0:
-            fail(
+            warn(
                 AWS_SUBNETS_MISSING_K8S_LB_TAG,
                 subjects=["Public"],
                 resources=subnet_missing_tags,
@@ -405,7 +405,7 @@ def aws_private_subnets_tags_validation() -> None:
         subnet_missing_tags = [k for k, v in subnets_w_valid_tag.items() if not v]
 
         if len(subnet_missing_tags) > 0:
-            fail(
+            warn(
                 AWS_SUBNETS_MISSING_K8S_LB_TAG,
                 subjects=["Private"],
                 resources=subnet_missing_tags,
@@ -479,7 +479,7 @@ def aws_vpc_subnets_validation(
         )["EnableDnsHostnames"]["Value"]
 
         if not (enable_dns_hostnames and enable_dns_support):
-            fail(AWS_DNS_SUPPORT_NOT_ENABLED_FOR_VPC, subjects=[vpc_id])
+            warn(AWS_DNS_SUPPORT_NOT_ENABLED_FOR_VPC, subjects=[vpc_id])
     except KeyError as e:
         fail(AWS_REQUIRED_DATA_MISSING, e.args[0])
     except ec2_client.exceptions.ClientError as ce:
