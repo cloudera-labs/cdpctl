@@ -194,12 +194,14 @@ class Context:
         self.validation_name = None
         self.function = None
         self.nodeid = None
+        self.state = None
 
     def clear(self) -> None:
         """Clear all the context values."""
         self.validation_name = None
         self.function = None
         self.nodeid = None
+        self.state = None
 
 
 current_context: Context = Context()
@@ -222,6 +224,11 @@ def validator(func):
 def _add_issue(issue_type: IssueType, issue: Issue):
     """Add an Issue to the selected type for the current validation."""
     context = current_context
+    if not context.state:
+        context.state = issue_type
+    elif issue_type == IssueType.PROBLEM and context.state == IssueType.WARNING:
+        context.state = IssueType.PROBLEM
+
     if context.validation_name not in get_issues():
         get_issues()[context.validation_name] = {
             IssueType.PROBLEM.value: [],
