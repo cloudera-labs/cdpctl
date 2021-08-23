@@ -44,11 +44,19 @@ import re
 from typing import Dict, List, Optional
 
 import boto3
-import pytest
 from boto3_type_annotations.iam import Client as IAMClient
 from botocore.exceptions import ClientError, ProfileNotFound
 
-from cdpctl.validation import UnrecoverableValidationError, get_config_value
+from cdpctl.validation import UnrecoverableValidationError, fail, get_config_value
+from cdpctl.validation.issues import (
+    AWS_INSTANCE_PROFILE_NOT_FOUND,
+    AWS_MISSING_ACTIONS,
+    AWS_PROFILE_CONFIG_NOT_DEFINED,
+    AWS_PROFILE_NOT_DEFINED,
+    AWS_REGION_CONFIG_NOT_DEFINED,
+    AWS_REGION_NOT_DEFINED,
+    AWS_ROLE_MISSING,
+)
 
 
 def get_client(client_type: str, config):
@@ -63,32 +71,25 @@ def get_client(client_type: str, config):
         config,
         "infra:aws:profile",
         key_value_expected=False,
-        key_missing_message=(
-            "No profile has been defined for config option: env:aws:profile"
-        ),
-        data_expected_error_message=(
-            "No profile was provided for config option: env:aws:profile"
-        ),
+        key_not_found_issue=AWS_PROFILE_CONFIG_NOT_DEFINED,
+        data_expected_issue=AWS_PROFILE_NOT_DEFINED,
     )
     region_name: Optional[str] = get_config_value(
         config,
         "infra:aws:region",
         key_value_expected=False,
-        key_missing_message=(
-            "No region has been defined for config option: env:aws:region"
-        ),
-        data_expected_error_message=(
-            "No region was provided for config option: env:aws:region"
-        ),
+        key_not_found_issue=AWS_REGION_CONFIG_NOT_DEFINED,
+        data_expected_issue=AWS_REGION_NOT_DEFINED,
     )
 
-    if profile_name:
-        session = boto3.session.Session(profile_name=profile_name)
-        return session.client(client_type)
     if region_name:
+        if profile_name:
+            session = boto3.session.Session(profile_name=profile_name)
+            return session.client(client_type, region_name=region_name)
         return boto3.client(client_type, region_name=region_name)
-
-    raise Exception(f"Unable to create AWS client for type {client_type}")
+    raise UnrecoverableValidationError(
+        "No AWS region name has been defined for the config option infra:aws:region."
+    )
 
 
 def parse_arn(arn: str) -> Dict[str, str]:
@@ -139,7 +140,8 @@ def simulate_policy(
     policy_source_arn: str,
     resource_arns: List[str],
     needed_actions: List[str],
-    missing_actions_message: str = "The following actions are required:\n{0}",
+    subjects: List[str] = None,
+    missing_actions_issue: str = AWS_MISSING_ACTIONS,
 ) -> None:
     """
     Simulate a list of actions against a resource.
@@ -148,7 +150,6 @@ def simulate_policy(
     in missing_actions_message. The first string-formatted argument is the
     list of actions that were missing from the required list.
     """
-
     response = iam_client.simulate_principal_policy(
         PolicySourceArn=policy_source_arn,
         ActionNames=needed_actions,
@@ -162,9 +163,8 @@ def simulate_policy(
     ]
 
     if len(missing_actions) > 0:
-        pytest.fail(
-            missing_actions_message.format(set(missing_actions)),
-            False,
+        fail(
+            template=missing_actions_issue, subjects=subjects, resources=missing_actions
         )
 
 
@@ -173,10 +173,7 @@ def get_instance_profile(iam_client: IAMClient, name: str) -> Dict:
     try:
         instance_profile = iam_client.get_instance_profile(InstanceProfileName=name)
     except iam_client.exceptions.NoSuchEntityException:
-        pytest.fail(
-            f"instance profile {name} was not found",
-            False,
-        )
+        fail(AWS_INSTANCE_PROFILE_NOT_FOUND, name)
     except iam_client.exceptions.ServiceFailureException as e:
         raise Exception(
             "Unable to retrieve role information due to a service failure"
@@ -188,7 +185,7 @@ def get_instance_profile(iam_client: IAMClient, name: str) -> Dict:
 def get_role(
     iam_client: IAMClient,
     role_name: str,
-    role_missing_message: str = "Unable to find role ({0})",
+    missing_issue: str = AWS_ROLE_MISSING,
     service_failure_message: str = "Unable to retrieve role information due to a \
         service failure",
 ) -> Dict:
@@ -198,11 +195,11 @@ def get_role(
     try:
         role = iam_client.get_role(RoleName=role_name)
     except iam_client.exceptions.NoSuchEntityException:
-        pytest.fail(role_missing_message.format(role_name), False)
+        fail(template=missing_issue, resources=[role_name])
     except iam_client.exceptions.ServiceFailureException as e:
-        raise Exception(service_failure_message) from e
+        raise UnrecoverableValidationError(service_failure_message) from e
     # handling stub client error
     except ClientError:
-        pytest.fail(role_missing_message.format(role_name), False)
+        fail(missing_issue, role_name)
 
     return role
