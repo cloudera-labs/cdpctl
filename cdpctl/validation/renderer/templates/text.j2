@@ -18,7 +18,7 @@ Problems Found:
 {%- endif -%}
 {% endfor %}
 {%- endif %}
-{% if issue_types["warning"]|length %}
+{%- if issue_types["warning"]|length -%}
 Warnings Found:
 {% for warning in issue_types["warning"] -%}
 * {{warning.message}}
