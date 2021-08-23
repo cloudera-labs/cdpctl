@@ -22,12 +22,15 @@ summary: No profile was defined for for config option {0}
 ---
 id: AWS_REGION_CONFIG_NOT_DEFINED
 summary: No region config option defined {0}
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-aws/topics/mc-aws-req-region.html
 ---
 id: AWS_REGION_NOT_DEFINED
 summary: No region was defined for for config option {0}
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-aws/topics/mc-aws-req-region.html
 ---
 id: AWS_MISSING_ACTIONS
 summary: "The following IAM actions are required:"
 ---
 id: AWS_INSTANCE_PROFILE_NOT_FOUND
 summary: The IAM Instance Profile {0} was not found
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-aws/topics/mc-idbroker-minimum-setup.html
