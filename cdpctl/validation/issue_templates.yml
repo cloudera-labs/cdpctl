@@ -1,0 +1,33 @@
+---
+id: CONFIG_OPTION_KEY_NOT_DEFINED
+summary: "The config option {0} is missing"
+---
+id: CONFIG_OPTION_DATA_NOT_DEFINED
+summary: No entry was provided for config option {0}
+---
+id: CONFIG_OPTION_PARENT_PATH_NOT_DEFINED
+summary: Unable to find key path
+render_type: list
+---
+id: AWS_ROLE_MISSING
+summary: Unable to find the following IAM role.
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-aws/topics/mc-aws-req-credential.html
+render_type: list
+---
+id: AWS_PROFILE_CONFIG_NOT_DEFINED
+summary: No profile config option defined {0}
+---
+id: AWS_PROFILE_NOT_DEFINED
+summary: No profile was defined for for config option {0}
+---
+id: AWS_REGION_CONFIG_NOT_DEFINED
+summary: No region config option defined {0}
+---
+id: AWS_REGION_NOT_DEFINED
+summary: No region was defined for for config option {0}
+---
+id: AWS_MISSING_ACTIONS
+summary: "The following IAM actions are required:"
+---
+id: AWS_INSTANCE_PROFILE_NOT_FOUND
+summary: The IAM Instance Profile {0} was not found

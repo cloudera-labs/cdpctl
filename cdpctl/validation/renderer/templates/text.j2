@@ -1,0 +1,37 @@
+{%- if issues|length %}
+--- Issues Found ---
+{% for validation_name, issue_types in issues.items() %}
+{% for n in range(validation_name|length+13)-%}-{%endfor%}
+Validation: {{ validation_name }}
+{% if issue_types["problem"]|length -%}
+Problems Found:
+{% for problem in issue_types["problem"] -%}
+* {{problem.message}}
+    {%- if problem.render_type == "list" -%}
+    {%- for resource in problem.resources %}
+    - {{ resource }}
+    {%- endfor %}
+    {%- endif -%}
+{%- if problem.docs_link %}
+  Please see the following documentation for more information:
+  {{problem.docs_link}}
+{%- endif -%}
+{% endfor %}
+{%- endif %}
+{% if issue_types["warning"]|length %}
+Warnings Found:
+{% for warning in issue_types["warning"] -%}
+* {{warning.message}}
+    {%- if warning.render_type == "list" -%}
+    {%- for resource in warning.resources %}
+    - {{ resource }}
+    {%- endfor %}
+    {%- endif %}
+{% if warning.docs_link %}
+   Please see the following documentation for more information:
+   {{warning.docs_link}}
+{%- endif %}
+{% endfor %}
+{%- endif %}
+{% endfor %}
+{% endif -%}

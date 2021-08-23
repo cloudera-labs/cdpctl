@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 ###
 # CLOUDERA CDP Control (cdpctl)
 #
@@ -36,7 +37,50 @@
 # BUSINESS ADVANTAGE OR UNAVAILABILITY, OR LOSS OR CORRUPTION OF
 # DATA.
 #
-# Source File Name:  __init__.py
+# Source File Name:  update_issue_templates.py
 ###
-"""Base infa package."""
-sections = ["infra"]
+# flake8: noqa
+# pylint: skip-file
+"""Update the issue templates."""
+import os
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from cdpctl.validation import (
+    ISSUE_TEMPLATES_FILE,
+    load_issue_templates,
+)
+from jinja2 import (
+    Environment,
+    FileSystemLoader,
+    select_autoescape,
+)
+
+
+VALIDATIONS_ROOT = "cdpctl/validation"
+ISSUE_OUTPUT_FILE = "issues.py"
+
+
+def render_template_for_dir(path):
+    issue_templates = load_issue_templates(os.path.join(path, ISSUE_TEMPLATES_FILE))
+    template.stream(issue_templates=issue_templates).dump(
+        os.path.join(path, ISSUE_OUTPUT_FILE)
+    )
+
+
+basedir = os.path.abspath(
+    os.path.join(os.path.basename(__file__), "..", VALIDATIONS_ROOT)
+)
+
+env = Environment(
+    loader=FileSystemLoader(os.path.join(os.path.dirname(__file__), "templates")),
+    autoescape=select_autoescape(),
+)
+template = env.get_template("issues.py.j2")
+
+
+for root, dirs, files in os.walk(basedir):
+    if ISSUE_TEMPLATES_FILE in files:
+        print(f"Processing issue templates in dir {root}")
+        render_template_for_dir(root)

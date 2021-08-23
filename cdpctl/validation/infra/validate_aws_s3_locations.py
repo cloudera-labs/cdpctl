@@ -46,12 +46,17 @@ import botocore
 import pytest
 from boto3_type_annotations.s3 import Client as S3Client
 
-from cdpctl.validation import get_config_value, validator
+from cdpctl.validation import fail, get_config_value, validator
 from cdpctl.validation.aws_utils import (
     convert_s3a_to_arn,
     get_client,
     is_valid_s3a_url,
     parse_arn,
+)
+from cdpctl.validation.infra.issues import (
+    AWS_S3_BUCKET_DOES_NOT_EXIST,
+    AWS_S3_BUCKET_FORBIDDEN_ACCESS,
+    AWS_S3_BUCKET_INVALID,
 )
 
 
@@ -77,8 +82,6 @@ def aws_s3_data_bucket_exists(config: Dict[str, Any], s3_client: S3Client) -> No
     data_bucket_url: str = get_config_value(
         config,
         "infra:aws:vpc:existing:storage:data",
-        key_missing_message="No s3a url defined for config option: {0}",
-        data_expected_error_message="No s3a url was provided for config option: {0}",
     )
     aws_s3_bucket_exists(data_bucket_url, s3_client)
 
@@ -99,8 +102,6 @@ def aws_s3_logs_bucket_exists(config: Dict[str, Any], s3_client: S3Client) -> No
     logs_bucket_url: str = get_config_value(
         config,
         "infra:aws:vpc:existing:storage:logs",
-        key_missing_message="No s3a url defined for config option: {0}",
-        data_expected_error_message="No s3a url was provided for config option: {0}",
     )
     aws_s3_bucket_exists(logs_bucket_url, s3_client)
 
@@ -122,8 +123,6 @@ def aws_s3_backup_bucket_exists(config: Dict[str, Any], s3_client: S3Client) -> 
     backup_bucket_url: str = get_config_value(
         config,
         "infra:aws:vpc:existing:storage:backup",
-        key_missing_message="No s3a url defined for config option: {0}",
-        data_expected_error_message="No s3a url was provided for config option: {0}",
     )
     # TODO: Handle a specific parameter for backup S3 location once it exists
     aws_s3_bucket_exists(backup_bucket_url, s3_client)
@@ -132,7 +131,7 @@ def aws_s3_backup_bucket_exists(config: Dict[str, Any], s3_client: S3Client) -> 
 def aws_s3_bucket_exists(bucket_url: str, s3_client: S3Client) -> None:
     """Check to see if the s3 bucket exists."""
     if not is_valid_s3a_url(bucket_url):
-        pytest.fail(f"The s3a url {bucket_url} is invalid.", False)
+        fail(AWS_S3_BUCKET_INVALID, bucket_url)
 
     # get bucket name
     bucket_name = parse_arn(convert_s3a_to_arn(bucket_url))["resource_type"]
@@ -145,6 +144,6 @@ def aws_s3_bucket_exists(bucket_url: str, s3_client: S3Client) -> None:
         # If it was a 404 error, then the bucket does not exist.
         error_code = int(e.response["Error"]["Code"])
         if error_code == 403:
-            pytest.fail(f"S3 bucket {bucket_name} has forbidden access.", False)
+            fail(AWS_S3_BUCKET_FORBIDDEN_ACCESS, bucket_name)
         elif error_code == 404:
-            pytest.fail(f"S3 bucket {bucket_name} does not exist.", False)
+            fail(AWS_S3_BUCKET_DOES_NOT_EXIST, bucket_name)

@@ -46,8 +46,22 @@ from typing import Any, Dict, List
 import pytest
 from boto3_type_annotations.iam import Client as EC2Client
 
-from cdpctl.validation import get_config_value
+from cdpctl.validation import fail, get_config_value
 from cdpctl.validation.aws_utils import get_client
+from cdpctl.validation.infra.issues import (
+    AWS_DNS_SUPPORT_NOT_ENABLED_FOR_VPC,
+    AWS_INVALID_DATA,
+    AWS_INVALID_SUBNET_ID,
+    AWS_NOT_ENOUGH_AZ_FOR_SUBNETS,
+    AWS_NOT_ENOUGH_SUBNETS_PROVIDED,
+    AWS_REQUIRED_DATA_MISSING,
+    AWS_SUBNETS_DO_NOT_EXIST,
+    AWS_SUBNETS_MISSING_K8S_LB_TAG,
+    AWS_SUBNETS_NOT_PART_OF_VPC,
+    AWS_SUBNETS_OR_VPC_WITHOUT_INTERNET_GATEWAY,
+    AWS_SUBNETS_WITHOUT_INTERNET_GATEWAY,
+    AWS_SUBNETS_WITHOUT_VALID_RANGE,
+)
 
 subnets_data = {}
 
@@ -68,21 +82,13 @@ def aws_public_subnets_validation(
     public_subnets: List[str] = get_config_value(
         config,
         "infra:aws:vpc:existing:public_subnet_ids",
-        key_missing_message="No public subnets defined for config option: {0}",
-        data_expected_error_message="No public subnets were provided for config option: {0}",  # noqa: E501
     )
 
-    if not isinstance(public_subnets, List):
-        pytest.fail(
-            """Invalid syntax, config data expected in following format
-                                public_subnet_ids:
-                                    - subnetId-1
-                                    - subnetId-2
-                                    - subnetId-3""",
-            False,
-        )
+    public_subnets = (
+        [public_subnets] if isinstance(public_subnets, str) else public_subnets
+    )
     if not len(public_subnets) > 2:
-        pytest.fail("Not enough subnets provided, at least 3 subnets required.", False)
+        fail(AWS_NOT_ENOUGH_SUBNETS_PROVIDED, subjects=["Public"])
 
     try:
         # query subnets
@@ -94,43 +100,13 @@ def aws_public_subnets_validation(
                 if subnet["SubnetId"] == pu_id:
                     missing_subnets.remove(pu_id)
         if len(missing_subnets) > 0:
-            pytest.fail(
-                f"Subnets ({missing_subnets}) do not exist.",
-                False,
-            )
+            fail(AWS_SUBNETS_DO_NOT_EXIST, subjects="Public", resources=missing_subnets)
         subnets_data["public_subnets"] = subnets["Subnets"]
         subnets_data["public_subnets_ids"] = public_subnets
     except KeyError as e:
-        pytest.fail(f"Validation error - missing required data : {e.args[0]}", False)
+        fail(AWS_REQUIRED_DATA_MISSING, e.args[0])
     except ec2_client.exceptions.ClientError as ce:
-        pytest.fail(f"Validation error - invalid subnetId : {ce.args[0]}", False)
-
-
-@pytest.mark.aws
-@pytest.mark.infra
-@pytest.mark.dependency(depends=["aws_public_subnets_validation"])
-@pytest.mark.skip(reason="Suffixes are not part of config at this time.")
-def aws_public_subnets_suffix_validation(config: Dict[str, Any]) -> None:
-    """Public subnets have the defined suffix."""  # noqa: D401,E501
-    public_subnets_suffix: List[str] = get_config_value(
-        config,
-        "infra:aws:vpc:existing:public_subnets_suffix",
-        key_missing_message="No public subnets suffix defined for config option: {0}",
-        data_expected_error_message="No public subnets suffix was provided for config option: {0}",  # noqa: E501
-    )
-    try:
-        subnets_wo_valid_suffix = []
-        for subnet_id in subnets_data["public_subnets_ids"]:
-            if not subnet_id.endswith(public_subnets_suffix):
-                subnets_wo_valid_suffix.append(subnet_id)
-
-        if len(subnets_wo_valid_suffix) > 0:
-            pytest.fail(
-                f"Subnets ({subnets_wo_valid_suffix}) without valid suffix ({public_subnets_suffix}).",  # noqa: E501
-                False,
-            )
-    except KeyError as e:
-        pytest.fail(f"Validation error - missing required data : {e.args[0]}", False)
+        fail(AWS_INVALID_SUBNET_ID, subjects=["Public", ce.args[0]])
 
 
 @pytest.mark.aws
@@ -146,13 +122,9 @@ def aws_public_subnets_availablity_zone_validation() -> None:
 
         # minimum two availability zones validations
         if len(azs) <= 1:
-            pytest.fail(
-                """Not enough availability zones, subnets should be in
-            atleast 2 availability zones.""",
-                False,
-            )
+            fail(AWS_NOT_ENOUGH_AZ_FOR_SUBNETS, subjects=["Public"])
     except KeyError as e:
-        pytest.fail(f"Validation error - missing required data : {e.args[0]}", False)
+        fail(AWS_REQUIRED_DATA_MISSING, e.args[0])
 
 
 @pytest.mark.aws
@@ -179,8 +151,6 @@ def aws_public_subnets_route_validation(
         vpc_id: List[str] = get_config_value(
             config,
             "infra:aws:vpc:existing:vpc_id",
-            key_missing_message="No VPC id defined for config option: {0}",
-            data_expected_error_message="No VPC id was provided for config option: {0}",
         )
         Filters = [
             {
@@ -204,23 +174,23 @@ def aws_public_subnets_route_validation(
                     if "GatewayId" in route:
                         gateway_ids.append(route["GatewayId"])
         else:
-            pytest.fail(
-                f"""Provided subnets {subnets_data["public_subnets_ids"]} and
-                or VPC {vpc_id} do not have internet gateway(s).""",
-                False,
+            fail(
+                AWS_SUBNETS_OR_VPC_WITHOUT_INTERNET_GATEWAY,
+                subjects=["Public", vpc_id],
+                resources=subnets_data["public_subnets_ids"],
             )
 
         if not set(igw_ids) & set(gateway_ids):
-            pytest.fail(
-                f"""Provided subnets {subnets_data["public_subnets_ids"]} do not
-                have internet gateway(s).""",
-                False,
+            fail(
+                AWS_SUBNETS_WITHOUT_INTERNET_GATEWAY,
+                subjects=["Public"],
+                resources=subnets_data["public_subnets_ids"],
             )
 
     except KeyError as e:
-        pytest.fail(f"Validation error - missing required data : {e.args[0]}", False)
+        fail(AWS_REQUIRED_DATA_MISSING, e.args[0])
     except ec2_client.exceptions.ClientError as ce:
-        pytest.fail(f"Validation error - invalid data : {ce.args[0]}", False)
+        fail(AWS_INVALID_DATA, ce.args[0])
 
 
 @pytest.mark.aws
@@ -236,12 +206,13 @@ def aws_public_subnets_range_validation() -> None:
                 subnets_wo_valid_range.append(subnet["SubnetId"])
 
         if len(subnets_wo_valid_range) > 0:
-            pytest.fail(
-                f"Public subnets ({subnets_wo_valid_range}) without valid required range.",  # noqa: E501
-                False,
+            fail(
+                AWS_SUBNETS_WITHOUT_VALID_RANGE,
+                subjects=["Public"],
+                resources=subnets_wo_valid_range,
             )
     except KeyError as e:
-        pytest.fail(f"Validation error - missing required data : {e.args[0]}", False)
+        fail(AWS_REQUIRED_DATA_MISSING, e.args[0])
 
 
 @pytest.mark.aws
@@ -262,13 +233,13 @@ def aws_public_subnets_tags_validation() -> None:
         subnet_missing_tags = [k for k, v in subnets_w_valid_tag.items() if not v]
 
         if len(subnet_missing_tags) > 0:
-            pytest.fail(
-                f"""Public subnet(s) {subnet_missing_tags} missing tag
-                'kubernetes.io/role/elb'.""",
-                False,
+            fail(
+                AWS_SUBNETS_MISSING_K8S_LB_TAG,
+                subjects=["Public"],
+                resources=subnet_missing_tags,
             )
     except KeyError as e:
-        pytest.fail(f"Validation error - missing required data : {e.args[0]}", False)
+        fail(AWS_REQUIRED_DATA_MISSING, e.args[0])
 
 
 @pytest.mark.aws
@@ -281,21 +252,12 @@ def aws_private_subnets_validation(
     private_subnets: List[str] = get_config_value(
         config,
         "infra:aws:vpc:existing:private_subnet_ids",
-        key_missing_message="No private subnets defined for config option: {0}",
-        data_expected_error_message="No private subnets were provided for config "
-        "option: {0}",
     )
-    if not isinstance(private_subnets, List):
-        pytest.fail(
-            """Invalid syntax, config data expected in following format
-                                private_subnet_ids:
-                                    - subnetId-1
-                                    - subnetId-2
-                                    - subnetId-3""",
-            False,
-        )
+    private_subnets = (
+        [private_subnets] if isinstance(private_subnets, str) else private_subnets
+    )
     if not len(private_subnets) > 2:
-        pytest.fail("Not enough subnets provided, at least 3 subnets required.", False)
+        fail(AWS_NOT_ENOUGH_SUBNETS_PROVIDED, subjects=["Private"])
 
     try:
         # query subnets
@@ -307,43 +269,15 @@ def aws_private_subnets_validation(
                 if subnet["SubnetId"] == pvt_id:
                     missing_subnets.remove(pvt_id)
         if len(missing_subnets) > 0:
-            pytest.fail(
-                f"Subnets ({missing_subnets}) do not exist.",
-                False,
+            fail(
+                AWS_SUBNETS_DO_NOT_EXIST, subjects="Private", resources=missing_subnets
             )
         subnets_data["private_subnets"] = subnets["Subnets"]
         subnets_data["private_subnets_ids"] = private_subnets
     except KeyError as e:
-        pytest.fail(f"Validation error - missing required data : {e.args[0]}", False)
+        fail(AWS_REQUIRED_DATA_MISSING, e.args[0])
     except ec2_client.exceptions.ClientError as ce:
-        pytest.fail(f"Validation error - invalid subnetId : {ce.args[0]}", False)
-
-
-@pytest.mark.aws
-@pytest.mark.infra
-@pytest.mark.dependency(depends=["aws_private_subnets_validation"])
-@pytest.mark.skip(reason="Suffixes are not part of config at this time.")
-def aws_private_subnets_suffix_validation(config: Dict[str, Any]) -> None:
-    """Private subnets have the defined suffix."""  # noqa: D401,E501
-    private_subnets_suffix: List[str] = get_config_value(
-        config,
-        "infra:aws:vpc:existing:private_subnets_suffix",
-        key_missing_message="No private subnets suffix defined for config option: {0}",
-        data_expected_error_message="No private subnets suffix was provided for config option: {0}",  # noqa: E501
-    )
-    try:
-        subnets_wo_valid_suffix = []
-        for subnet_id in subnets_data["private_subnets_ids"]:
-            if not subnet_id.endswith(private_subnets_suffix):
-                subnets_wo_valid_suffix.append(subnet_id)
-
-        if len(subnets_wo_valid_suffix) > 0:
-            pytest.fail(
-                f"Subnets ({subnets_wo_valid_suffix}) without valid suffix ({private_subnets_suffix}).",  # noqa: E501
-                False,
-            )
-    except KeyError as e:
-        pytest.fail(f"Validation error - missing required data : {e.args[0]}", False)
+        fail(AWS_INVALID_SUBNET_ID, subjects=["Private", ce.args[0]])
 
 
 @pytest.mark.aws
@@ -359,13 +293,10 @@ def aws_private_subnets_availablity_zone_validation() -> None:
 
         # minimum two availability zones validations
         if len(azs) <= 1:
-            pytest.fail(
-                """Not enough availability zones, subnets should be in
-            at least 2 availability zones.""",
-                False,
-            )
+            fail(AWS_NOT_ENOUGH_AZ_FOR_SUBNETS, subjects=["Private"])
+
     except KeyError as e:
-        pytest.fail(f"Validation error - missing required data : {e.args[0]}", False)
+        fail(AWS_REQUIRED_DATA_MISSING, e.args[0])
 
 
 @pytest.mark.aws
@@ -392,8 +323,6 @@ def aws_private_subnets_route_validation(
         vpc_id: List[str] = get_config_value(
             config,
             "infra:aws:vpc:existing:vpc_id",
-            key_missing_message="No vpc id defined for config option: {0}",
-            data_expected_error_message="No vpc id was provided for config option: {0}",
         )
         Filters = [
             {
@@ -415,22 +344,22 @@ def aws_private_subnets_route_validation(
                     if "NatGatewayId" in route:
                         gateway_ids.append(route["NatGatewayId"])
         else:
-            pytest.fail(
-                f"""Provided Subnets {subnets_data["private_subnets_ids"]} and
-                or VPC {vpc_id} do not have NAT gateway(s).""",
-                False,
+            fail(
+                AWS_SUBNETS_OR_VPC_WITHOUT_INTERNET_GATEWAY,
+                subjects=["Private", vpc_id],
+                resources=subnets_data["public_subnets_ids"],
             )
         if not set(igw_ids) & set(gateway_ids):
-            pytest.fail(
-                f"""Provided subnets {subnets_data["private_subnets_ids"]} do not
-                have NAT gateway(s).""",
-                False,
+            fail(
+                AWS_SUBNETS_WITHOUT_INTERNET_GATEWAY,
+                subjects=["Private"],
+                resources=subnets_data["public_subnets_ids"],
             )
 
     except KeyError as e:
-        pytest.fail(f"Validation error - missing required data : {e.args[0]}", False)
+        fail(AWS_REQUIRED_DATA_MISSING, e.args[0])
     except ec2_client.exceptions.ClientError as ce:
-        pytest.fail(f"Validation error - invalid data : {ce.args[0]}", False)
+        fail(AWS_INVALID_DATA, ce.args[0])
 
 
 @pytest.mark.aws
@@ -446,12 +375,13 @@ def aws_private_subnets_range_validation() -> None:
                 subnets_wo_valid_range.append(subnet["SubnetId"])
 
         if len(subnets_wo_valid_range) > 0:
-            pytest.fail(
-                f"Private subnets ({subnets_wo_valid_range}) without valid required range.",  # noqa: E501
-                False,
+            fail(
+                AWS_SUBNETS_WITHOUT_VALID_RANGE,
+                subjects=["Private"],
+                resources=subnets_wo_valid_range,
             )
     except KeyError as e:
-        pytest.fail(f"Validation error - missing required data : {e.args[0]}", False)
+        fail(AWS_REQUIRED_DATA_MISSING, e.args[0])
 
 
 @pytest.mark.aws
@@ -475,13 +405,13 @@ def aws_private_subnets_tags_validation() -> None:
         subnet_missing_tags = [k for k, v in subnets_w_valid_tag.items() if not v]
 
         if len(subnet_missing_tags) > 0:
-            pytest.fail(
-                f"""Private subnet(s) {subnet_missing_tags} missing tag
-                'kubernetes.io/role/internal-elb'.""",
-                False,
+            fail(
+                AWS_SUBNETS_MISSING_K8S_LB_TAG,
+                subjects=["Private"],
+                resources=subnet_missing_tags,
             )
     except KeyError as e:
-        pytest.fail(f"Validation error - missing required data : {e.args[0]}", False)
+        fail(AWS_REQUIRED_DATA_MISSING, e.args[0])
 
 
 @pytest.mark.aws
@@ -518,8 +448,6 @@ def aws_vpc_subnets_validation(
     vpc_id: List[str] = get_config_value(
         config,
         "infra:aws:vpc:existing:vpc_id",
-        key_missing_message="No vpc id defined for config option: {0}",
-        data_expected_error_message="No vpc id was provided for config option: {0}",
     )
     try:
         vpc_d = ec2_client.describe_vpcs(VpcIds=[vpc_id])
@@ -536,9 +464,10 @@ def aws_vpc_subnets_validation(
                 missing_subnets.append(public_id)
 
         if len(missing_subnets) > 0:
-            pytest.fail(
-                f"""Subnets {missing_subnets} are not associated to provided vpc.""",
-                False,
+            fail(
+                AWS_SUBNETS_NOT_PART_OF_VPC,
+                subjects=[vpc_id],
+                resources=missing_subnets,
             )
 
         # DNS names and DNS resolution enabled
@@ -550,8 +479,8 @@ def aws_vpc_subnets_validation(
         )["EnableDnsHostnames"]["Value"]
 
         if not (enable_dns_hostnames and enable_dns_support):
-            pytest.fail("DNS support not enabled for provided vpc.", False)
+            fail(AWS_DNS_SUPPORT_NOT_ENABLED_FOR_VPC, subjects=[vpc_id])
     except KeyError as e:
-        pytest.fail(f"Validation error - missing required data : {e.args[0]}", False)
+        fail(AWS_REQUIRED_DATA_MISSING, e.args[0])
     except ec2_client.exceptions.ClientError as ce:
-        pytest.fail(f"Validation error - invalid data : {ce.args[0]}", False)
+        fail(AWS_INVALID_DATA, ce.args[0])
