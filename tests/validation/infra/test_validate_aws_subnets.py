@@ -61,7 +61,11 @@ from cdpctl.validation.infra.validate_aws_subnets import (
     aws_public_subnets_validation,
     aws_vpc_subnets_validation,
 )
-from tests.validation import expect_validation_failure, expect_validation_success
+from tests.validation import (
+    expect_validation_failure,
+    expect_validation_success,
+    expect_validation_warning,
+)
 
 sample_public_subnets_response = {
     "Subnets": [
@@ -518,7 +522,7 @@ def test_aws_public_subnets_tags_validation_success(ec2_client: EC2Client) -> No
         func()
 
 
-def test_aws_public_subnets_tags_validation_failure(ec2_client: EC2Client) -> None:
+def test_aws_public_subnets_tags_validation_warning(ec2_client: EC2Client) -> None:
     """Unit test public subnets tags failure."""
     config = get_config(public_subnet_ids, "fail")
     stubber = Stubber(ec2_client)
@@ -554,7 +558,7 @@ def test_aws_public_subnets_tags_validation_failure(ec2_client: EC2Client) -> No
         func = expect_validation_success(aws_public_subnets_validation)
         func(config, ec2_client)
     with stubber:
-        func = expect_validation_failure(aws_public_subnets_tags_validation)
+        func = expect_validation_warning(aws_public_subnets_tags_validation)
         func()
 
 
@@ -933,7 +937,7 @@ def test_aws_private_subnets_tags_validation_failure(ec2_client: EC2Client) -> N
         func = expect_validation_success(aws_private_subnets_validation)
         func(config, ec2_client)
     with stubber:
-        func = expect_validation_failure(aws_private_subnets_tags_validation)
+        func = expect_validation_warning(aws_private_subnets_tags_validation)
         func()
 
 

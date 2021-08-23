@@ -46,12 +46,15 @@ from typing import Any, Callable
 import pytest
 from _pytest.outcomes import Failed
 
+from cdpctl.validation import IssueType, current_context
+
 
 def expect_validation_failure(func: Callable) -> Callable:
     """Check that the validation fails."""
 
     @functools.wraps(func)
     def wrapper(*args: Any, **kwargs: Any) -> None:
+        current_context.clear()
         fail_caught = False
         try:
             func(*args, **kwargs)
@@ -63,11 +66,30 @@ def expect_validation_failure(func: Callable) -> Callable:
     return wrapper
 
 
+def expect_validation_warning(func: Callable) -> Callable:
+    """Check that the validation succeeds."""
+
+    @functools.wraps(func)
+    def wrapper(*args: Any, **kwargs: Any) -> None:
+        current_context.clear()
+        try:
+            func(*args, **kwargs)
+        except Failed as e:
+            pytest.fail(
+                f"Expected {func.__name__!r} to have only a warning, not a problem. Failed with message: {e.msg}"
+            )
+        if current_context.state != IssueType.WARNING:
+            pytest.fail(f"Expected {func.__name__!r} to have a warning.")
+
+    return wrapper
+
+
 def expect_validation_success(func: Callable) -> Callable:
     """Check that the validation succeeds."""
 
     @functools.wraps(func)
     def wrapper(*args: Any, **kwargs: Any) -> None:
+        current_context.clear()
         try:
             func(*args, **kwargs)
         except Failed as e:

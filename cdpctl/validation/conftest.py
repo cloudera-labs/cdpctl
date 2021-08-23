@@ -55,7 +55,7 @@ from pytest import Collector, ExitCode, Item, Session
 
 from cdpctl.utils import load_config
 
-from . import UnrecoverableValidationError, current_context, get_config_value
+from . import IssueType, UnrecoverableValidationError, current_context, get_config_value
 
 this = sys.modules[__name__]
 this.config_file = "config.yaml"
@@ -94,13 +94,12 @@ def pytest_runtest_makereport(item: Item, call: CallInfo[None]) -> TestReport:
             current_context.nodeid = item.nodeid
             click.echo(suf, nl=False, err=True)
     elif call.when == "call":  # Validation was called
-        if result.passed:
-            # All good
-            click.echo(f" {emoji.emojize(':check_mark:')}", err=True)
-        elif result.failed:
-            # Catch any issues
+        if current_context.state == IssueType.PROBLEM:
             click.echo(f" {emoji.emojize(':cross_mark:')}", err=True)
-            # item.session.issues[item] = str(result.longrepr.chain[-1][0])
+        elif current_context.state == IssueType.WARNING:
+            click.echo(f" {emoji.emojize(':red_exclamation_mark:')}", err=True)
+        else:
+            click.echo(f" {emoji.emojize(':check_mark:')}", err=True)
     elif call.when == "teardown":
         this.run_validations += 1
     sys.stdout.flush()
