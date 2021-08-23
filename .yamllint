@@ -34,6 +34,8 @@ rules:
   document-start:
     level: error
     present: false
+    ignore: |
+      **/issue_templates.yml
   empty-lines:
     level: error
     max: 1

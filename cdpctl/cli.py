@@ -50,15 +50,19 @@ from cdpctl.__version__ import __version__
 from cdpctl.command.config import render_skeleton
 from cdpctl.command.validate import run_validation
 
+SUPPORTED_OUTPUT_TYPES = ["text", "json"]
+
 
 @click.group(invoke_without_command=True)
+@click.option("-q", "--quiet", is_flag=True, default=False)
 @click.option("--debug/--no-debug", default=False)
 @click.option("-v", "--version", is_flag=True, default=False)
 @click.pass_context
-def _cli(ctx, debug=False, version=False) -> None:
+def _cli(ctx, debug=False, version=False, quiet=False) -> None:
     """Run the cli."""
     ctx.ensure_object(dict)
     ctx.obj["DEBUG"] = debug
+    ctx.obj["QUIET"] = quiet
     if version:
         print_version()
     if ctx.invoked_subcommand is None:
@@ -77,9 +81,31 @@ def _cli(ctx, debug=False, version=False) -> None:
     help="The config file to use. Defaults to config.yml.",
     type=click.Path(exists=False),
 )
-def validate(ctx, target: str, config_file) -> None:  # pylint: disable=unused-argument
+@click.option(
+    "-o",
+    "--output_file",
+    default="-",
+    help="The file to output the results to. Defaults to stdout.",
+    type=click.Path(exists=False),
+)
+@click.option(
+    "-f",
+    "--output_format",
+    default="text",
+    help="The format to output the results as.",
+    type=click.Choice(SUPPORTED_OUTPUT_TYPES, case_sensitive=False),
+)
+def validate(
+    ctx, target: str, config_file, output_file, output_format
+) -> None:  # pylint: disable=unused-argument
     """Run validation checks on provided section."""
-    run_validation(target=target, config_file=config_file, debug=ctx.obj["DEBUG"])
+    run_validation(
+        target=target,
+        config_file=config_file,
+        debug=ctx.obj["DEBUG"],
+        output_format=output_format,
+        output_file=output_file,
+    )
 
 
 @click.group()

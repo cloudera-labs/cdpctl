@@ -52,13 +52,11 @@ from cdpctl.validation.infra.validate_aws_subnets import (
     aws_private_subnets_availablity_zone_validation,
     aws_private_subnets_range_validation,
     aws_private_subnets_route_validation,
-    aws_private_subnets_suffix_validation,
     aws_private_subnets_tags_validation,
     aws_private_subnets_validation,
     aws_public_subnets_availablity_zone_validation,
     aws_public_subnets_range_validation,
     aws_public_subnets_route_validation,
-    aws_public_subnets_suffix_validation,
     aws_public_subnets_tags_validation,
     aws_public_subnets_validation,
     aws_vpc_subnets_validation,
@@ -209,45 +207,6 @@ def test_aws_public_subnets_validation_failure(
     with stubber:
         func = expect_validation_failure(aws_public_subnets_validation)
         func(config, ec2_client)
-
-
-def test_aws_public_subnets_suffix_validation_success(
-    ec2_client: EC2Client,
-) -> None:
-    """Unit test public subnets suffix success."""
-    config = get_config(
-        public_subnet_ids_val=public_subnet_ids, public_suffix_val="cdp"
-    )
-    stubber = Stubber(ec2_client)
-    stubber.add_response(
-        "describe_subnets",
-        sample_public_subnets_response,
-        expected_params={"SubnetIds": public_subnet_ids},
-    )
-    with stubber:
-        func = expect_validation_success(aws_public_subnets_validation)
-        func(config, ec2_client)
-    with stubber:
-        func = expect_validation_success(aws_public_subnets_suffix_validation)
-        func(config)
-
-
-def test_aws_public_subnets_suffix_validation_failure(
-    ec2_client: EC2Client,
-) -> None:
-    """Unit test public subnets suffix failure."""
-    config = get_config(
-        public_subnet_ids_val=public_subnet_ids, public_suffix_val="fail"
-    )
-    stubber = Stubber(ec2_client)
-    stubber.add_response(
-        "describe_subnets",
-        sample_public_subnets_response,
-        expected_params={"SubnetIds": public_subnet_ids},
-    )
-    with stubber:
-        func = expect_validation_failure(aws_public_subnets_suffix_validation)
-        func(config)
 
 
 def test_aws_public_subnets_availablity_zone_validation_success(
@@ -625,44 +584,6 @@ def test_aws_private_subnets_validation_failure(ec2_client: EC2Client) -> None:
     with stubber:
         func = expect_validation_failure(aws_private_subnets_validation)
         func(config, ec2_client)
-
-
-def test_aws_private_subnets_suffix_validation_success(ec2_client: EC2Client) -> None:
-    """Unit test private subnets suffix success."""
-    config = get_config(
-        private_subnet_ids_val=private_subnet_ids, private_suffix_val="cdp"
-    )
-    stubber = Stubber(ec2_client)
-    stubber.add_response(
-        "describe_subnets",
-        sample_private_subnets_response,
-        expected_params={"SubnetIds": private_subnet_ids},
-    )
-    with stubber:
-        func = expect_validation_success(aws_private_subnets_validation)
-        func(config, ec2_client)
-    with stubber:
-        func = expect_validation_success(aws_private_subnets_suffix_validation)
-        func(config)
-
-
-def test_aws_private_subnets_suffix_validation_failure(ec2_client: EC2Client) -> None:
-    """Unit test private subnets suffix failure."""
-    config = get_config(
-        private_subnet_ids_val=private_subnet_ids, private_suffix_val="fail"
-    )
-    stubber = Stubber(ec2_client)
-    stubber.add_response(
-        "describe_subnets",
-        sample_private_subnets_response,
-        expected_params={"SubnetIds": private_subnet_ids},
-    )
-    with stubber:
-        func = expect_validation_success(aws_private_subnets_validation)
-        func(config, ec2_client)
-    with stubber:
-        func = expect_validation_failure(aws_private_subnets_suffix_validation)
-        func(config)
 
 
 def test_aws_private_subnets_availablity_zone_validation_success(

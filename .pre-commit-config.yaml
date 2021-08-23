@@ -3,7 +3,8 @@ repos:
     rev: 20.8b1
     hooks:
       - id: black
-        args: [--safe, --quiet, --target-version, py36]
+        args: [--safe, --quiet, --target-version, py36, --exclude, scripts/update_issue_templates.py]
+        exclude: issues.py
   - repo: https://github.com/asottile/blacken-docs
     rev: v1.8.0
     hooks:
@@ -20,6 +21,7 @@ repos:
       - id: check-json
         exclude: ^.vscode/
       - id: check-yaml
+        args: [--allow-multiple-documents]
       - id: requirements-txt-fixer
       - id: check-byte-order-marker
       - id: check-case-conflict
@@ -32,10 +34,11 @@ repos:
     rev: v2.7.0
     hooks:
       - id: validate_manifest
-  - repo: https://github.com/pre-commit/mirrors-autopep8
-    rev: v1.5.4
-    hooks:
-      - id: autopep8
+  # - repo: https://github.com/pre-commit/mirrors-autopep8
+  #   rev: v1.5.4
+  #   hooks:
+  #     - id: autopep8
+  #       args: ["--exclude scripts/update_issue_templates.py"]
   - repo: https://github.com/PyCQA/isort
     rev: 5.5.0
     hooks:

@@ -46,8 +46,13 @@ from typing import Any, Dict, List
 import pytest
 from boto3_type_annotations.iam import Client as EC2Client
 
-from cdpctl.validation import get_config_value
+from cdpctl.validation import fail, get_config_value
 from cdpctl.validation.aws_utils import get_client
+from cdpctl.validation.infra.issues import (
+    AWS_REQUIRED_DATA_MISSING,
+    AWS_SSH_IS_INVALID,
+    AWS_SSH_KEY_ID_DOES_NOT_EXIST,
+)
 
 subnets_data = {}
 
@@ -69,14 +74,12 @@ def aws_ssh_key_validation(
         ssh_key_id: List[str] = get_config_value(
             config,
             "globals:ssh:public_key_id",
-            key_missing_message="No ssh key is defined for config option: {0}",
-            data_expected_error_message="No ssh key were provided for config option: {0}",  # noqa: E501
         )
 
         key_pairs = ec2_client.describe_key_pairs(KeyPairIds=[ssh_key_id])["KeyPairs"]
         if not key_pairs:
-            pytest.fail(f"SSH key id ({ssh_key_id}) do not exist.", False)
+            fail(AWS_SSH_KEY_ID_DOES_NOT_EXIST, ssh_key_id)
     except KeyError as e:
-        pytest.fail(f"Validation error - missing required data : {e.args[0]}", False)
-    except ec2_client.exceptions.ClientError as ce:
-        pytest.fail(f"Validation error - invalid ssh key id : {ce.args[0]}", False)
+        fail(AWS_REQUIRED_DATA_MISSING, e.args[0])
+    except ec2_client.exceptions.ClientError:
+        fail(AWS_SSH_IS_INVALID, ssh_key_id)
