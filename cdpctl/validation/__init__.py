@@ -183,9 +183,6 @@ def get_issues() -> Dict[str, Dict[str, List[Issue]]]:
 _issue_templates: Dict[str, IssueTemplate] = load_all_issue_templates()
 
 
-ValidationContext = namedtuple("CurrentValidationContext", "validation_name")
-
-
 class Context:
     """Basic Validation Context."""
 
@@ -195,6 +192,7 @@ class Context:
         self.function = None
         self.nodeid = None
         self.state = None
+        self.last_message = None
 
     def clear(self) -> None:
         """Clear all the context values."""
@@ -202,6 +200,7 @@ class Context:
         self.function = None
         self.nodeid = None
         self.state = None
+        self.last_message = None
 
 
 current_context: Context = Context()
@@ -235,6 +234,7 @@ def _add_issue(issue_type: IssueType, issue: Issue):
             IssueType.WARNING.value: [],
         }
     get_issues()[context.validation_name][issue_type.value].append(issue)
+    context.last_message = issue.message
 
 
 def fail(
@@ -253,7 +253,7 @@ def fail(
             template=_issue_templates[template], subjects=subjects, resources=resources
         ),
     )
-    raise pytest.fail("", False)
+    raise pytest.fail(current_context.last_message, False)
 
 
 def warn(

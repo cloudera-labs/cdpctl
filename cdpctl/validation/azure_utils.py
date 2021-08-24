@@ -47,6 +47,7 @@ from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.authorization import AuthorizationManagementClient
 
 from cdpctl.validation import UnrecoverableValidationError, get_config_value
+from cdpctl.validation.issues import AZURE_NO_SUBSCRIPTION_HAS_BEEN_DEFINED
 
 
 def get_client(client_type: str, config):
@@ -59,12 +60,7 @@ def get_client(client_type: str, config):
         config,
         "infra:azure:subscription_id",
         key_value_expected=False,
-        key_missing_message=(
-            "No subscription id has been defined for config option: env:azure:subscription_id"
-        ),
-        data_expected_error_message=(
-            "No subscription id was provided for config option: env:azure:subscription_id"
-        ),
+        data_expected_issue=AZURE_NO_SUBSCRIPTION_HAS_BEEN_DEFINED,
     )
 
     credential = AzureCliCredential()
