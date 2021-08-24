@@ -41,7 +41,6 @@
 ###
 """Shared validation functions."""
 import os
-from collections import namedtuple
 from enum import Enum
 from typing import Any, Dict, List
 

@@ -43,10 +43,10 @@
 
 import os
 import sys
-from _pytest.outcomes import Failed
 
 import click
 import pytest
+from _pytest.outcomes import Failed
 
 import cdpctl.validation as validation
 from cdpctl import SUPPORTED_PLATFORMS

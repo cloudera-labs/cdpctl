@@ -43,8 +43,8 @@
 from typing import Optional
 
 from azure.identity import AzureCliCredential
-from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.authorization import AuthorizationManagementClient
+from azure.mgmt.resource import ResourceManagementClient
 
 from cdpctl.validation import UnrecoverableValidationError, get_config_value
 from cdpctl.validation.issues import AZURE_NO_SUBSCRIPTION_HAS_BEEN_DEFINED

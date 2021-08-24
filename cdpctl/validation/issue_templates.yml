@@ -37,5 +37,3 @@ docs_link: https://docs.cloudera.com/cdp/latest/requirements-aws/topics/mc-idbro
 ---
 id: AZURE_NO_SUBSCRIPTION_HAS_BEEN_DEFINED
 summary: "No subscription id was provided for config option: {0}"
-
-
