@@ -40,12 +40,12 @@
 # Source File Name:  validate_azure_example.py
 ###
 """Validation of Azure."""
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 import pytest
 from azure.mgmt.resource import ResourceManagementClient
 
-from cdpctl.validation import get_config_value, validator
+from cdpctl.validation import validator
 from cdpctl.validation.azure_utils import get_client
 
 
@@ -66,7 +66,8 @@ def azure_client_validation(
 
 @validator
 def _azure_client_validation(
-    config: Dict[str, Any], resource_client: ResourceManagementClient
+    config: Dict[str, Any],  # pylint: disable=unused-argument
+    resource_client: ResourceManagementClient,
 ) -> None:  # pragma: no cover
     """Azure test example."""  # noqa: D401,E501
 
