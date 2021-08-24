@@ -61,6 +61,7 @@ from cdpctl.validation.infra.issues import (
     AWS_SUBNETS_OR_VPC_WITHOUT_INTERNET_GATEWAY,
     AWS_SUBNETS_WITHOUT_INTERNET_GATEWAY,
     AWS_SUBNETS_WITHOUT_VALID_RANGE,
+    AWS_SUBNETS_WITH_PUBLIC_IPS_ENABLED,
 )
 
 subnets_data = {}
@@ -426,13 +427,13 @@ def aws_private_subnets_auto_assign_ip_validation() -> None:
                 subnets_w_public_ips_enabled.append(subnet["SubnetId"])
 
         if len(subnets_w_public_ips_enabled) > 0:
-            pytest.fail(
-                f"""Private subnet(s) {subnets_w_public_ips_enabled} have
-                'Auto-assign Public IPs' enabled.""",
-                False,
+            warn(
+                AWS_SUBNETS_WITH_PUBLIC_IPS_ENABLED,
+                subjects=["Private"],
+                resources=subnets_w_public_ips_enabled,
             )
     except KeyError as e:
-        pytest.fail(f"Validation error - missing required data : {e.args[0]}", False)
+        fail(AWS_REQUIRED_DATA_MISSING, e.args[0])
 
 
 @pytest.mark.aws

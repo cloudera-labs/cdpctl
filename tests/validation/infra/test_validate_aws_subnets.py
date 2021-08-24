@@ -903,7 +903,7 @@ def test_aws_private_subnets_tags_validation_success(ec2_client: EC2Client) -> N
         func()
 
 
-def test_aws_private_subnets_tags_validation_failure(ec2_client: EC2Client) -> None:
+def test_aws_private_subnets_tags_validation_warning(ec2_client: EC2Client) -> None:
     """Unit test private subnets tags failure."""
     config = get_config(
         private_subnet_ids_val=private_subnet_ids, private_suffix_val="fail"
@@ -966,7 +966,7 @@ def test_aws_private_subnets_auto_assign_ip_validation_success(
         func()
 
 
-def test_aws_private_subnets_auto_assign_ip_validation_failure(
+def test_aws_private_subnets_auto_assign_ip_validation_warning(
     ec2_client: EC2Client,
 ) -> None:
     """Unit test private subnets auto assign ip settings failure"""
@@ -998,7 +998,7 @@ def test_aws_private_subnets_auto_assign_ip_validation_failure(
         func = expect_validation_success(aws_private_subnets_validation)
         func(config, ec2_client)
     with stubber:
-        func = expect_validation_failure(aws_private_subnets_auto_assign_ip_validation)
+        func = expect_validation_warning(aws_private_subnets_auto_assign_ip_validation)
         func()
 
 
