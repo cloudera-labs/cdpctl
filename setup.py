@@ -121,6 +121,7 @@ package_data = {
         "validation/renderer/templates/*.j2",
         "validation/**/issue_templates.yml",
         "validation/issue_templates.yml",
+        "validation/resources/*",
     ],
 }
 

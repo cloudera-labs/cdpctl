@@ -40,6 +40,9 @@
 # Source File Name:  azure_utils.py
 ###
 """Azure Specific Utils."""
+import csv
+import os
+from enum import Enum
 from typing import Optional
 
 from azure.identity import AzureCliCredential
@@ -80,3 +83,42 @@ def validate_azure_config(config):
         get_client("resource", config)
     except Exception as ex:
         raise UnrecoverableValidationError(ex) from ex
+
+
+class AzureSupportedRegionFeatures(Enum):
+    """Enum of CDP Features."""
+
+    ENVIRONMENT = "Environment"
+    DATA_HUB = "Data Hub"
+    DATA_WAREHOUSE = "Data Warehouse"
+    MACHINE_LEARNING = "Machine Learning"
+    DATA_ENGINEERING = "Data Engineering"
+    OPERATIONAL_DATABASE = "Operational Database"
+
+
+# Function to convert a CSV to JSON
+# Takes the file paths as arguments
+def read_azure_supported_regions():
+    """Load the Azure Supported Regions and Feature Matrix."""
+
+    support_features_map = {}
+    basic_supported_regions = []
+
+    csv_file = os.path.join(
+        os.path.dirname(__file__), "resources/AzureRegionSupport.csv"
+    )
+
+    with open(csv_file, encoding="utf-8") as csvf:
+        csvReader = csv.DictReader(csvf)
+        for rows in csvReader:
+            region = rows["Region Name"]
+            support_features_map[region] = rows
+            del support_features_map[region]["Region Name"]
+
+            for name, val in support_features_map[region].items():
+                support_features_map[region][name] = val.lower() == "true"
+            if support_features_map[region][
+                AzureSupportedRegionFeatures.ENVIRONMENT.value
+            ]:
+                basic_supported_regions.append(region)
+    return basic_supported_regions, support_features_map

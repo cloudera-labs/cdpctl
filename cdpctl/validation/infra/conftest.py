@@ -40,9 +40,11 @@
 # Source File Name:  conftest.py
 ###
 """Fixtures for the AWS CDP bucket access policy."""
-from typing import List
+from typing import Dict, List
 
 import pytest
+
+from cdpctl.validation.azure_utils import read_azure_supported_regions
 
 
 @pytest.fixture
@@ -294,3 +296,17 @@ def identity_management_needed_actions() -> List[str]:
 def cdp_cidrs() -> List[str]:
     """Get the CDP control plane CIDRs."""
     return ["52.36.110.208/32", "52.40.165.49/32", "35.166.86.177/32"]
+
+
+@pytest.fixture
+def azure_supported_regions() -> List[str]:
+    """Get the Azure regions supported by CDP."""
+    base_regions, _ = read_azure_supported_regions()
+    return base_regions
+
+
+@pytest.fixture
+def azure_supported_region_experiences() -> Dict[str, bool]:
+    """Get the Azure regions supported by CDP."""
+    _, region_features = read_azure_supported_regions()
+    return region_features
