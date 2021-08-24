@@ -59,6 +59,7 @@ from cdpctl.validation.infra.issues import (
     AWS_SUBNETS_MISSING_K8S_LB_TAG,
     AWS_SUBNETS_NOT_PART_OF_VPC,
     AWS_SUBNETS_OR_VPC_WITHOUT_INTERNET_GATEWAY,
+    AWS_SUBNETS_WITH_PUBLIC_IPS_ENABLED,
     AWS_SUBNETS_WITHOUT_INTERNET_GATEWAY,
     AWS_SUBNETS_WITHOUT_VALID_RANGE,
 )
@@ -409,6 +410,27 @@ def aws_private_subnets_tags_validation() -> None:
                 AWS_SUBNETS_MISSING_K8S_LB_TAG,
                 subjects=["Private"],
                 resources=subnet_missing_tags,
+            )
+    except KeyError as e:
+        fail(AWS_REQUIRED_DATA_MISSING, e.args[0])
+
+
+@pytest.mark.aws
+@pytest.mark.infra
+@pytest.mark.dependency(depends=["aws_private_subnets_validation"])
+def aws_private_subnets_auto_assign_ip_validation() -> None:
+    """Private subnets have auto-assign public IPs disabled."""  # noqa: D401,E501
+    try:
+        subnets_w_public_ips_enabled = []
+        for subnet in subnets_data["private_subnets"]:
+            if subnet["MapPublicIpOnLaunch"]:
+                subnets_w_public_ips_enabled.append(subnet["SubnetId"])
+
+        if len(subnets_w_public_ips_enabled) > 0:
+            warn(
+                AWS_SUBNETS_WITH_PUBLIC_IPS_ENABLED,
+                subjects=["Private"],
+                resources=subnets_w_public_ips_enabled,
             )
     except KeyError as e:
         fail(AWS_REQUIRED_DATA_MISSING, e.args[0])

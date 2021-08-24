@@ -165,3 +165,7 @@ docs_link: https://docs.cloudera.com/cdp/latest/requirements-aws/topics/mc-aws-r
 id: AWS_VPC_NOT_FOUND_IN_ACCOUNT
 summary: "VPC ID {0} set in infra:aws:vpc:existing:vpc_id was not found in the AWS account."
 docs_link: https://docs.cloudera.com/cdp/latest/requirements-aws/topics/mc-aws-req-vpc.html
+---
+id: AWS_SUBNETS_WITH_PUBLIC_IPS_ENABLED
+summary: "These {0} Subnets must have 'Auto-assign Public IPs' disabled for a fully-private network configuration."
+render_type: list
