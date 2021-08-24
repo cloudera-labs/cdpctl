@@ -948,7 +948,7 @@ def test_aws_private_subnets_tags_validation_warning(ec2_client: EC2Client) -> N
 def test_aws_private_subnets_auto_assign_ip_validation_success(
     ec2_client: EC2Client,
 ) -> None:
-    """Unit test private subnets auto assign ip settings success"""
+    """Unit test private subnets auto assign ip settings success."""
     config = get_config(
         private_subnet_ids_val=private_subnet_ids, private_suffix_val="cdp"
     )
@@ -969,7 +969,7 @@ def test_aws_private_subnets_auto_assign_ip_validation_success(
 def test_aws_private_subnets_auto_assign_ip_validation_warning(
     ec2_client: EC2Client,
 ) -> None:
-    """Unit test private subnets auto assign ip settings failure"""
+    """Unit test private subnets auto assign ip settings failure."""
     config = get_config(
         private_subnet_ids_val=private_subnet_ids, private_suffix_val="fail"
     )
