@@ -120,7 +120,10 @@ class Issue:
     @property
     def message(self):
         """Get the message."""
-        return self._template.summary.format(*self._subjects)
+        if self._subjects:
+            return self._template.summary.format(*self._subjects)
+        else:
+            return self._template.summary
 
     @property
     def resources(self) -> List[str]:
