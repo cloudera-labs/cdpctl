@@ -46,6 +46,7 @@ import sys
 
 import click
 import pytest
+from _pytest.outcomes import Failed
 
 import cdpctl.validation as validation
 from cdpctl import SUPPORTED_PLATFORMS
@@ -97,6 +98,9 @@ def run_validation(
         if infra_type == "aws":
             validate_aws_config(config=config)
     except UnrecoverableValidationError as e:
+        click.secho(e, fg="red")
+        sys.exit(1)
+    except Failed as e:
         click.secho(e, fg="red")
         sys.exit(1)
 

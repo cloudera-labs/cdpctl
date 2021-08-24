@@ -1,12 +1,12 @@
 ---
 id: CONFIG_OPTION_KEY_NOT_DEFINED
-summary: "The config option {0} is missing"
+summary: "The config option {0} is missing."
 ---
 id: CONFIG_OPTION_DATA_NOT_DEFINED
-summary: No entry was provided for config option {0}
+summary: No entry was provided for config option {0}.
 ---
 id: CONFIG_OPTION_PARENT_PATH_NOT_DEFINED
-summary: Unable to find key path
+summary: Unable to find key path {0} in config.
 render_type: list
 ---
 id: AWS_ROLE_MISSING

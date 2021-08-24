@@ -65,7 +65,7 @@ render_type: list
 docs_link: https://docs.cloudera.com/cdp/latest/requirements-aws/topics/mc-iam-policy-definitions.html#autoId1
 ---
 id: AWS_LOGGER_INSTANCE_PROFILE_SHOULD_CONTAIN_LOGGER_ROLE
-summary: "The logger instance profile {0} set in config {1} should contain a logger role."
+summary: "The logger instance profile {0} should contain a logger role."
 docs_link: https://docs.cloudera.com/cdp/latest/requirements-aws/topics/mc-idbroker-minimum-setup.html#autoId1
 ---
 id: AWS_LOGGER_ROLE_SHOULD_HAVE_EC2_TRUST
