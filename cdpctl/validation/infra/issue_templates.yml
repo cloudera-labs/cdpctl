@@ -165,3 +165,12 @@ docs_link: https://docs.cloudera.com/cdp/latest/requirements-aws/topics/mc-aws-r
 id: AWS_VPC_NOT_FOUND_IN_ACCOUNT
 summary: "VPC ID {0} set in infra:aws:vpc:existing:vpc_id was not found in the AWS account."
 docs_link: https://docs.cloudera.com/cdp/latest/requirements-aws/topics/mc-aws-req-vpc.html
+---
+id: AZURE_REGION_NOT_SUPPORTED
+summary: "The Azure Region ({0}) is not supported by CDP."
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-azure-region.html
+---
+id: AZURE_REGION_FEATURES_NOT_SUPPORTED
+summary: "The following experinces are not supported in the {0} Azure Region"
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-azure-regions.html
+render_type: list
