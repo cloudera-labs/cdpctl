@@ -117,11 +117,8 @@ def read_azure_supported_regions():
 
             for name, val in support_features_map[region].items():
                 support_features_map[region][name] = val.lower() == "true"
-            if (
-                support_features_map[region][
-                    AzureSupportedRegionFeatures.ENVIRONMENT.value
-                ]
-                is True
-            ):
+            if support_features_map[region][
+                AzureSupportedRegionFeatures.ENVIRONMENT.value
+            ]:
                 basic_supported_regions.append(region)
     return basic_supported_regions, support_features_map
