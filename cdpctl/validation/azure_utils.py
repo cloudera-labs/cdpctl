@@ -43,17 +43,18 @@
 import csv
 import os
 from enum import Enum
-from typing import Optional
+from typing import Optional, Tuple
 
 from azure.identity import AzureCliCredential
 from azure.mgmt.authorization import AuthorizationManagementClient
 from azure.mgmt.resource import ResourceManagementClient
+from azure.storage.filedatalake import DataLakeServiceClient
 
 from cdpctl.validation import UnrecoverableValidationError, get_config_value
 from cdpctl.validation.issues import AZURE_NO_SUBSCRIPTION_HAS_BEEN_DEFINED
 
 
-def get_client(client_type: str, config):
+def get_client(client_type: str, config, url=None):
     """
     Get an Azure client for the specified type.
 
@@ -73,6 +74,9 @@ def get_client(client_type: str, config):
 
     if client_type == "auth":
         return AuthorizationManagementClient(credential, subscription_id)
+
+    if client_type == "datalake":
+        return DataLakeServiceClient(url, credential)
 
     raise Exception(f"Unable to create Azure client for type {client_type}")
 
@@ -122,3 +126,21 @@ def read_azure_supported_regions():
             ]:
                 basic_supported_regions.append(region)
     return basic_supported_regions, support_features_map
+
+
+def parse_adls_path(path: str) -> Tuple:
+    """Parse Azure ADLS path."""
+    try:
+        if not path.startswith("adls://"):
+            raise ValueError(f"Invalid adls path: {path}")
+
+        if not path.replace("adls://", "").split("@", 1)[0]:
+            raise ValueError(f"Invalid adls path: {path}")
+
+        return (
+            "https://" + path.replace("adls://", "").split("@", 1)[1],
+            path.replace("adls://", "").split("@", 1)[0],
+        )
+
+    except IndexError as ie:
+        raise ValueError(f"Invalid adls path: {path}") from ie

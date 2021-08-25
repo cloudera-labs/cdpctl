@@ -39,10 +39,13 @@
 # Source File Name:  test_azure_utils.py
 ###
 """Azure Utils Test."""
+import pytest
 from cdpctl.validation.azure_utils import (
     AzureSupportedRegionFeatures,
     read_azure_supported_regions,
 )
+from cdpctl.validation.azure_utils import parse_adls_path, get_client
+from azure.storage.filedatalake import DataLakeServiceClient
 
 
 def test_read_azure_supported_regions():
@@ -69,3 +72,32 @@ def test_read_azure_supported_regions():
     ]
     assert "Germany Central" in regions_feature_map
     assert "Germany Central" not in regions
+
+
+def test_get_client():
+    """Test Datalake service client."""
+    datalake_client_service = get_client(
+        "datalake",
+        {"infra": {"azure": {"subscription_id": 123}}},
+        "https://test.dfs.core.windows.net",
+    )
+    assert isinstance(datalake_client_service, DataLakeServiceClient)
+
+
+def test_parse_adls_path():
+    """Test parse adls path."""
+    parsed_url = parse_adls_path("adls://container@test.dfs.core.windows.net")
+    assert parsed_url[0].startswith("https://")
+    assert parsed_url[1] == ("container")
+
+
+def test_parse_adls_path_invalid():
+    """Test parse adls path with invalid value."""
+    with pytest.raises(ValueError):
+        parse_adls_path("container@test.dfs.core.windows.net")
+
+
+def test_parse_adls_path_invalid_container():
+    """Test parse adls path with invalid container value."""
+    with pytest.raises(ValueError):
+        parse_adls_path("adls://test.dfs.core.windows.net")
