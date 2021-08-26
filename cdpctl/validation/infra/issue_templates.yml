@@ -174,3 +174,57 @@ id: AZURE_REGION_FEATURES_NOT_SUPPORTED
 summary: "The following experinces are not supported in the {0} Azure Region"
 docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-azure-regions.html
 render_type: list
+---
+id: AZURE_VNET_NOT_FOUND
+summary: "The Azure Virtual Network {0} was not found in the subscription for the {1} Resource Group."
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-azure-vnet-and-subnets.html
+---
+id: AZURE_VNET_AT_LEAST_ONE_SUBNET_NEEDED
+summary: "The Azure Virtual Network {0} requires at least one (1) Subnet defined."
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-azure-vnet-and-subnets.html
+---
+id: AZURE_VNET_SHOULD_HAVE_CLASS_B_TOTAL_ADDRESSES
+summary: "The Azure Virtual Network {0} address space only has a total of {1} IP addresses. It Should be a Class B (/16) with at least 65,536 IP addresses."
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-network-planning-azure.html
+---
+id: AZURE_VNET_ADDRESS_SPACE_OVERLAPS_RESERVED
+summary: "The Azure Virtual Network {0} address space overlaps the following reserved networks."
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-network-planning-azure.html
+render_type: list
+---
+id: AZURE_VNET_ADDRESS_SPACE_HAS_PUBLIC_CIDRS
+summary: "The Azure Virtual Network {0} address space contains the following Public IP address range(s)."
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-network-planning-azure.html
+render_type: list
+---
+id: AZURE_VNET_SUBNET_NEEDS_CLASS_C_FOR_DLDH
+summary: "The Azure Virtual Network {0} does not contain a subnet with at least a /24 address range for Data Lake and Data Hub."
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-network-planning-azure.html
+---
+id: AZURE_VNET_SUBNET_NEEDS_CLASS_C_FOR_DLDH
+summary: "The Azure Virtual Network {0} does not contain a subnet with at least a /24 address range for Data Lake and Data Hub."
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-network-planning-azure.html
+---
+id: AZURE_VNET_NOT_ENOUGH_DW_SIZED_SUBNETS
+summary: "The Azure Virtual Network {0} does not contain enough at least three (3) /20 addresss range subnets to support the Data Warehouse experience."
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-network-planning-azure.html
+---
+id: AZURE_VNET_NOT_ENOUGH_DW_SUBNETS
+summary: "The Azure Virtual Network {0} does not contain enough Subnets to support an environment with a Data Warehouse experience."
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-network-planning-azure.html
+---
+id: AZURE_VNET_NO_SUBNET_WITH_NETAPP_DELEGATION_FOR_ML
+summary: "The Azure Virtual Network {0} does not have a Subnet delegated to the Azure NetApp Files service needed for the Machine Learning experience."
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-network-planning-azure.html
+---
+id: AZURE_VNET_SUBNET_WITH_NETAPP_DELEGATION_NOT_SIZED_FOR_ML
+summary: "The Azure Virtual Network {0} does not have a Subnet delegated to the Azure NetApp Files that has at least a /28 address range needed for the Machine Learning experience."
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-network-planning-azure.html
+---
+id: AZURE_VNET_SUBNET_DOES_NOT_HAVE_SUBNETS_FOR_WORKSPACES_IN_ML
+summary: "The Azure Virtual Network {0} does not appear to have enough Subnets for workspaces when using the Machine Learning experience."
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-network-planning-azure.html
+---
+id: AZURE_VNET_SUBNET_DOES_NOT_HAVE_SUBNETS_FOR_DE
+summary: "The Azure Virtual Network {0} does not appear to have enough Subnets to run a Data Engineering experience.  A Data Engineering experience needs at least one (1) dedicated /24 network."
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-network-planning-azure.html

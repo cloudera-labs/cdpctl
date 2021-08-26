@@ -92,6 +92,8 @@ def expect_validation_success(func: Callable) -> Callable:
         current_context.clear()
         try:
             func(*args, **kwargs)
+            if current_context.state == IssueType.WARNING:
+                raise Failed("A warning was issued.")
         except Failed as e:
             pytest.fail(
                 f"Expected {func.__name__!r} to succeed. Failed with message: {e.msg}"

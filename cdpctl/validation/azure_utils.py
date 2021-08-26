@@ -47,6 +47,7 @@ from typing import Optional
 
 from azure.identity import AzureCliCredential
 from azure.mgmt.authorization import AuthorizationManagementClient
+from azure.mgmt.network import NetworkManagementClient
 from azure.mgmt.resource import ResourceManagementClient
 
 from cdpctl.validation import UnrecoverableValidationError, get_config_value
@@ -62,7 +63,7 @@ def get_client(client_type: str, config):
     subscription_id: Optional[str] = get_config_value(
         config,
         "infra:azure:subscription_id",
-        key_value_expected=False,
+        key_value_expected=True,
         data_expected_issue=AZURE_NO_SUBSCRIPTION_HAS_BEEN_DEFINED,
     )
 
@@ -73,6 +74,11 @@ def get_client(client_type: str, config):
 
     if client_type == "auth":
         return AuthorizationManagementClient(credential, subscription_id)
+
+    if client_type == "network":
+        return NetworkManagementClient(
+            credential=credential, subscription_id=subscription_id
+        )
 
     raise Exception(f"Unable to create Azure client for type {client_type}")
 
