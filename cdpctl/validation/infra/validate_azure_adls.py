@@ -68,7 +68,7 @@ def datalake_service_client_fixture():
 def azure_adls_data_storage_validation(
     config: Dict[str, Any], dls_client: DataLakeServiceClient
 ) -> None:  # pragma: no cover
-    """Data ADLS Storage."""  # noqa: D401
+    """ADLS Storage Data Container exists."""  # noqa: D401
     try:
         data_path: str = get_config_value(
             config,
@@ -96,7 +96,7 @@ def azure_adls_data_storage_validation(
 def azure_adls_logs_storage_validation(
     config: Dict[str, Any], dls_client: DataLakeServiceClient
 ) -> None:  # pragma: no cover
-    """Logs ADLS Storage."""  # noqa: D401
+    """ADLS Storage Logs Container exists."""  # noqa: D401
     try:
         logs_path: str = get_config_value(
             config,

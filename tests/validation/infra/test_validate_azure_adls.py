@@ -45,17 +45,19 @@ from cdpctl.validation.infra.validate_azure_adls import (
     azure_adls_logs_storage_validation,
 )
 import pytest
-from cdpctl.validation.azure_utils import get_client
 
 
-# mock objects used for unit testing
 class DataLakeServiceClient:
+    """Mock class for unit testing."""
+
     def __init__(self, config, url):
+        """Mock init for testing."""
         self.config = config
         self.url = url
         self.client = None
 
     def get_file_system_client(self, file_system=None):
+        """Mock method for testing."""
         if file_system == "failure":
             self.client = Client(False)
         else:
@@ -64,11 +66,42 @@ class DataLakeServiceClient:
 
 
 class Client:
+    """Mock class for unit testing."""
+
     def __init__(self, val):
+        """Mock init for testing."""
         self.exists_val = val
 
     def exists(self):
+        """Mock method for testing."""
         return self.exists_val
+
+
+CONFIG = {
+    "env": {
+        "azure": {
+            "storage": {
+                "path": {
+                    "data": "adls://container@test.dfs.core.windows.net",
+                    "logs": "adls://container@test.dfs.core.windows.net",
+                }
+            }
+        }
+    }
+}
+FAILURE_CONFIG = {
+    "env": {
+        "azure": {
+            "storage": {
+                "path": {
+                    "data": "adls://failure@test.dfs.core.windows.net",
+                    "logs": "adls://failure@test.dfs.core.windows.net",
+                }
+            }
+        }
+    }
+}
+EMPTY_CONFIG = {}
 
 
 @pytest.fixture(autouse=True, name="dls_client")
@@ -85,98 +118,42 @@ def datalake_service_client_fixture():
 def test_azure_adls_data_storage_validation_success(
     dls_client: DataLakeServiceClient,
 ) -> None:
-    config = {
-        "env": {
-            "azure": {
-                "storage": {
-                    "path": {"data": "adls://container@test.dfs.core.windows.net"}
-                }
-            }
-        }
-    }
     func = expect_validation_success(azure_adls_data_storage_validation)
-    func(config, dls_client)
+    func(CONFIG, dls_client)
 
 
 def test_azure_adls_data_storage_validation_failure(
     dls_client: DataLakeServiceClient,
 ) -> None:
 
-    config = {
-        "env": {
-            "azure": {
-                "storage": {
-                    "path": {"data": "adls://failure@test.dfs.core.windows.net"}
-                }
-            }
-        }
-    }
     func = expect_validation_failure(azure_adls_data_storage_validation)
-    func(config, dls_client)
+    func(FAILURE_CONFIG, dls_client)
 
 
 def test_azure_adls_data_storage_validation_wo_config_failure(
     dls_client: DataLakeServiceClient,
 ) -> None:
 
-    config = {
-        "env": {
-            "azure": {
-                "storage": {
-                    "path": {"logs": "adls://failure@test.dfs.core.windows.net"}
-                }
-            }
-        }
-    }
     func = expect_validation_failure(azure_adls_data_storage_validation)
-    func(config, dls_client)
+    func(EMPTY_CONFIG, dls_client)
 
 
 def test_azure_adls_logs_storage_validation_success(
     dls_client: DataLakeServiceClient,
 ) -> None:
-    config = {
-        "env": {
-            "azure": {
-                "storage": {
-                    "path": {"logs": "adls://container@test.dfs.core.windows.net"}
-                }
-            }
-        }
-    }
     func = expect_validation_success(azure_adls_logs_storage_validation)
-    func(config, dls_client)
+    func(CONFIG, dls_client)
 
 
 def test_azure_adls_logs_storage_validation_failure(
     dls_client: DataLakeServiceClient,
 ) -> None:
-
-    config = {
-        "env": {
-            "azure": {
-                "storage": {
-                    "path": {"logs": "adls://failure@test.dfs.core.windows.net"}
-                }
-            }
-        }
-    }
     func = expect_validation_failure(azure_adls_logs_storage_validation)
-    func(config, dls_client)
+    func(FAILURE_CONFIG, dls_client)
 
 
 def test_azure_adls_logs_storage_validation_wo_config_failure(
     dls_client: DataLakeServiceClient,
 ) -> None:
-
-    config = {
-        "env": {
-            "azure": {
-                "storage": {
-                    "path": {"data": "adls://failure@test.dfs.core.windows.net"}
-                }
-            }
-        }
-    }
-    func = expect_validation_failure(azure_adls_data_storage_validation)
-    func(config, dls_client)
+    func = expect_validation_failure(azure_adls_logs_storage_validation)
+    func(EMPTY_CONFIG, dls_client)
