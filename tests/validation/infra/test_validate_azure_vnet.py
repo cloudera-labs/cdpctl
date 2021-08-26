@@ -57,6 +57,8 @@ from cdpctl.validation.infra.validate_azure_vnet import (
     azure_vnet_subnets_for_ml,
     azure_vnet_subnets_range_for_dl_and_dh,
     azure_vnet_subnets_range_for_dw,
+    azure_vnet_subnets_with_db_service_endpoints,
+    azure_vnet_subnets_with_storage_service_endpoints,
     vnet_reserved_ip_cidrs,
 )
 from tests.validation import (
@@ -364,4 +366,113 @@ def test_azure_vnet_subnets_for_de_warning_not_enough_subnets(basic_azure_test_c
         ],
     )
     func = expect_validation_warning(azure_vnet_subnets_for_de)
+    func(vnet)
+
+
+def test_azure_vnet_subnets_with_storage_service_endpoints_success(
+    basic_azure_test_config,
+):
+    ServiceEndpointProperty = dataclasses.make_dataclass(
+        "ServiceEndpointProperty", ["service"]
+    )
+    Subnet = dataclasses.make_dataclass(
+        "Subnet", ["name", "address_prefix", "service_endpoints"]
+    )
+    VirtualNetwork = dataclasses.make_dataclass("VirtualNetwork", ["name", "subnets"])
+    vnet = VirtualNetwork(
+        basic_azure_test_config["infra"]["vpc"]["name"],
+        [
+            Subnet(
+                "default",
+                "10.3.0.0/24",
+                [
+                    ServiceEndpointProperty("Microsoft.Sql"),
+                    ServiceEndpointProperty("Microsoft.Storage"),
+                ],
+            ),
+            Subnet(
+                "default",
+                "10.3.16.0/20",
+                [
+                    ServiceEndpointProperty("Microsoft.Sql"),
+                    ServiceEndpointProperty("Microsoft.Storage"),
+                ],
+            ),
+        ],
+    )
+    func = expect_validation_success(azure_vnet_subnets_with_storage_service_endpoints)
+    func(vnet)
+
+
+def test_azure_vnet_subnets_with_storage_service_endpoints_warning(
+    basic_azure_test_config,
+):
+    ServiceEndpointProperty = dataclasses.make_dataclass(
+        "ServiceEndpointProperty", ["service"]
+    )
+    Subnet = dataclasses.make_dataclass(
+        "Subnet", ["name", "address_prefix", "service_endpoints"]
+    )
+    VirtualNetwork = dataclasses.make_dataclass("VirtualNetwork", ["name", "subnets"])
+    vnet = VirtualNetwork(
+        basic_azure_test_config["infra"]["vpc"]["name"],
+        [
+            Subnet(
+                "default",
+                "10.3.0.0/24",
+                [
+                    ServiceEndpointProperty("Microsoft.Sql"),
+                    ServiceEndpointProperty("Microsoft.Storage"),
+                ],
+            ),
+            Subnet(
+                "default",
+                "10.3.16.0/20",
+                [],
+            ),
+        ],
+    )
+    func = expect_validation_warning(azure_vnet_subnets_with_storage_service_endpoints)
+    func(vnet)
+
+
+def test_azure_vnet_subnets_with_db_service_endpoints_success(
+    basic_azure_test_config,
+):
+    ServiceEndpointProperty = dataclasses.make_dataclass(
+        "ServiceEndpointProperty", ["service"]
+    )
+    Subnet = dataclasses.make_dataclass(
+        "Subnet", ["name", "address_prefix", "service_endpoints"]
+    )
+    VirtualNetwork = dataclasses.make_dataclass("VirtualNetwork", ["name", "subnets"])
+    vnet = VirtualNetwork(
+        basic_azure_test_config["infra"]["vpc"]["name"],
+        [
+            Subnet(
+                "default",
+                "10.3.0.0/24",
+                [
+                    ServiceEndpointProperty("Microsoft.Sql"),
+                    ServiceEndpointProperty("Microsoft.Storage"),
+                ],
+            )
+        ],
+    )
+    func = expect_validation_success(azure_vnet_subnets_with_db_service_endpoints)
+    func(vnet)
+
+
+def test_azure_vnet_subnets_with_db_service_endpoints_warning(
+    basic_azure_test_config,
+):
+    Subnet = dataclasses.make_dataclass(
+        "Subnet", ["name", "address_prefix", "service_endpoints"]
+    )
+    VirtualNetwork = dataclasses.make_dataclass("VirtualNetwork", ["name", "subnets"])
+    vnet = VirtualNetwork(
+        basic_azure_test_config["infra"]["vpc"]["name"],
+        [Subnet("default", "10.3.0.0/24", [])],
+    )
+    func = expect_validation_warning(azure_vnet_subnets_with_db_service_endpoints)
     func(vnet)

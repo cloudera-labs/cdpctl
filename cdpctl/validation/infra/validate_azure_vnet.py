@@ -57,6 +57,8 @@ from cdpctl.validation.infra.issues import (
     AZURE_VNET_NOT_ENOUGH_DW_SUBNETS,
     AZURE_VNET_NOT_FOUND,
     AZURE_VNET_SHOULD_HAVE_CLASS_B_TOTAL_ADDRESSES,
+    AZURE_VNET_SUBNET_DOES_NOT_HAVE_SERVICE_ENDPOINTS_FOR_DL,
+    AZURE_VNET_SUBNET_DOES_NOT_HAVE_SERVICE_ENDPOINTS_FOR_DW,
     AZURE_VNET_SUBNET_DOES_NOT_HAVE_SUBNETS_FOR_DE,
     AZURE_VNET_SUBNET_DOES_NOT_HAVE_SUBNETS_FOR_WORKSPACES_IN_ML,
     AZURE_VNET_SUBNET_NEEDS_CLASS_C_FOR_DLDH,
@@ -121,6 +123,7 @@ def azure_vnet_exists(
         _vnet_info["vnet"] = azure_network_client.virtual_networks.get(
             virtual_network_name=vnet_name, resource_group_name=resource_group_name
         )
+        pass
     except ResourceNotFoundError:
         fail(AZURE_VNET_NOT_FOUND, [vnet_name, resource_group_name])
 
@@ -221,20 +224,44 @@ def azure_vnet_subnets_count(vnet_info) -> None:  # pragma: no cover
 def azure_vnet_subnets_range_for_dl_and_dh_validation(
     vnet_info,
 ) -> None:  # pragma: no cover
-    """Virtual Network has a Subnet with an address range for Datalake and DataHub."""  # noqa: D401,E501
+    """Virtual Network has a Subnet with an address range for Data Lake and Data Hub."""  # noqa: D401,E501
     azure_vnet_subnets_range_for_dl_and_dh(vnet_info)
 
 
 @validator
 def azure_vnet_subnets_range_for_dl_and_dh(vnet_info) -> None:  # pragma: no cover
     """Check that the VNet a /24 for the DL and DH."""  # noqa: D401,E501
-    found_compatabile_subnet = False
+    found_compatible_subnet = False
     for subnet in vnet_info.subnets:
         if ipaddress.ip_network(subnet.address_prefix).prefixlen <= 24:
-            found_compatabile_subnet = True
+            found_compatible_subnet = True
 
-    if not found_compatabile_subnet:
+    if not found_compatible_subnet:
         fail(AZURE_VNET_SUBNET_NEEDS_CLASS_C_FOR_DLDH, vnet_info.name)
+
+
+@pytest.mark.azure
+@pytest.mark.infra
+@pytest.mark.dependency(depends=["azure_vnet_subnets_count_validation"])
+def azure_vnet_subnets_with_db_service_endpoints_validation(
+    vnet_info,
+) -> None:  # pragma: no cover
+    """Virtual Network has a Subnet with Database service endpoints setup for Data Lake."""  # noqa: D401,E501
+    azure_vnet_subnets_with_db_service_endpoints(vnet_info)
+
+
+@validator
+def azure_vnet_subnets_with_db_service_endpoints(vnet_info) -> None:  # pragma: no cover
+    """Check thats subnet service endpoints are set for DL subnet."""  # noqa: D401,E501
+    found_compatible_subnet = False
+    for subnet in vnet_info.subnets:
+        if ipaddress.ip_network(subnet.address_prefix).prefixlen <= 24:
+            for endpoint in subnet.service_endpoints:
+                if endpoint.service == "Microsoft.Sql":
+                    found_compatible_subnet = True
+
+    if not found_compatible_subnet:
+        warn(AZURE_VNET_SUBNET_DOES_NOT_HAVE_SERVICE_ENDPOINTS_FOR_DL, vnet_info.name)
 
 
 @pytest.mark.azure
@@ -260,6 +287,38 @@ def azure_vnet_subnets_range_for_dw(vnet_info) -> None:  # pragma: no cover
 
     if len(vnet_info.subnets) < 2:
         warn(AZURE_VNET_NOT_ENOUGH_DW_SUBNETS, vnet_info.name)
+
+
+@pytest.mark.azure
+@pytest.mark.infra
+@pytest.mark.dependency(depends=["azure_vnet_subnets_count_validation"])
+def azure_vnet_subnets_with_storage_service_endpoints_validation(
+    vnet_info,
+) -> None:  # pragma: no cover
+    """Virtual Network has a Subnet with Storage service endpoints setup for Data Warehouse."""  # noqa: D401,E501
+    azure_vnet_subnets_with_storage_service_endpoints(vnet_info)
+
+
+@validator
+def azure_vnet_subnets_with_storage_service_endpoints(
+    vnet_info,
+) -> None:  # pragma: no cover
+    """Check thats subnet service endpoints are set for DW subnet."""  # noqa: D401,E501
+    found_compatible_subnet = False
+    for subnet in vnet_info.subnets:
+        if ipaddress.ip_network(subnet.address_prefix).prefixlen <= 20:
+            found_sql = False
+            found_storage = False
+            for endpoint in subnet.service_endpoints:
+                if endpoint.service == "Microsoft.Storage":
+                    found_storage = True
+                if endpoint.service == "Microsoft.Sql":
+                    found_sql = True
+            if found_sql and found_storage:
+                found_compatible_subnet = True
+
+    if not found_compatible_subnet:
+        warn(AZURE_VNET_SUBNET_DOES_NOT_HAVE_SERVICE_ENDPOINTS_FOR_DW, vnet_info.name)
 
 
 @pytest.mark.azure

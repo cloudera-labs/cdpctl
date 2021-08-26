@@ -206,7 +206,7 @@ summary: "The Azure Virtual Network {0} does not contain a subnet with at least 
 docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-network-planning-azure.html
 ---
 id: AZURE_VNET_NOT_ENOUGH_DW_SIZED_SUBNETS
-summary: "The Azure Virtual Network {0} does not contain enough at least three (3) /20 addresss range subnets to support the Data Warehouse experience."
+summary: "The Azure Virtual Network {0} does not contain enough at least one (1) /20 addresss range subnets to support the Data Warehouse experience."
 docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-network-planning-azure.html
 ---
 id: AZURE_VNET_NOT_ENOUGH_DW_SUBNETS
@@ -228,3 +228,11 @@ docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-net
 id: AZURE_VNET_SUBNET_DOES_NOT_HAVE_SUBNETS_FOR_DE
 summary: "The Azure Virtual Network {0} does not appear to have enough Subnets to run a Data Engineering experience.  A Data Engineering experience needs at least one (1) dedicated /24 network."
 docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-network-planning-azure.html
+---
+id: AZURE_VNET_SUBNET_DOES_NOT_HAVE_SERVICE_ENDPOINTS_FOR_DL
+summary: "The Azure Virtual Network {0} does not appear to have a compatible Subnet with SQL service endpoints setup for the Data Lake to access the database.  If not setup private endpoints for PostgreSQL will need to be used."
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-set-up-azure-service-endpoints-for-network.html
+---
+id: AZURE_VNET_SUBNET_DOES_NOT_HAVE_SERVICE_ENDPOINTS_FOR_DW
+summary: "The Azure Virtual Network {0} does not appear to have a compatible Subnet with the service endpoints setup for the Data Warehouse experience to access storage."
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-set-up-azure-service-endpoints-for-network.html
