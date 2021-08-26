@@ -255,10 +255,10 @@ def azure_vnet_subnets_range_for_dw(vnet_info) -> None:  # pragma: no cover
         if ipaddress.ip_network(subnet.address_prefix).prefixlen <= 20:
             dw_size_subnets += 1
 
-    if dw_size_subnets < 3:
+    if dw_size_subnets < 1:
         warn(AZURE_VNET_NOT_ENOUGH_DW_SIZED_SUBNETS, vnet_info.name)
 
-    if len(vnet_info.subnets) < 4:
+    if len(vnet_info.subnets) < 2:
         warn(AZURE_VNET_NOT_ENOUGH_DW_SUBNETS, vnet_info.name)
 
 
@@ -294,12 +294,12 @@ def azure_vnet_subnets_for_ml(vnet_info) -> None:  # pragma: no cover
     else:
         warn(AZURE_VNET_NO_SUBNET_WITH_NETAPP_DELEGATION_FOR_ML, vnet_info.name)
 
-    compatable_subnets = 0
+    compatible_subnets = 0
     for subnet in vnet_info.subnets:
         if ipaddress.ip_network(subnet.address_prefix).prefixlen <= 25:
-            compatable_subnets += 1
+            compatible_subnets += 1
     # must have at least a DLDH subnet and 1 more
-    if not compatable_subnets >= 2:
+    if not compatible_subnets >= 2:
         warn(
             AZURE_VNET_SUBNET_DOES_NOT_HAVE_SUBNETS_FOR_WORKSPACES_IN_ML, vnet_info.name
         )
@@ -318,10 +318,10 @@ def azure_vnet_subnets_for_de_validation(
 @validator
 def azure_vnet_subnets_for_de(vnet_info) -> None:  # pragma: no cover
     """Check that the VNet has enough /24 subnets for DE."""  # noqa: D401,E501
-    compatable_subnets = 0
+    compatible_subnets = 0
     for subnet in vnet_info.subnets:
         if ipaddress.ip_network(subnet.address_prefix).prefixlen <= 24:
-            compatable_subnets += 1
+            compatible_subnets += 1
     # must have at least a DLDH subnet and 1 more
-    if not compatable_subnets >= 2:
+    if not compatible_subnets >= 2:
         warn(AZURE_VNET_SUBNET_DOES_NOT_HAVE_SUBNETS_FOR_DE, vnet_info.name)

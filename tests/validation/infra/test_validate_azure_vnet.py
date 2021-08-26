@@ -250,8 +250,6 @@ def test_azure_vnet_subnets_range_for_dw_success(basic_azure_test_config):
         [
             Subnet("default", "10.3.0.0/24"),
             Subnet("default", "10.3.16.0/20"),
-            Subnet("default", "10.3.32.0/20"),
-            Subnet("default", "10.3.48.0/20"),
         ],
     )
     func = expect_validation_success(azure_vnet_subnets_range_for_dw)
@@ -266,8 +264,6 @@ def test_azure_vnet_subnets_range_for_dw_warning_not_sized(basic_azure_test_conf
         [
             Subnet("default", "10.3.0.0/24"),
             Subnet("default", "10.3.16.0/24"),
-            Subnet("default", "10.3.32.0/20"),
-            Subnet("default", "10.3.48.0/20"),
         ],
     )
     func = expect_validation_warning(azure_vnet_subnets_range_for_dw)
@@ -281,8 +277,6 @@ def test_azure_vnet_subnets_range_for_dw_warning_not_enough(basic_azure_test_con
         basic_azure_test_config["infra"]["vpc"]["name"],
         [
             Subnet("default", "10.3.16.0/20"),
-            Subnet("default", "10.3.32.0/20"),
-            Subnet("default", "10.3.48.0/20"),
         ],
     )
     func = expect_validation_warning(azure_vnet_subnets_range_for_dw)
