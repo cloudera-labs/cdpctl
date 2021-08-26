@@ -299,7 +299,7 @@ def azure_vnet_subnets_for_ml(vnet_info) -> None:  # pragma: no cover
         if ipaddress.ip_network(subnet.address_prefix).prefixlen <= 25:
             compatable_subnets += 1
     # must have at least a DLDH subnet and 1 more
-    if not compatable_subnets > 2:
+    if not compatable_subnets >= 2:
         warn(
             AZURE_VNET_SUBNET_DOES_NOT_HAVE_SUBNETS_FOR_WORKSPACES_IN_ML, vnet_info.name
         )
