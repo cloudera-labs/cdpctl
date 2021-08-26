@@ -55,7 +55,7 @@ from pytest import Collector, ExitCode, Item, Session
 
 from cdpctl.utils import load_config
 
-from . import UnrecoverableValidationError, get_config_value
+from . import IssueType, UnrecoverableValidationError, current_context, get_config_value
 
 this = sys.modules[__name__]
 this.config_file = "config.yaml"
@@ -84,19 +84,22 @@ def pytest_runtest_makereport(item: Item, call: CallInfo[None]) -> TestReport:
     node = item.obj
 
     if call.when == "setup":  # Validation is starting
+        current_context.clear()
         suf = node.__doc__.strip() if node.__doc__ else node.__name__
         if result.failed:
-            click.echo(f"Unable to setup validation '{suf}'")
+            click.echo(f"Unable to setup validation '{suf}'", err=True)
         if result.passed:
-            click.echo(suf, nl=False)
+            current_context.validation_name = suf
+            current_context.function = item.name
+            current_context.nodeid = item.nodeid
+            click.echo(suf, nl=False, err=True)
     elif call.when == "call":  # Validation was called
-        if result.passed:
-            # All good
-            click.echo(f" {emoji.emojize(':check_mark:')}")
-        elif result.failed:
-            # Catch any issues
-            click.echo(f" {emoji.emojize(':cross_mark:')}")
-            item.session.issues[item] = str(result.longrepr.chain[-1][0])
+        if current_context.state == IssueType.PROBLEM:
+            click.echo(f" {emoji.emojize(':cross_mark:')}", err=True)
+        elif current_context.state == IssueType.WARNING:
+            click.echo(f" {emoji.emojize(':red_exclamation_mark:')}", err=True)
+        else:
+            click.echo(f" {emoji.emojize(':check_mark:')}", err=True)
     elif call.when == "teardown":
         this.run_validations += 1
     sys.stdout.flush()
@@ -109,16 +112,17 @@ def pytest_exception_interact(
 ) -> None:
     """Catch exceptions and fail out on Unrecoverable ones."""
     if isinstance(call.excinfo.value, UnrecoverableValidationError):
-        click.echo("")
+        click.echo("", err=True)
         suf = node.obj.__doc__.strip() if node.obj.__doc__ else node.obj.__name__
-        click.secho("\n--- An Error Occured ---", fg="red")
+        click.secho("\n--- An Error Occured ---", fg="red", err=True)
         click.echo(
             f'An Error occured while running the "{suf}" validation.\n'
             + "It has the following information:\n",
+            err=True,
         )
-        click.echo(f"{str(call.excinfo.value)}\n")
-        click.echo(f"({node.nodeid})")
-        click.secho("-------------", fg="red")
+        click.echo(f"{str(call.excinfo.value)}\n", err=True)
+        click.echo(f"({node.nodeid})", err=True)
+        click.secho("-------------", fg="red", err=True)
         pytest.exit(1)
 
 
@@ -128,17 +132,7 @@ def pytest_sessionfinish(
 ) -> None:
     """Finish the validation session."""
     if session.exitstatus != ExitCode.INTERRUPTED:
-        # time.sleep(0.1)  # letting progress bar finish
         click.echo("")
-        if session.issues:
-            click.secho("\n--- Issues Found ---", fg="yellow")
-            # pylint: disable=unused-variable
-            for item, result in session.issues.items():
-                click.echo(f"- {result}")
-                click.echo("\n")
-            click.secho("-------------------", fg="yellow")
-        else:
-            click.secho("No Issues Found", fg="green")
 
 
 def pytest_report_teststatus(

@@ -20,8 +20,24 @@
                 "validate",
                 "infra",
                 "--config_file",
-                "config.yaml"
-            ]
+                "config.yml"
+            ],
+            "justMyCode": false
+        },
+        {
+            "name": "cdpctl validate infra -f json",
+            "type": "python",
+            "request": "launch",
+            "module": "cdpctl",
+            "args": [
+                "validate",
+                "infra",
+                "--config_file",
+                "config.yml",
+                "-f",
+                "json"
+            ],
+            "justMyCode": false
         },
         {
             "name": "cdpctl provision infra",
@@ -32,7 +48,7 @@
                 "provision",
                 "infra",
                 "--config_file",
-                "config.yaml"
+                "config.yml"
             ]
         },
         {
@@ -44,6 +60,14 @@
                 "config",
                 "skeleton"
             ]
+        },
+        {
+            "name": "generate issue templates",
+            "type": "python",
+            "request": "launch",
+            "program": "scripts/update_issue_templates.py",
+            "console": "integratedTerminal"
         }
+
     ]
 }

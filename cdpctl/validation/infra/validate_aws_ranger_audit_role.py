@@ -45,13 +45,19 @@ from typing import Any, Dict, List
 import pytest
 from boto3_type_annotations.iam import Client as IAMClient
 
-from cdpctl.validation import get_config_value
+from cdpctl.validation import fail, get_config_value
 from cdpctl.validation.aws_utils import (
     convert_s3a_to_arn,
     get_client,
     get_role,
     parse_arn,
     simulate_policy,
+)
+from cdpctl.validation.infra.issues import (
+    AWS_REQUIRED_DATA_MISSING,
+    AWS_ROLE_FOR_DATA_BUCKET_MISSING_ACTIONS,
+    AWS_ROLE_FOR_DL_BUCKET_MISSING_ACTIONS,
+    AWS_ROLE_REQUIRES_ACTIONS_FOR_ALL_S3_RESOURCES,
 )
 
 ranger_audit_data = {}
@@ -72,8 +78,6 @@ def aws_ranger_audit_role_exists_validation(
     ranger_audit_role: str = get_config_value(
         config,
         "env:aws:role:name:ranger_audit",
-        key_missing_message="No role defined for config option: {0}",
-        data_expected_error_message="No role was provided for config option: {0}",
     )
 
     # ranger audit role arn
@@ -92,8 +96,6 @@ def aws_ranger_audit_role_data_location_exist_validation(
     data_location: str = get_config_value(
         config,
         "infra:aws:vpc:existing:storage:data",
-        key_missing_message="No s3a url defined for config option: {0}",
-        data_expected_error_message="No s3a url was provided for config option: {0}",
     )
     # data access s3 bucket arn
     data_location_arn = convert_s3a_to_arn(data_location)
@@ -111,9 +113,6 @@ def aws_ranger_audit_role_audit_location_exist_validation(
     ranger_audit_location: str = get_config_value(
         config,
         "infra:aws:vpc:existing:storage:ranger_audit",
-        key_missing_message="No ranger audit s3a url defined for config option: {0}",
-        data_expected_error_message="No ranger audit s3a url was provided for config "
-        "option: {0}",
     )
 
     # ranger audit s3 bucket arn
@@ -136,16 +135,18 @@ def aws_ranger_audit_location_needed_actions_validation(
     try:
         # aws-cdp-ranger-audit-s3-policy
         simulate_policy(
-            iam_client,
-            ranger_audit_data["role_arn"],
-            [ranger_audit_data["ranger_audit_location_arn"] + "/*"],
-            ranger_audit_location_needed_actions,
-            f"""The role ({ranger_audit_data["ranger_audit_role"]}) requires the
-            following actions for the datalake S3 bucket
-            ({ranger_audit_data["ranger_audit_location_arn"] + "/*"}) : \n {{}}""",
+            iam_client=iam_client,
+            policy_source_arn=ranger_audit_data["role_arn"],
+            resource_arns=[ranger_audit_data["ranger_audit_location_arn"] + "/*"],
+            needed_actions=ranger_audit_location_needed_actions,
+            subjects=[
+                ranger_audit_data["ranger_audit_role"],
+                ranger_audit_data["ranger_audit_location_arn"] + "/*",
+            ],
+            missing_actions_issue=AWS_ROLE_FOR_DL_BUCKET_MISSING_ACTIONS,
         )
     except KeyError as e:
-        pytest.fail(f"Validation error - missing required data : {e.args[0]}", False)
+        fail(AWS_REQUIRED_DATA_MISSING, e.args[0])
 
 
 @pytest.mark.aws
@@ -162,16 +163,18 @@ def aws_ranger_audit_s3_bucket_needed_actions_validation(
     """Ranger audit role has the needed actions for audit s3."""  # noqa: D401
     try:
         simulate_policy(
-            iam_client,
-            ranger_audit_data["role_arn"],
-            [ranger_audit_data["ranger_audit_bucket_arn"]],
-            ranger_audit_bucket_needed_actions,
-            f"""The role ({ranger_audit_data["ranger_audit_role"]}) requires the
-            following actions for the datalake S3 bucket
-            ({ranger_audit_data["ranger_audit_bucket_arn"]}) : \n {{}}""",
+            iam_client=iam_client,
+            policy_source_arn=ranger_audit_data["role_arn"],
+            resource_arns=[ranger_audit_data["ranger_audit_bucket_arn"]],
+            needed_actions=ranger_audit_bucket_needed_actions,
+            subjects=[
+                ranger_audit_data["ranger_audit_role"],
+                ranger_audit_data["ranger_audit_bucket_arn"],
+            ],
+            missing_actions_issue=AWS_ROLE_FOR_DL_BUCKET_MISSING_ACTIONS,
         )
     except KeyError as e:
-        pytest.fail(f"Validation error - missing required data : {e.args[0]}", False)
+        fail(AWS_REQUIRED_DATA_MISSING, e.args[0])
 
 
 @pytest.mark.aws
@@ -184,15 +187,15 @@ def aws_ranger_audit_cdp_s3_needed_actions_validation(
     try:
         # aws-cdp-bucket-access-policy
         simulate_policy(
-            iam_client,
-            ranger_audit_data["role_arn"],
-            ["*"],
-            s3_needed_actions_to_all,
-            f"""The role ({ranger_audit_data["ranger_audit_role"]}) requires the
-            following actions for all S3 resources ([*]) : \n {{}}""",
+            iam_client=iam_client,
+            policy_source_arn=ranger_audit_data["role_arn"],
+            resource_arns=["*"],
+            needed_actions=s3_needed_actions_to_all,
+            subjects=[ranger_audit_data["ranger_audit_role"]],
+            missing_actions_issue=AWS_ROLE_REQUIRES_ACTIONS_FOR_ALL_S3_RESOURCES,
         )
     except KeyError as e:
-        pytest.fail(f"Validation error - missing required data : {e.args[0]}", False)
+        fail(AWS_REQUIRED_DATA_MISSING, e.args[0])
 
 
 @pytest.mark.aws
@@ -204,16 +207,18 @@ def aws_ranger_audit_data_location_needed_actions_validation(
     """Ranger audit role has needed actions for the data location."""  # noqa: D401
     try:
         simulate_policy(
-            iam_client,
-            ranger_audit_data["role_arn"],
-            [
+            iam_client=iam_client,
+            policy_source_arn=ranger_audit_data["role_arn"],
+            resource_arns=[
                 ranger_audit_data["data_location_arn"],
                 ranger_audit_data["data_location_arn"] + "/*",
             ],
-            data_location_needed_actions,
-            f"The role ({ranger_audit_data['ranger_audit_role']}) "
-            "requires the following actions for the S3 data location "
-            f"({ranger_audit_data['data_location_arn']}/*): \n {{}}",
+            needed_actions=data_location_needed_actions,
+            subjects=[
+                ranger_audit_data["ranger_audit_role"],
+                ranger_audit_data["data_location_arn"] + "/*",
+            ],
+            missing_actions_issue=AWS_ROLE_FOR_DATA_BUCKET_MISSING_ACTIONS,
         )
     except KeyError as e:
-        pytest.fail(f"Validation error - missing required data : {e.args[0]}", False)
+        fail(AWS_REQUIRED_DATA_MISSING, e.args[0])

@@ -46,15 +46,23 @@ import sys
 
 import click
 import pytest
+from _pytest.outcomes import Failed
 
 import cdpctl.validation as validation
 from cdpctl import SUPPORTED_PLATFORMS
 from cdpctl.utils import load_config
-from cdpctl.validation import UnrecoverableValidationError, conftest
+from cdpctl.validation import UnrecoverableValidationError, conftest, get_issues
 from cdpctl.validation.aws_utils import validate_aws_config
+from cdpctl.validation.renderer import get_renderer
 
 
-def run_validation(target: str, config_file: str, debug: bool = False) -> None:
+def run_validation(
+    target: str,
+    config_file: str,
+    debug: bool = False,
+    output_format: str = "text",
+    output_file: str = "-",
+) -> None:
     """Run the validate command."""
     click.echo(
         f"Targeting {click.style(target, fg='blue')} section with config file "
@@ -92,6 +100,9 @@ def run_validation(target: str, config_file: str, debug: bool = False) -> None:
     except UnrecoverableValidationError as e:
         click.secho(e, fg="red")
         sys.exit(1)
+    except Failed as e:
+        click.secho(e, fg="red")
+        sys.exit(1)
 
     click.secho("Validating:", fg="blue")
 
@@ -113,3 +124,11 @@ def run_validation(target: str, config_file: str, debug: bool = False) -> None:
         options.append("-s")
 
     pytest.main(options)
+
+    renderer = get_renderer(output_format=output_format)
+    renderer.render(get_issues(), output_file)
+    if output_file != "-":
+        click.echo(
+            message=f"Results written to file {click.format_filename(output_file)}.",
+            err=True,
+        )

@@ -40,35 +40,26 @@
 # Source File Name:  validate_aws_security_groups.py
 ###
 """Validation of AWS security groups."""
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import pytest
 from boto3_type_annotations.ec2 import Client as EC2Client
 
-from cdpctl.validation import get_config_value, validator
+from cdpctl.validation import fail, get_config_value, validator
 from cdpctl.validation.aws_utils import get_client
+from cdpctl.validation.infra.issues import (
+    AWS_DEFAULT_SG_NEEDS_ALLOW_ACCESS_INTERNAL_TO_VPC,
+    AWS_GATEWAY_SG_NEEDS_ALLOW_ACCESS_INTERNAL_TO_VPC,
+    AWS_NON_CCM_DEFAULT_SG_NEEDS_TO_ALLOW_CDP_CIDRS,
+    AWS_NON_CCM_GATEWAY_SG_MISSING_CIDRS,
+    AWS_VPC_NOT_FOUND_IN_ACCOUNT,
+)
 
 
 @pytest.fixture(autouse=True, name="ec2_client")
 def iam_client_fixture(config: Dict[str, Any]) -> EC2Client:
     """Return an AWS EC2 Client."""
     return get_client("ec2", config)
-
-
-def tunnel_enabled(config: Dict[str, Any]):
-    """Return the tunnel enabled condition, which is sourced from config.yaml."""
-    tunnel_val: Optional[str] = get_config_value(
-        config,
-        "env:tunnel",
-        key_value_expected=False,
-        key_missing_message="",
-        data_expected_error_message="",
-    )
-
-    if tunnel_val:
-        return tunnel_val
-
-    return False
 
 
 @pytest.mark.aws
@@ -90,14 +81,10 @@ def _aws_default_security_groups_contains_cdp_cidr_validation(
     config: Dict[str, Any], ec2_client: EC2Client, cdp_cidrs: List[str]
 ) -> None:
     """Default security groups contain CDP CIDRs if CCM is not enabled."""  # noqa: D401,E501
-    if tunnel_enabled(config):
-        return
 
     default_security_groups_id: str = get_config_value(
         config,
         "infra:aws:vpc:existing:security_groups:default_id",
-        key_missing_message="No default security groups id defined for config option {}",  # noqa: E501
-        data_expected_error_message="No default security groups id provided for config option: {}",  # noqa: E501
     )
 
     security_groups = ec2_client.describe_security_groups(
@@ -126,10 +113,9 @@ def _aws_default_security_groups_contains_cdp_cidr_validation(
             missing_cdp_cidr_9443.append(cdp_cidr)
 
     if len(missing_cdp_cidr_9443) > 0:
-        pytest.fail(
-            "For non-CCM setup (tunnel = false/unset): "
-            f" TCP Port 9443 needs to allow CDP CIDRs {missing_cdp_cidr_9443}",
-            False,
+        fail(
+            AWS_NON_CCM_DEFAULT_SG_NEEDS_TO_ALLOW_CDP_CIDRS,
+            resources=missing_cdp_cidr_9443,
         )
 
 
@@ -152,16 +138,10 @@ def _aws_gateway_security_groups_contains_cdp_cidr_validation(
     config: Dict[str, Any], ec2_client: EC2Client, cdp_cidrs: List[str]
 ) -> None:
     """Validate that gateway security groups contain CDP CIDRs if CCM not used."""
-    if tunnel_enabled(config):
-        return
 
     gateway_security_groups_id: str = get_config_value(
         config,
         "infra:aws:vpc:existing:security_groups:knox_id",
-        key_missing_message="No gateway security groups id defined for "
-        "config option: {}",
-        data_expected_error_message="No gateway security groups id provided for "
-        "config option: {}",
     )
 
     security_groups = ec2_client.describe_security_groups(
@@ -198,18 +178,22 @@ def _aws_gateway_security_groups_contains_cdp_cidr_validation(
         if not found_cidr_9443:
             missing_cdp_cidr_9443.append(cdp_cidr)
 
-    missing_cidrs = ""
+    missing_cidrs = []
     if len(missing_cdp_cidr_443) > 0:
-        missing_cidrs = f" TCP Port 443 needs to allow CDP CIDRs {missing_cdp_cidr_443}"
+        missing_cidrs = (
+            "Access to TCP port 443 needs to be allowed for "
+            f"Cloudera CDP CIDR {missing_cdp_cidr_443}"
+        )
     if len(missing_cdp_cidr_9443) > 0:
         missing_cidrs = (
-            missing_cidrs
-            + f" TCP Port 9443 needs to allow CDP CIDRs {missing_cdp_cidr_9443}"
+            missing_cidrs + "Access to TCP port 9443 needs to be allowed "
+            f"for Cloudera CDP CIDR {missing_cdp_cidr_9443}"
         )
     if missing_cidrs:
-        pytest.fail(
-            "For non-CCM setup (tunnel = false/unset): " + missing_cidrs,
-            False,
+        fail(
+            AWS_NON_CCM_GATEWAY_SG_MISSING_CIDRS,
+            subjects=gateway_security_groups_id,
+            resources=missing_cidrs,
         )
 
 
@@ -220,17 +204,12 @@ def security_groups_contains_vpc_cidr(
     vpc_id: str = get_config_value(
         config,
         "infra:aws:vpc:existing:vpc_id",
-        key_missing_message="No vpc id defined for " "config option: {}",
-        data_expected_error_message="No vpc id provided for " "config option: {}",
     )
 
     vpcs = ec2_client.describe_vpcs(VpcIds=[vpc_id])
 
     if len(vpcs["Vpcs"]) == 0:
-        pytest.fail(
-            f"vpc id {vpc_id} set in infra:aws:vpc:existing:vpc_id "
-            "was not found on the AWS account."
-        )
+        fail(AWS_VPC_NOT_FOUND_IN_ACCOUNT, subjects=[vpc_id])
 
     vpc_cidr = vpcs["Vpcs"][0]["CidrBlock"]
 
@@ -279,19 +258,14 @@ def _aws_default_security_groups_contains_vpc_cidr_validation(
     default_security_groups_id: str = get_config_value(
         config,
         "infra:aws:vpc:existing:security_groups:default_id",
-        key_missing_message="No default security groups id defined for "
-        "config option: {}",
-        data_expected_error_message="No default security groups id provided for "
-        "config option: {}",
     )
 
     if not security_groups_contains_vpc_cidr(
         config, ec2_client, default_security_groups_id
     ):
-        pytest.fail(
-            "Your VPC CIDR should be allowed for port "
-            " 0-65535 in default security group.",
-            False,
+        fail(
+            AWS_DEFAULT_SG_NEEDS_ALLOW_ACCESS_INTERNAL_TO_VPC,
+            subjects=default_security_groups_id,
         )
 
 
@@ -312,17 +286,12 @@ def _aws_gateway_security_groups_contains_vpc_cidr_validation(
     gateway_security_groups_id: str = get_config_value(
         config,
         "infra:aws:vpc:existing:security_groups:knox_id",
-        key_missing_message="No gateway security groups id defined for "
-        "config option: {}",
-        data_expected_error_message="No gateway security groups id provided for "
-        "config option: {}",
     )
 
     if not security_groups_contains_vpc_cidr(
         config, ec2_client, gateway_security_groups_id
     ):
-        pytest.fail(
-            "Your VPC CIDR should be allowed for port "
-            "0-65535 in gateway security group.",
-            False,
+        fail(
+            AWS_GATEWAY_SG_NEEDS_ALLOW_ACCESS_INTERNAL_TO_VPC,
+            subjects=gateway_security_groups_id,
         )

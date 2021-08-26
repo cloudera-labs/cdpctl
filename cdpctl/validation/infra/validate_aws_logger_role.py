@@ -46,13 +46,19 @@ from typing import Any, Dict, List
 import pytest
 from boto3_type_annotations.iam import Client as IAMClient
 
-from cdpctl.validation import get_config_value, validator
+from cdpctl.validation import fail, get_config_value, validator
 from cdpctl.validation.aws_utils import (
     convert_s3a_to_arn,
     get_client,
     get_instance_profile,
     parse_arn,
     simulate_policy,
+)
+from cdpctl.validation.infra.issues import (
+    AWS_LOGGER_INSTANCE_PROFILE_SHOULD_CONTAIN_LOGGER_ROLE,
+    AWS_LOGGER_ROLE_SHOULD_HAVE_EC2_TRUST,
+    AWS_ROLE_REQUIRES_ACTIONS_FOR_LOG_BUCKET,
+    AWS_ROLE_REQUIRES_ACTIONS_FOR_LOG_PATH,
 )
 
 
@@ -69,10 +75,6 @@ def get_logger_instance_profile(
     logger_instance_profile: str = get_config_value(
         config,
         "env:aws:instance_profile:name:log",
-        key_missing_message=("No logger instance profile defined for config option {}"),
-        data_expected_error_message=(
-            "No logger instance profile provided for config option {}"
-        ),
     )
 
     return get_instance_profile(iam_client, logger_instance_profile)
@@ -95,12 +97,9 @@ def _aws_logger_instance_profile_exists_with_role_validation(
     profile = get_logger_instance_profile(config=config, iam_client=iam_client)
 
     if not profile["InstanceProfile"]["Roles"]:
-        pytest.fail(
-            """The logger instance profile {} set in config env:aws:instance_profile:name:log
-             should contain a logger role.""".format(
-                profile["InstanceProfile"]["Arn"]
-            ),
-            False,
+        fail(
+            template=AWS_LOGGER_INSTANCE_PROFILE_SHOULD_CONTAIN_LOGGER_ROLE,
+            subjects=profile["InstanceProfile"]["Arn"],
         )
 
 
@@ -147,10 +146,7 @@ def _aws_logger_role_has_ec2_trust_policy_validation(
             continue
 
     if not found_ec2_trust:
-        pytest.fail(
-            f"""The logger role {role} should contain a trust policy for ec2""",
-            False,
-        )
+        fail(AWS_LOGGER_ROLE_SHOULD_HAVE_EC2_TRUST, subjects=[role])
 
 
 @pytest.mark.aws
@@ -183,18 +179,16 @@ def _aws_logger_role_has_necessary_s3_actions_validation(
     log_location: str = get_config_value(
         config,
         "infra:aws:vpc:existing:storage:logs",
-        key_missing_message="No log storage path defined for config option: {}",
-        data_expected_error_message="No log storage path provided for config option: {}",  # noqa: E501
     )
     log_location_arn = convert_s3a_to_arn(log_location)
 
     simulate_policy(
-        iam_client,
-        role_arn,
-        [f"{log_location_arn}/*"],
-        logs_needed_actions,
-        f"""The role ({role_arn}) requires the following actions
-         for the log storage path ({log_location}):\n{{}}""",
+        iam_client=iam_client,
+        policy_source_arn=role_arn,
+        resource_arns=[f"{log_location_arn}/*"],
+        needed_actions=logs_needed_actions,
+        subjects=[role_arn, log_location],
+        missing_actions_issue=AWS_ROLE_REQUIRES_ACTIONS_FOR_LOG_PATH,
     )
 
 
@@ -230,8 +224,6 @@ def _aws_logger_role_has_necessary_s3_bucket_actions_validation(
     log_location: str = get_config_value(
         config,
         "infra:aws:vpc:existing:storage:logs",
-        key_missing_message="No log storage path defined for config option: {}",
-        data_expected_error_message="No log storage path provided for config option: {}",  # noqa: E501
     )
 
     log_location_arn = convert_s3a_to_arn(log_location)
@@ -239,10 +231,10 @@ def _aws_logger_role_has_necessary_s3_bucket_actions_validation(
     log_bucket_arn = convert_s3a_to_arn(f"s3a://{log_bucket_name}")
 
     simulate_policy(
-        iam_client,
-        role_arn,
-        [log_bucket_arn],
-        log_bucket_needed_actions,
-        f"""The role ({role_arn}) requires the following actions
-         for the log storage bucket ({log_bucket_arn}):\n{{}}""",
+        iam_client=iam_client,
+        policy_source_arn=role_arn,
+        resource_arns=[log_bucket_arn],
+        needed_actions=log_bucket_needed_actions,
+        subjects=[role_arn, log_bucket_arn],
+        missing_actions_issue=AWS_ROLE_REQUIRES_ACTIONS_FOR_LOG_BUCKET,
     )

@@ -53,6 +53,11 @@ from cdpctl.validation.aws_utils import (
     parse_arn,
     simulate_policy,
 )
+from cdpctl.validation.infra.issues import (
+    AWS_ROLE_FOR_DATA_BUCKET_MISSING_ACTIONS,
+    AWS_ROLE_FOR_DL_BUCKET_MISSING_ACTIONS,
+    AWS_ROLE_REQUIRES_ACTIONS_FOR_ALL_S3_RESOURCES,
+)
 
 
 @pytest.fixture(scope="module", name="bucket_access_policy_actions")
@@ -179,15 +184,11 @@ def aws_datalake_admin_role_has_bucket_access_policy(
     datalake_admin_role_name: str = get_config_value(
         config,
         "env:aws:role:name:datalake_admin",
-        key_missing_message="No role defined for config option: {0}",
-        data_expected_error_message="No role was provided for config option: {0}",
     )
 
     data_location: str = get_config_value(
         config,
         "infra:aws:vpc:existing:storage:data",
-        key_missing_message="No s3a url defined for config option: {0}",
-        data_expected_error_message="No s3a url was provided for config option: {0}",
     )
 
     data_location_arn = convert_s3a_to_arn(data_location)
@@ -198,12 +199,12 @@ def aws_datalake_admin_role_has_bucket_access_policy(
     datalake_admin_role_arn = datalake_admin_role["Role"]["Arn"]
 
     simulate_policy(
-        iam_client,
-        datalake_admin_role_arn,
-        [bucket_arn, f"{bucket_arn}/*"],
-        bucket_access_policy_actions,
-        missing_actions_message=f"The role ({datalake_admin_role_name}) requires the following actions for the \
-            datalake S3 bucket ({bucket_name}):\n{{0}}",
+        iam_client=iam_client,
+        policy_source_arn=datalake_admin_role_arn,
+        resource_arns=[bucket_arn, f"{bucket_arn}/*"],
+        needed_actions=bucket_access_policy_actions,
+        subjects=[datalake_admin_role_name, bucket_name],
+        missing_actions_issue=AWS_ROLE_FOR_DL_BUCKET_MISSING_ACTIONS,
     )
 
 
@@ -237,20 +238,18 @@ def aws_datalake_admin_role_has_bucket_access_policy_all_resources(
     datalake_admin_role_name: str = get_config_value(
         config,
         "env:aws:role:name:datalake_admin",
-        key_missing_message="No role defined for config option: {0}",
-        data_expected_error_message="No role was provided for config option: {0}",
     )
 
     datalake_admin_role = get_role(iam_client, datalake_admin_role_name)
     datalake_admin_role_arn = datalake_admin_role["Role"]["Arn"]
 
     simulate_policy(
-        iam_client,
-        datalake_admin_role_arn,
-        ["*"],
-        bucket_access_policy_all_resources_actions,
-        missing_actions_message=f"The role ({datalake_admin_role_name}) requires the following actions for all \
-            S3 resources:\n{{0}}",
+        iam_client=iam_client,
+        policy_source_arn=datalake_admin_role_arn,
+        resource_arns=["*"],
+        needed_actions=bucket_access_policy_all_resources_actions,
+        subjects=[datalake_admin_role_name],
+        missing_actions_issue=AWS_ROLE_REQUIRES_ACTIONS_FOR_ALL_S3_RESOURCES,
     )
 
 
@@ -286,15 +285,11 @@ def aws_datalake_admin_role_has_s3_policy(
     datalake_admin_role_name: str = get_config_value(
         config,
         "env:aws:role:name:datalake_admin",
-        key_missing_message="No role defined for config option: {0}",
-        data_expected_error_message="No role was provided for config option: {0}",
     )
 
     data_location: str = get_config_value(
         config,
         "infra:aws:vpc:existing:storage:data",
-        key_missing_message="No s3a url defined for config option: {0}",
-        data_expected_error_message="No s3a url was provided for config option: {0}",
     )
 
     data_location_arn = convert_s3a_to_arn(data_location)
@@ -303,10 +298,10 @@ def aws_datalake_admin_role_has_s3_policy(
     datalake_admin_role_arn = datalake_admin_role["Role"]["Arn"]
 
     simulate_policy(
-        iam_client,
-        datalake_admin_role_arn,
-        [data_location_arn, f"{data_location_arn}/*"],
-        datalake_admin_s3_policy_actions,
-        missing_actions_message=f"The role ({datalake_admin_role_name}) requires the following actions for the \
-            S3 data location ({data_location}):\n{{0}}",
+        iam_client=iam_client,
+        policy_source_arn=datalake_admin_role_arn,
+        resource_arns=[data_location_arn, f"{data_location_arn}/*"],
+        needed_actions=datalake_admin_s3_policy_actions,
+        subjects=[datalake_admin_role_name, data_location],
+        missing_actions_issue=AWS_ROLE_FOR_DATA_BUCKET_MISSING_ACTIONS,
     )

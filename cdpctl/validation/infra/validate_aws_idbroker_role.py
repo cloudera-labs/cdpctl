@@ -46,7 +46,7 @@ from typing import Any, Dict, List
 import pytest
 from boto3_type_annotations.iam import Client as IAMClient
 
-from cdpctl.validation import get_config_value, validator
+from cdpctl.validation import fail, get_config_value, validator
 from cdpctl.validation.aws_utils import (
     convert_s3a_to_arn,
     get_client,
@@ -54,6 +54,13 @@ from cdpctl.validation.aws_utils import (
     get_role,
     parse_arn,
     simulate_policy,
+)
+from cdpctl.validation.infra.issues import (
+    AWS_IDBROKER_INSTANCE_PROLFILE_NEEDS_ROLE,
+    AWS_IDBROKER_ROLE_NEED_EC2_TRUST_POLICY,
+    AWS_IDBROKER_ROLE_REQUIRES_ACTIONS_FOR_ALL_RESOURCES,
+    AWS_ROLE_REQUIRES_ACTIONS_FOR_LOG_BUCKET,
+    AWS_ROLE_REQUIRES_ACTIONS_FOR_LOG_PATH,
 )
 
 
@@ -70,12 +77,6 @@ def get_idbroker_instance_profile(
     idbroker_instance_profile: str = get_config_value(
         config,
         "env:aws:instance_profile:name:idbroker",
-        key_missing_message=(
-            "No idbroker instance profile defined for config option: {}"
-        ),
-        data_expected_error_message=(
-            "No idbroker instance profile provided for config option: {}"
-        ),
     )
 
     return get_instance_profile(iam_client, idbroker_instance_profile)
@@ -98,12 +99,8 @@ def _aws_idbroker_instance_profile_exists_with_role_validation(
     profile = get_idbroker_instance_profile(config=config, iam_client=iam_client)
 
     if not profile["InstanceProfile"]["Roles"]:
-        pytest.fail(
-            """IdBroker instance profile {} set in config env:aws:instance_profile:name:idbroker
-             should contain a idbroker role.""".format(
-                profile["InstanceProfile"]["Arn"]
-            ),
-            False,
+        fail(
+            AWS_IDBROKER_INSTANCE_PROLFILE_NEEDS_ROLE, profile["InstanceProfile"]["Arn"]
         )
 
 
@@ -150,12 +147,7 @@ def _aws_idbroker_role_has_ec2_trust_policy_validation(
             continue
 
     if not found_ec2_trust:
-        pytest.fail(
-            """The idbroker role {} should contain a trust policy for ec2""".format(
-                role
-            ),
-            False,
-        )
+        fail(AWS_IDBROKER_ROLE_NEED_EC2_TRUST_POLICY, role)
 
 
 @pytest.mark.aws
@@ -185,8 +177,6 @@ def _aws_idbroker_role_has_assumerole_policy_validation(
     ranger_audit_role_name: str = get_config_value(
         config,
         "env:aws:role:name:ranger_audit",
-        key_missing_message="No role defined for config option: {0}",
-        data_expected_error_message="No role was provided for config option: {0}",
     )
     ranger_audit_role = get_role(iam_client, ranger_audit_role_name)
     ranger_audit_role_arn = ranger_audit_role["Role"]["Arn"]
@@ -194,20 +184,18 @@ def _aws_idbroker_role_has_assumerole_policy_validation(
     datalake_admin_role_name: str = get_config_value(
         config,
         "env:aws:role:name:datalake_admin",
-        key_missing_message="No role defined for config option: {0}",
-        data_expected_error_message="No role was provided for config option: {0}",
     )
 
     datalake_admin_role = get_role(iam_client, datalake_admin_role_name)
     datalake_admin_role_arn = datalake_admin_role["Role"]["Arn"]
 
     simulate_policy(
-        iam_client,
-        idbroker_role_arn,
-        [ranger_audit_role_arn, datalake_admin_role_arn],
-        ["sts:AssumeRole"],
-        f"The role ({idbroker_role_arn}) requires the following "
-        f"actions for resource wildcard (*) :\n{{}}",
+        iam_client=iam_client,
+        policy_source_arn=idbroker_role_arn,
+        resource_arns=[ranger_audit_role_arn, datalake_admin_role_arn],
+        needed_actions=["sts:AssumeRole"],
+        subjects=idbroker_role_arn,
+        missing_actions_issue=AWS_IDBROKER_ROLE_REQUIRES_ACTIONS_FOR_ALL_RESOURCES,
     )
 
 
@@ -241,18 +229,16 @@ def _aws_idbroker_role_has_necessary_s3_actions_validation(
     log_location: str = get_config_value(
         config,
         "infra:aws:vpc:existing:storage:logs",
-        key_missing_message="No log storage path defined for config option: {}",
-        data_expected_error_message="No log storage path provided for config option: {}",  # noqa: E501
     )
     log_location_arn = convert_s3a_to_arn(log_location)
 
     simulate_policy(
-        iam_client,
-        role_arn,
-        [f"{log_location_arn}/*"],
-        logs_needed_actions,
-        f"""The role ({role_arn}) requires the following actions
-         for the log storage path ({log_location}):\n{{}}""",
+        iam_client=iam_client,
+        policy_source_arn=role_arn,
+        resource_arns=[f"{log_location_arn}/*"],
+        needed_actions=logs_needed_actions,
+        subjects=[role_arn, log_location],
+        missing_actions_issue=AWS_ROLE_REQUIRES_ACTIONS_FOR_LOG_PATH,
     )
 
 
@@ -288,8 +274,6 @@ def _aws_idbroker_role_has_necessary_s3_bucket_actions_validation(
     log_location: str = get_config_value(
         config,
         "infra:aws:vpc:existing:storage:logs",
-        key_missing_message="No log storage path defined for config option: {}",
-        data_expected_error_message="No log storage path provided for config option: {}",  # noqa: E501
     )
 
     log_location_arn = convert_s3a_to_arn(log_location)
@@ -297,10 +281,10 @@ def _aws_idbroker_role_has_necessary_s3_bucket_actions_validation(
     log_bucket_arn = convert_s3a_to_arn(f"s3a://{log_bucket_name}")
 
     simulate_policy(
-        iam_client,
-        role_arn,
-        [log_bucket_arn],
-        log_bucket_needed_actions,
-        f"""The role ({role_arn}) requires the following actions
-         for the log storage bucket ({log_bucket_arn}):\n{{}}""",
+        iam_client=iam_client,
+        policy_source_arn=role_arn,
+        resource_arns=[log_bucket_arn],
+        needed_actions=log_bucket_needed_actions,
+        subjects=[role_arn, log_bucket_arn],
+        missing_actions_issue=AWS_ROLE_REQUIRES_ACTIONS_FOR_LOG_BUCKET,
     )

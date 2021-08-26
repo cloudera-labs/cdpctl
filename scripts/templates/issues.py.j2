@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 ###
 # CLOUDERA CDP Control (cdpctl)
 #
@@ -36,7 +37,14 @@
 # BUSINESS ADVANTAGE OR UNAVAILABILITY, OR LOSS OR CORRUPTION OF
 # DATA.
 #
-# Source File Name:  __init__.py
+# Source File Name: issues.py
 ###
-"""Base infa package."""
-sections = ["infra"]
+# flake8: noqa
+# pylint: skip-file
+
+# THIS FILE IS GENERATED. DO NOT UPDATE BY HAND.
+# Use the update_issue_templates.py script
+"""Issue Templates."""
+{% for issue_template in issue_templates %}
+{{ issue_template.id }} = "{{ issue_template.id }}"
+{% endfor %}
