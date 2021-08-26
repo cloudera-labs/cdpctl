@@ -44,12 +44,13 @@ from typing import Any, Dict
 
 import pytest
 from azure.storage.filedatalake import DataLakeServiceClient
-from cdpctl.validation import get_config_value, fail
-from cdpctl.validation.azure_utils import parse_adls_path, get_client
+
+from cdpctl.validation import fail, get_config_value
+from cdpctl.validation.azure_utils import get_client, parse_adls_path
 from cdpctl.validation.issues import (
-    AZURE_STORAGE_NOT_DEFINED,
     AZURE_INVALID_STORAGE_HAS_BEEN_DEFINED,
     AZURE_STORAGE_CONTAINER_DOES_NOT_EXIST,
+    AZURE_STORAGE_NOT_DEFINED,
 )
 
 

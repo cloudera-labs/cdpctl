@@ -39,12 +39,13 @@
 # Source File Name:  test_validate_azure_adls.py
 ###
 """Azure ADLS Tests."""
-from tests.validation import expect_validation_failure, expect_validation_success
+import pytest
+
 from cdpctl.validation.infra.validate_azure_adls import (
     azure_adls_data_storage_validation,
     azure_adls_logs_storage_validation,
 )
-import pytest
+from tests.validation import expect_validation_failure, expect_validation_success
 
 
 class DataLakeServiceClient:
