@@ -93,14 +93,14 @@ def azure_network_client_fixture(config: Dict[str, Any]) -> NetworkManagementCli
     return get_client("network", config)
 
 
-# @pytest.mark.dependency(
-#     depends=[
-#         "infra/validate_azure_region.py::azure_region_validation",
-#     ],
-#     scope="session",
-# )
 @pytest.mark.azure
 @pytest.mark.infra
+@pytest.mark.dependency(
+    depends=[
+        "infra/validate_azure_region.py::azure_region_validation",
+    ],
+    scope="session",
+)
 def azure_vnet_exists_validation(
     config: Dict[str, Any], azure_network_client: NetworkManagementClient
 ) -> None:  # pragma: no cover
