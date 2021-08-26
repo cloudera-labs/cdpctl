@@ -40,12 +40,12 @@
 ###
 """Azure Utils Test."""
 import pytest
+from azure.storage.filedatalake import DataLakeServiceClient
 from cdpctl.validation.azure_utils import (
     AzureSupportedRegionFeatures,
     read_azure_supported_regions,
 )
 from cdpctl.validation.azure_utils import parse_adls_path, get_client
-from azure.storage.filedatalake import DataLakeServiceClient
 
 
 def test_read_azure_supported_regions():

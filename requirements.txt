@@ -3,6 +3,7 @@ ansible-runner==2.0.1
 azure-identity==1.6.0
 azure-storage-file-datalake==12.4.0
 azure-mgmt-authorization==0.51.1
+azure-mgmt-network==19.0.0
 azure-mgmt-resource==19.0.0
 boto3==1.17.95
 boto3_type_annotations==0.3.1
