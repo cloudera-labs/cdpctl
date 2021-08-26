@@ -334,7 +334,7 @@ def test_azure_vnet_subnets_for_ml_warning_not_enough_subnets(basic_azure_test_c
         basic_azure_test_config["infra"]["vpc"]["name"],
         [
             Subnet("default", "10.3.0.0/24", []),
-            Subnet("default", "10.3.2.0/25", [Delegation("Microsoft.Netapp/volumes")]),
+            Subnet("default", "10.3.2.0/28", [Delegation("Microsoft.Netapp/volumes")]),
         ],
     )
     func = expect_validation_warning(azure_vnet_subnets_for_ml)
