@@ -53,6 +53,9 @@ from azure.storage.filedatalake import DataLakeServiceClient
 
 from cdpctl.validation import UnrecoverableValidationError, get_config_value
 from cdpctl.validation.issues import AZURE_NO_SUBSCRIPTION_HAS_BEEN_DEFINED
+from cdpctl.validation.azure_identity_credential_adapter import (
+    AzureIdentityCredentialAdapter,
+)
 
 
 def get_client(client_type: str, config, url=None):
@@ -74,7 +77,9 @@ def get_client(client_type: str, config, url=None):
         return ResourceManagementClient(credential, subscription_id)
 
     if client_type == "auth":
-        return AuthorizationManagementClient(credential, subscription_id)
+        return AuthorizationManagementClient(
+            AzureIdentityCredentialAdapter(credential), subscription_id
+        )
 
     if client_type == "datalake":
         return DataLakeServiceClient(url, credential)
