@@ -51,6 +51,7 @@ from cdpctl.validation.azure_utils import (
     check_for_role,
     get_client,
     get_role_assignments,
+    get_storage_container_scope,
     parse_adls_path,
 )
 from cdpctl.validation.infra.issues import AZURE_IDENTITY_MISSING_ROLE
@@ -95,7 +96,9 @@ def azure_logger_blob_role_validation(
     )
 
     proper_role = "Storage Blob Data Contributor"
-    proper_scope = f"/subscriptions/{sub_id}/resourceGroups/{rg_name}/providers/Microsoft.Storage/storageAccounts/{storage_name}/blobServices/default/containers/{container_name}"  # noqa: E501
+    proper_scope = get_storage_container_scope(
+        sub_id, rg_name, storage_name, container_name
+    )
 
     if not check_for_role(
         auth_client=auth_client,

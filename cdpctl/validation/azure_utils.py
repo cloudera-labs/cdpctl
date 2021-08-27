@@ -158,6 +158,13 @@ def parse_adls_path(path: str) -> Tuple:
         raise ValueError(f"Invalid adls path: {path}") from ie
 
 
+def get_storage_container_scope(
+    subscription_id: str, resource_group: str, storage: str, container: str
+):
+    """Get Azure full scope string."""
+    return f"/subscriptions/{subscription_id}/resourceGroups/{resource_group}/providers/Microsoft.Storage/storageAccounts/{storage}/blobServices/default/containers/{container}"  # noqa: E501
+
+
 def get_role_assignments(
     auth_client: AuthorizationManagementClient,
     resource_client: ResourceManagementClient,
