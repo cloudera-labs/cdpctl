@@ -139,7 +139,7 @@ def aws_s3_bucket_exists(
     # get bucket name
     bucket_name = parse_arn(convert_s3a_to_arn(bucket_url))["resource_type"]
 
-    vpc_region: str = get_config_value(
+    env_region: str = get_config_value(
         config,
         "infra:aws:region",
     )
@@ -147,7 +147,7 @@ def aws_s3_bucket_exists(
     try:
         if (
             s3_client.get_bucket_location(Bucket=bucket_name)["LocationConstraint"]
-            != vpc_region
+            != env_region
         ):
             fail(AWS_S3_BUCKET_NOT_IN_SAME_REGION_AS_ENVIRONMENT, bucket_name)
     except botocore.exceptions.ClientError as e:
