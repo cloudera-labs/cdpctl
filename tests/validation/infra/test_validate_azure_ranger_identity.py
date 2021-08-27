@@ -36,7 +36,7 @@
 # BUSINESS ADVANTAGE OR UNAVAILABILITY, OR LOSS OR CORRUPTION OF
 # DATA.
 #
-# Source File Name:  test_validate_azure_dladmin_identity.py
+# Source File Name:  test_validate_azure_ranger_identity.py
 ###
 """Azure Validate Ranger Identity Tests."""
 import dataclasses
