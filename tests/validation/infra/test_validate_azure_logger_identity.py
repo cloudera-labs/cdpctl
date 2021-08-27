@@ -40,11 +40,10 @@
 ###
 """Azure Validate Logger Identity Tests."""
 
-from tests.validation import expect_validation_failure, expect_validation_success
-
 from cdpctl.validation.infra.validate_azure_logger_identity import (
     azure_logger_blob_role_validation,
 )
+from tests.validation import expect_validation_failure, expect_validation_success
 
 
 def get_config(role_name):
@@ -87,7 +86,9 @@ class ResourceResponseType:
 class ResourceManagementClientHelper:
     """Mock ResourceManagementClient Interface."""
 
-    def get_by_id(resource_id, api_version):
+    def get_by_id(
+        resource_id, api_version
+    ):  # pylint: disable=no-self-argument,unused-argument
         """Mock get_by_id."""
         resource = ResourceResponseType
         if (
@@ -101,14 +102,14 @@ class ResourceManagementClientHelper:
 class AuthorizationManagementClientHelper:
     """Mock Auth Interface."""
 
-    def get_by_id(resource_id):
+    def get_by_id(resource_id):  # pylint: disable=no-self-argument
         """Mock get_by_id."""
         resource = AuthResponseType
         if resource_id == "fail":
             resource.role_name = "fail"
         return resource
 
-    def list(filter):
+    def list(filter):  # pylint: disable=no-self-argument,redefined-builtin
         """Mock list function."""
         response = AuthResponseType
         if filter == "principalId eq 'fail'":

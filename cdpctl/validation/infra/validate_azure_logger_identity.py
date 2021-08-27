@@ -43,13 +43,11 @@
 from typing import Any, Dict
 
 import pytest
-from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.authorization import AuthorizationManagementClient
+from azure.mgmt.resource import ResourceManagementClient
 
-from cdpctl.validation import fail
-from cdpctl.validation import get_config_value
+from cdpctl.validation import fail, get_config_value
 from cdpctl.validation.azure_utils import get_client, parse_adls_path
-
 from cdpctl.validation.infra.issues import (
     AZURE_LOGGER_IDENTITY_MISSING_BLOB_CONTRIBUTOR,
     AZURE_LOGGER_IDENTITY_NOT_FOUND,

@@ -44,8 +44,8 @@ import csv
 import os
 from enum import Enum
 from typing import Optional, Tuple
-from azure.identity import AzureCliCredential
 
+from azure.identity import AzureCliCredential
 from azure.mgmt.authorization import AuthorizationManagementClient
 from azure.mgmt.network import NetworkManagementClient
 from azure.mgmt.resource import ResourceManagementClient
