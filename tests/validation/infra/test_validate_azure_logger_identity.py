@@ -45,54 +45,86 @@ from tests.validation import expect_validation_failure, expect_validation_succes
 from cdpctl.validation.infra.validate_azure_logger_identity import (
     azure_logger_blob_role_validation,
 )
-import pytest
 
 
 def get_config(role_name):
-    return {"infra": {"azure": {"role": {"name": {"log": f"{role_name}"}}}}}
+    return {
+        "infra": {
+            "azure": {"subscription_id": "test_id", "metagroup": {"name": "rg_name"}}
+        },
+        "env": {
+            "azure": {
+                "role": {"name": {"log": f"{role_name}"}},
+                "storage": {
+                    "name": "storage_name",
+                    "path": {"logs": "abfs://logs@storage_name.dfs.core.windows.net"},
+                },
+            }
+        },
+    }
 
 
-# mock return type for get_by_id
-class GenericResponseType:
-    properties = {"principalId": "success"}
+class PropertiesType:
+    """Mock for AuthResponseType.Properties."""
+
     role_definition_id = "success"
+    scope = "/subscriptions/test_id/resourceGroups/rg_name/providers/Microsoft.Storage/storageAccounts/storage_name/blobServices/default/containers/logs"
+
+
+class AuthResponseType:
+    """Mock return type for AuthorizationManagementClient."""
+
+    properties = PropertiesType
     role_name = "Storage Blob Data Contributor"
 
 
-# mock ResourceManagementClient Interface
+class ResourceResponseType:
+    """Mock return type for ResourceManagementClient."""
+
+    properties = {"principalId": "success"}
+
+
 class ResourceManagementClientHelper:
-    def __init__(self):
-        self.nature = 1
+    """Mock ResourceManagementClient Interface."""
 
     def get_by_id(resource_id, api_version):
-        resource = GenericResponseType
-        if resource_id == "fail":
+        """Mock get_by_id."""
+        resource = ResourceResponseType
+        if (
+            resource_id
+            == "/subscriptions/test_id/resourcegroups/rg_name/providers/Microsoft.ManagedIdentity/userAssignedIdentities/fail"
+        ):
             resource.properties["principalId"] = "fail"
         return resource
 
 
-# mock AuthorizationManagementClient Interface
 class AuthorizationManagementClientHelper:
+    """Mock Auth Interface."""
+
     def get_by_id(resource_id):
-        resource = GenericResponseType
-        if resource_id != "success":
+        """Mock get_by_id."""
+        resource = AuthResponseType
+        if resource_id == "fail":
             resource.role_name = "fail"
         return resource
 
     def list(filter):
-        response = GenericResponseType
+        """Mock list function."""
+        response = AuthResponseType
         if filter == "principalId eq 'fail'":
-            response.role_definition_id = "fail"
+            response.properties.role_definition_id = "fail"
         return [response]
 
 
-# mock ResourceManagementClient
 class ResourceManagementClient:
+    """Mock ResourceManagementClient interface."""
+
     resources = ResourceManagementClientHelper
 
 
-# mock AuthorizationManagementClient
 class AuthorizationManagementClient:
+    """Mock AuthorizationManagementClient interface."""
+
     role_assignments = AuthorizationManagementClientHelper
     role_definitions = AuthorizationManagementClientHelper
 

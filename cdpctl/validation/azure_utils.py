@@ -44,8 +44,8 @@ import csv
 import os
 from enum import Enum
 from typing import Optional, Tuple
-
 from azure.identity import AzureCliCredential
+
 from azure.mgmt.authorization import AuthorizationManagementClient
 from azure.mgmt.network import NetworkManagementClient
 from azure.mgmt.resource import ResourceManagementClient
@@ -53,9 +53,6 @@ from azure.storage.filedatalake import DataLakeServiceClient
 
 from cdpctl.validation import UnrecoverableValidationError, get_config_value
 from cdpctl.validation.issues import AZURE_NO_SUBSCRIPTION_HAS_BEEN_DEFINED
-from cdpctl.validation.azure_identity_credential_adapter import (
-    AzureIdentityCredentialAdapter,
-)
 
 
 def get_client(client_type: str, config, url=None):
@@ -78,7 +75,8 @@ def get_client(client_type: str, config, url=None):
 
     if client_type == "auth":
         return AuthorizationManagementClient(
-            AzureIdentityCredentialAdapter(credential), subscription_id
+            credential,
+            subscription_id,
         )
 
     if client_type == "datalake":
@@ -142,15 +140,15 @@ def read_azure_supported_regions():
 def parse_adls_path(path: str) -> Tuple:
     """Parse Azure ADLS path."""
     try:
-        if not path.startswith("adls://"):
+        if not path.startswith("abfs://"):
             raise ValueError(f"Invalid adls path: {path}")
 
-        if not path.replace("adls://", "").split("@", 1)[0]:
+        if not path.replace("abfs://", "").split("@", 1)[0]:
             raise ValueError(f"Invalid adls path: {path}")
 
         return (
-            "https://" + path.replace("adls://", "").split("@", 1)[1],
-            path.replace("adls://", "").split("@", 1)[0],
+            "https://" + path.replace("abfs://", "").split("@", 1)[1],
+            path.replace("abfs://", "").split("@", 1)[0],
         )
 
     except IndexError as ie:

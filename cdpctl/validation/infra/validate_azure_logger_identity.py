@@ -40,7 +40,7 @@
 # Source File Name:  validate_azure_logger_identity.py
 ###
 """Validation of Azure Logger Identity."""
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 import pytest
 from azure.mgmt.resource import ResourceManagementClient
@@ -48,10 +48,9 @@ from azure.mgmt.authorization import AuthorizationManagementClient
 
 from cdpctl.validation import fail
 from cdpctl.validation import get_config_value
-from cdpctl.validation.azure_utils import get_client
+from cdpctl.validation.azure_utils import get_client, parse_adls_path
 
 from cdpctl.validation.infra.issues import (
-    AZURE_LOGGER_IDENTITY_NOT_DEFINED,
     AZURE_LOGGER_IDENTITY_MISSING_BLOB_CONTRIBUTOR,
     AZURE_LOGGER_IDENTITY_NOT_FOUND,
 )
@@ -78,33 +77,43 @@ def azure_logger_blob_role_validation(
 ) -> None:  # pragma: no cover
     """Logger Identity has the Storage Blob Data Contributor Role."""  # noqa: D401,E501
 
-    logger_identity_id: Optional[str] = get_config_value(
-        config,
-        "infra:azure:role:name:log",
-        key_value_expected=True,
-        data_expected_issue=AZURE_LOGGER_IDENTITY_NOT_DEFINED,
-    )
+    sub_id: str = get_config_value(config=config, key="infra:azure:subscription_id")
+    rg_name: str = get_config_value(config=config, key="infra:azure:metagroup:name")
+    logger_name: str = get_config_value(config=config, key="env:azure:role:name:log")
+    storage_name: str = get_config_value(config=config, key="env:azure:storage:name")
+    log_path: str = get_config_value(config=config, key="env:azure:storage:path:logs")
 
+    parsed_logger_path = parse_adls_path(log_path)
+    container_name = parsed_logger_path[1]
+
+    logger_id = f"/subscriptions/{sub_id}/resourcegroups/{rg_name}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{logger_name}"  # noqa: E501
     logger_identity = resource_client.resources.get_by_id(
-        resource_id=logger_identity_id, api_version="2018-11-30"
+        resource_id=logger_id, api_version="2018-11-30"
     )
 
     if not logger_identity:
-        fail(AZURE_LOGGER_IDENTITY_NOT_FOUND, logger_identity_id)
+        fail(AZURE_LOGGER_IDENTITY_NOT_FOUND, logger_name)
 
     logger_identity_pricipalid = logger_identity.properties["principalId"]
 
-    assignments = auth_client.role_assignments.list(
+    role_assignments = auth_client.role_assignments.list(
         filter=f"principalId eq '{logger_identity_pricipalid}'"
     )
 
-    found_blog_data_contributor = False
-    for assignment in assignments:
-        definition = auth_client.role_definitions.get_by_id(
-            assignment.role_definition_id
-        )
-        if definition.role_name == "Storage Blob Data Contributor":
-            found_blog_data_contributor = True
+    found_blob_data_contributor = False
+    proper_scope = f"/subscriptions/{sub_id}/resourceGroups/{rg_name}/providers/Microsoft.Storage/storageAccounts/{storage_name}/blobServices/default/containers/{container_name}"  # noqa: E501
 
-    if not found_blog_data_contributor:
-        fail(AZURE_LOGGER_IDENTITY_MISSING_BLOB_CONTRIBUTOR, logger_identity_id)
+    for role_assignment in role_assignments:
+
+        definition = auth_client.role_definitions.get_by_id(
+            role_assignment.properties.role_definition_id
+        )
+
+        if (
+            definition.role_name == "Storage Blob Data Contributor"
+            and role_assignment.properties.scope == proper_scope
+        ):
+            found_blob_data_contributor = True
+
+    if not found_blob_data_contributor:
+        fail(AZURE_LOGGER_IDENTITY_MISSING_BLOB_CONTRIBUTOR, logger_name)
