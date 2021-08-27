@@ -74,7 +74,10 @@ def get_client(client_type: str, config, url=None):
         return ResourceManagementClient(credential, subscription_id)
 
     if client_type == "auth":
-        return AuthorizationManagementClient(credential, subscription_id)
+        return AuthorizationManagementClient(
+            credential,
+            subscription_id,
+        )
 
     if client_type == "datalake":
         return DataLakeServiceClient(url, credential)
@@ -137,15 +140,15 @@ def read_azure_supported_regions():
 def parse_adls_path(path: str) -> Tuple:
     """Parse Azure ADLS path."""
     try:
-        if not path.startswith("adls://"):
+        if not path.startswith("abfs://"):
             raise ValueError(f"Invalid adls path: {path}")
 
-        if not path.replace("adls://", "").split("@", 1)[0]:
+        if not path.replace("abfs://", "").split("@", 1)[0]:
             raise ValueError(f"Invalid adls path: {path}")
 
         return (
-            "https://" + path.replace("adls://", "").split("@", 1)[1],
-            path.replace("adls://", "").split("@", 1)[0],
+            "https://" + path.replace("abfs://", "").split("@", 1)[1],
+            path.replace("abfs://", "").split("@", 1)[0],
         )
 
     except IndexError as ie:

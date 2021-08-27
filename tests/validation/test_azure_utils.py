@@ -88,7 +88,7 @@ def test_get_client():
 
 def test_parse_adls_path():
     """Test parse adls path."""
-    parsed_url = parse_adls_path("adls://container@test.dfs.core.windows.net")
+    parsed_url = parse_adls_path("abfs://container@test.dfs.core.windows.net")
     assert parsed_url[0].startswith("https://")
     assert parsed_url[1] == ("container")
 
@@ -102,4 +102,4 @@ def test_parse_adls_path_invalid():
 def test_parse_adls_path_invalid_container():
     """Test parse adls path with invalid container value."""
     with pytest.raises(ValueError):
-        parse_adls_path("adls://test.dfs.core.windows.net")
+        parse_adls_path("abfs://test.dfs.core.windows.net")

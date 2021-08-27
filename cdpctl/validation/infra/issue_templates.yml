@@ -263,3 +263,11 @@ summary: >
   The Azure Virtual Network {0} does not appear to have a compatible Subnet with the service
   endpoints setup for the Data Warehouse experience to access storage.
 docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-set-up-azure-service-endpoints-for-network.html
+---
+id: AZURE_LOGGER_IDENTITY_NOT_FOUND
+summary: "No logger identity found with id {0}"
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-az-creating-managed-ids.html
+---
+id: AZURE_LOGGER_IDENTITY_MISSING_BLOB_CONTRIBUTOR
+summary: "The logger identity {0} is missing the Storage Blob Data Contributor role"
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-az-creating-managed-ids.html
