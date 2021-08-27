@@ -37,9 +37,9 @@
 # BUSINESS ADVANTAGE OR UNAVAILABILITY, OR LOSS OR CORRUPTION OF
 # DATA.
 #
-# Source File Name:  validate_azure_logger_identity.py
+# Source File Name:  validate_azure_dladmin_identity.py
 ###
-"""Validation of Azure Logger Identity."""
+"""Validation of Azure Datalake Admin Identity."""
 from typing import Any, Dict
 
 import pytest
@@ -71,18 +71,20 @@ def auth_client_fixture(config: Dict[str, Any]) -> AuthorizationManagementClient
 
 @pytest.mark.azure
 @pytest.mark.infra
-def azure_logger_blob_role_validation(
+def azure_dladmin_logs_owner_validation(
     config: Dict[str, Any],
     auth_client: AuthorizationManagementClient,
     resource_client: ResourceManagementClient,
 ) -> None:  # pragma: no cover
-    """Logger Identity has the Logs Container Contributor Role."""  # noqa: D401,E501
+    """Datalake Admin Identity has the Logs Container Owner Role."""  # noqa: D401,E501
 
     sub_id: str = get_config_value(config=config, key="infra:azure:subscription_id")
     rg_name: str = get_config_value(config=config, key="infra:azure:metagroup:name")
-    logger_name: str = get_config_value(config=config, key="env:azure:role:name:log")
     storage_name: str = get_config_value(config=config, key="env:azure:storage:name")
     log_path: str = get_config_value(config=config, key="env:azure:storage:path:logs")
+    datalake_admin: str = get_config_value(
+        config=config, key="env:azure:role:name:datalake_admin"
+    )
 
     parsed_logger_path = parse_adls_path(log_path)
     container_name = parsed_logger_path[1]
@@ -90,15 +92,15 @@ def azure_logger_blob_role_validation(
     role_assignments = get_role_assignments(
         auth_client=auth_client,
         resource_client=resource_client,
-        identity_name=logger_name,
+        identity_name=datalake_admin,
         subscription_id=sub_id,
         resource_group=rg_name,
     )
 
-    proper_role = "Storage Blob Data Contributor"
     proper_scope = get_storage_container_scope(
         sub_id, rg_name, storage_name, container_name
     )
+    proper_role = "Storage Blob Data Owner"
 
     if not check_for_role(
         auth_client=auth_client,
@@ -109,7 +111,56 @@ def azure_logger_blob_role_validation(
         fail(
             AZURE_IDENTITY_MISSING_ROLE,
             subjects=[
-                logger_name,
+                datalake_admin,
+                proper_role,
+                f"storageAccounts/{storage_name}/blobServices/default/containers/{container_name}",  # noqa: E501
+            ],
+        )
+
+
+@pytest.mark.azure
+@pytest.mark.infra
+def azure_dladmin_data_owner_validation(
+    config: Dict[str, Any],
+    auth_client: AuthorizationManagementClient,
+    resource_client: ResourceManagementClient,
+) -> None:  # pragma: no cover
+    """Datalake Admin Identity has the Storage Container Owner Role."""  # noqa: D401,E501
+
+    sub_id: str = get_config_value(config=config, key="infra:azure:subscription_id")
+    rg_name: str = get_config_value(config=config, key="infra:azure:metagroup:name")
+    storage_name: str = get_config_value(config=config, key="env:azure:storage:name")
+    data_path: str = get_config_value(config=config, key="env:azure:storage:path:data")
+    datalake_admin: str = get_config_value(
+        config=config, key="env:azure:role:name:datalake_admin"
+    )
+
+    parsed_data_path = parse_adls_path(data_path)
+    container_name = parsed_data_path[1]
+
+    role_assignments = get_role_assignments(
+        auth_client=auth_client,
+        resource_client=resource_client,
+        identity_name=datalake_admin,
+        subscription_id=sub_id,
+        resource_group=rg_name,
+    )
+
+    proper_scope = get_storage_container_scope(
+        sub_id, rg_name, storage_name, container_name
+    )
+    proper_role = "Storage Blob Data Owner"
+
+    if not check_for_role(
+        auth_client=auth_client,
+        role_assigments=role_assignments,
+        proper_role=proper_role,
+        proper_scope=proper_scope,
+    ):
+        fail(
+            AZURE_IDENTITY_MISSING_ROLE,
+            subjects=[
+                datalake_admin,
                 proper_role,
                 f"storageAccounts/{storage_name}/blobServices/default/containers/{container_name}",  # noqa: E501
             ],
