@@ -110,7 +110,7 @@ def azure_dladmin_logs_owner_validation(
             subjects=[
                 datalake_admin,
                 proper_role,
-                f"storageAccounts/{storage_name}/blobServices/default/containers/{container_name}",
+                f"storageAccounts/{storage_name}/blobServices/default/containers/{container_name}",  # noqa: E501
             ],
         )
 
@@ -157,6 +157,6 @@ def azure_dladmin_data_owner_validation(
             subjects=[
                 datalake_admin,
                 proper_role,
-                f"storageAccounts/{storage_name}/blobServices/default/containers/{container_name}",
+                f"storageAccounts/{storage_name}/blobServices/default/containers/{container_name}",  # noqa: E501
             ],
         )

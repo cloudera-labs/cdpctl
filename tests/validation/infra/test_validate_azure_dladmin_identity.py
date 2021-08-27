@@ -40,7 +40,7 @@
 ###
 """Azure Validate Datalake Admin Identity Tests."""
 import dataclasses
-from typing import Any, Dict
+from typing import Dict
 from unittest.mock import Mock
 
 from azure.mgmt.authorization import AuthorizationManagementClient

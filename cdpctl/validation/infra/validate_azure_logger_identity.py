@@ -108,6 +108,6 @@ def azure_logger_blob_role_validation(
             subjects=[
                 logger_name,
                 proper_role,
-                f"storageAccounts/{storage_name}/blobServices/default/containers/{container_name}",
+                f"storageAccounts/{storage_name}/blobServices/default/containers/{container_name}",  # noqa: E501
             ],
         )
