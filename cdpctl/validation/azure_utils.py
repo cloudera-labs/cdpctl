@@ -165,6 +165,11 @@ def get_storage_container_scope(
     return f"/subscriptions/{subscription_id}/resourceGroups/{resource_group}/providers/Microsoft.Storage/storageAccounts/{storage}/blobServices/default/containers/{container}"  # noqa: E501
 
 
+def get_resource_group_scope(subscription_id: str, resource_group: str):
+    """Get Azure resource group scope string."""
+    return f"/subscriptions/{subscription_id}/resourceGroups/{resource_group}"
+
+
 def get_role_assignments(
     auth_client: AuthorizationManagementClient,
     resource_client: ResourceManagementClient,
@@ -188,7 +193,7 @@ def get_role_assignments(
         filter=f"principalId eq '{identity_pricipalid}'"
     )
 
-    return role_assignments
+    return list(role_assignments)
 
 
 def check_for_role(
@@ -201,7 +206,6 @@ def check_for_role(
     found_role = False
 
     for role_assignment in role_assigments:
-
         definition = auth_client.role_definitions.get_by_id(
             role_assignment.properties.role_definition_id
         )
