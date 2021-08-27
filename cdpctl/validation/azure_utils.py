@@ -43,15 +43,18 @@
 import csv
 import os
 from enum import Enum
-from typing import Optional, Tuple
+from typing import Iterable, Optional, Tuple
 
+from azure.core.exceptions import ResourceNotFoundError
 from azure.identity import AzureCliCredential
 from azure.mgmt.authorization import AuthorizationManagementClient
+from azure.mgmt.authorization.models import RoleAssignmentListResult
 from azure.mgmt.network import NetworkManagementClient
 from azure.mgmt.resource import ResourceManagementClient
 from azure.storage.filedatalake import DataLakeServiceClient
 
-from cdpctl.validation import UnrecoverableValidationError, get_config_value
+from cdpctl.validation import UnrecoverableValidationError, fail, get_config_value
+from cdpctl.validation.infra.issues import AZURE_IDENTITY_NOT_FOUND
 from cdpctl.validation.issues import AZURE_NO_SUBSCRIPTION_HAS_BEEN_DEFINED
 
 
@@ -153,3 +156,53 @@ def parse_adls_path(path: str) -> Tuple:
 
     except IndexError as ie:
         raise ValueError(f"Invalid adls path: {path}") from ie
+
+
+def get_role_assignments(
+    auth_client: AuthorizationManagementClient,
+    resource_client: ResourceManagementClient,
+    identity_name: str,
+    subscription_id: str,
+    resource_group: str,
+) -> Iterable[RoleAssignmentListResult]:
+    """Get Azure role assigments for identity."""
+    identity_id = f"/subscriptions/{subscription_id}/resourcegroups/{resource_group}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identity_name}"  # noqa: E501
+
+    try:
+        identity = resource_client.resources.get_by_id(
+            resource_id=identity_id, api_version="2018-11-30"
+        )
+    except ResourceNotFoundError:
+        fail(AZURE_IDENTITY_NOT_FOUND, identity_name)
+
+    identity_pricipalid = identity.properties["principalId"]
+
+    role_assignments = auth_client.role_assignments.list(
+        filter=f"principalId eq '{identity_pricipalid}'"
+    )
+
+    return role_assignments
+
+
+def check_for_role(
+    auth_client: AuthorizationManagementClient,
+    role_assigments: Iterable[RoleAssignmentListResult],
+    proper_role: str,
+    proper_scope: str,
+):
+    """Check if Azure role assigments have the proper role and scope."""
+    found_role = False
+
+    for role_assignment in role_assigments:
+
+        definition = auth_client.role_definitions.get_by_id(
+            role_assignment.properties.role_definition_id
+        )
+
+        if (
+            definition.role_name == proper_role
+            and role_assignment.properties.scope == proper_scope
+        ):
+            found_role = True
+
+    return found_role

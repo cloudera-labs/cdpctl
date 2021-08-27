@@ -130,7 +130,7 @@ class AuthorizationManagementClient:
     role_definitions = AuthorizationManagementClientHelper
 
 
-def test_azure_adls_data_storage_validation_success() -> None:
+def test_azure_logger_blob_role_validation_success() -> None:
 
     auth_client = AuthorizationManagementClient()
     resource_client = ResourceManagementClient
@@ -139,7 +139,7 @@ def test_azure_adls_data_storage_validation_success() -> None:
     func(get_config("success"), auth_client, resource_client)
 
 
-def test_azure_adls_data_storage_validation_fail() -> None:
+def test_azure_logger_blob_role_validation_fail() -> None:
 
     auth_client = AuthorizationManagementClient
     resource_client = ResourceManagementClient
