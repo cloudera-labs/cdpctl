@@ -104,7 +104,7 @@ infra:
           knox_id:{{ info['infra:aws:vpc:existing:knox_id']|default("", true) }}
 
         storage:
-          ## The Storage location base for the Datalake
+          ## The Backup Storage location base for the Datalake
           # example: s3a://my-bucket/backup
           backup: {{ info['infra:storage:path:backup']|default("", true) }}
 
