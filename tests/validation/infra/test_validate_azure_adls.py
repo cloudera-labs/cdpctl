@@ -83,8 +83,8 @@ CONFIG = {
         "azure": {
             "storage": {
                 "path": {
-                    "data": "adls://container@test.dfs.core.windows.net",
-                    "logs": "adls://container@test.dfs.core.windows.net",
+                    "data": "abfs://container@test.dfs.core.windows.net",
+                    "logs": "abfs://container@test.dfs.core.windows.net",
                 }
             }
         }
@@ -95,8 +95,8 @@ FAILURE_CONFIG = {
         "azure": {
             "storage": {
                 "path": {
-                    "data": "adls://failure@test.dfs.core.windows.net",
-                    "logs": "adls://failure@test.dfs.core.windows.net",
+                    "data": "abfs://failure@test.dfs.core.windows.net",
+                    "logs": "abfs://failure@test.dfs.core.windows.net",
                 }
             }
         }
