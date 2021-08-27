@@ -48,10 +48,10 @@ from azure.mgmt.resource import ResourceManagementClient
 
 from cdpctl.validation import fail, get_config_value
 from cdpctl.validation.azure_utils import (
-    get_client,
-    parse_adls_path,
-    get_role_assignments,
     check_for_role,
+    get_client,
+    get_role_assignments,
+    parse_adls_path,
 )
 from cdpctl.validation.infra.issues import AZURE_IDENTITY_MISSING_ROLE
 
