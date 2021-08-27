@@ -50,8 +50,8 @@ from cdpctl.validation import fail, get_config_value
 from cdpctl.validation.azure_utils import (
     check_for_role,
     get_client,
-    get_role_assignments,
     get_resource_group_scope,
+    get_role_assignments,
     get_storage_container_scope,
     parse_adls_path,
 )
