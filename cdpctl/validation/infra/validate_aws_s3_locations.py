@@ -57,6 +57,7 @@ from cdpctl.validation.infra.issues import (
     AWS_S3_BUCKET_DOES_NOT_EXIST,
     AWS_S3_BUCKET_FORBIDDEN_ACCESS,
     AWS_S3_BUCKET_INVALID,
+    AWS_S3_BUCKET_NOT_IN_SAME_REGION_AS_ENVIRONMENT,
 )
 
 
@@ -83,7 +84,7 @@ def aws_s3_data_bucket_exists(config: Dict[str, Any], s3_client: S3Client) -> No
         config,
         "infra:aws:vpc:existing:storage:data",
     )
-    aws_s3_bucket_exists(data_bucket_url, s3_client)
+    aws_s3_bucket_exists(config, data_bucket_url, s3_client)
 
 
 @pytest.mark.aws
@@ -103,7 +104,7 @@ def aws_s3_logs_bucket_exists(config: Dict[str, Any], s3_client: S3Client) -> No
         config,
         "infra:aws:vpc:existing:storage:logs",
     )
-    aws_s3_bucket_exists(logs_bucket_url, s3_client)
+    aws_s3_bucket_exists(config, logs_bucket_url, s3_client)
 
 
 @pytest.mark.aws
@@ -125,10 +126,12 @@ def aws_s3_backup_bucket_exists(config: Dict[str, Any], s3_client: S3Client) -> 
         "infra:aws:vpc:existing:storage:backup",
     )
     # TODO: Handle a specific parameter for backup S3 location once it exists
-    aws_s3_bucket_exists(backup_bucket_url, s3_client)
+    aws_s3_bucket_exists(config, backup_bucket_url, s3_client)
 
 
-def aws_s3_bucket_exists(bucket_url: str, s3_client: S3Client) -> None:
+def aws_s3_bucket_exists(
+    config: Dict[str, Any], bucket_url: str, s3_client: S3Client
+) -> None:
     """Check to see if the s3 bucket exists."""
     if not is_valid_s3a_url(bucket_url):
         fail(AWS_S3_BUCKET_INVALID, bucket_url)
@@ -136,14 +139,22 @@ def aws_s3_bucket_exists(bucket_url: str, s3_client: S3Client) -> None:
     # get bucket name
     bucket_name = parse_arn(convert_s3a_to_arn(bucket_url))["resource_type"]
 
-    # check if s3 bucket exists
+    vpc_region: str = get_config_value(
+        config,
+        "infra:aws:region",
+    )
+    # check if bucket exists in same region
     try:
-        s3_client.head_bucket(Bucket=bucket_name)
+        if (
+            s3_client.get_bucket_location(Bucket=bucket_name)["LocationConstraint"]
+            != vpc_region
+        ):
+            fail(AWS_S3_BUCKET_NOT_IN_SAME_REGION_AS_ENVIRONMENT, bucket_name)
     except botocore.exceptions.ClientError as e:
-        # If a client error is thrown, then check that it was a 404 error.
-        # If it was a 404 error, then the bucket does not exist.
-        error_code = int(e.response["Error"]["Code"])
-        if error_code == 403:
-            fail(AWS_S3_BUCKET_FORBIDDEN_ACCESS, bucket_name)
-        elif error_code == 404:
+        # if a client error is thrown, check if it is a NoSuchBucket error
+        # if NoSuchBucket error thrown, the bucket does not exist
+        error_code = e.response["Error"]["Code"]
+        if error_code == "NoSuchBucket":
             fail(AWS_S3_BUCKET_DOES_NOT_EXIST, bucket_name)
+        elif int(error_code) == 403:
+            fail(AWS_S3_BUCKET_FORBIDDEN_ACCESS, bucket_name)
