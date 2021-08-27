@@ -84,7 +84,11 @@ def aws_s3_data_bucket_exists(config: Dict[str, Any], s3_client: S3Client) -> No
         config,
         "infra:aws:vpc:existing:storage:data",
     )
-    aws_s3_bucket_exists(config, data_bucket_url, s3_client)
+    region: str = get_config_value(
+        config,
+        "infra:aws:region",
+    )
+    aws_s3_bucket_exists(region, data_bucket_url, s3_client)
 
 
 @pytest.mark.aws
@@ -104,7 +108,11 @@ def aws_s3_logs_bucket_exists(config: Dict[str, Any], s3_client: S3Client) -> No
         config,
         "infra:aws:vpc:existing:storage:logs",
     )
-    aws_s3_bucket_exists(config, logs_bucket_url, s3_client)
+    region: str = get_config_value(
+        config,
+        "infra:aws:region",
+    )
+    aws_s3_bucket_exists(region, logs_bucket_url, s3_client)
 
 
 @pytest.mark.aws
@@ -125,13 +133,15 @@ def aws_s3_backup_bucket_exists(config: Dict[str, Any], s3_client: S3Client) -> 
         config,
         "infra:aws:vpc:existing:storage:backup",
     )
+    region: str = get_config_value(
+        config,
+        "infra:aws:region",
+    )
     # TODO: Handle a specific parameter for backup S3 location once it exists
-    aws_s3_bucket_exists(config, backup_bucket_url, s3_client)
+    aws_s3_bucket_exists(region, backup_bucket_url, s3_client)
 
 
-def aws_s3_bucket_exists(
-    config: Dict[str, Any], bucket_url: str, s3_client: S3Client
-) -> None:
+def aws_s3_bucket_exists(region: str, bucket_url: str, s3_client: S3Client) -> None:
     """Check to see if the s3 bucket exists."""
     if not is_valid_s3a_url(bucket_url):
         fail(AWS_S3_BUCKET_INVALID, bucket_url)
@@ -139,15 +149,11 @@ def aws_s3_bucket_exists(
     # get bucket name
     bucket_name = parse_arn(convert_s3a_to_arn(bucket_url))["resource_type"]
 
-    env_region: str = get_config_value(
-        config,
-        "infra:aws:region",
-    )
     # check if bucket exists in same region
     try:
         if (
             s3_client.get_bucket_location(Bucket=bucket_name)["LocationConstraint"]
-            != env_region
+            != region
         ):
             fail(AWS_S3_BUCKET_NOT_IN_SAME_REGION_AS_ENVIRONMENT, bucket_name)
     except botocore.exceptions.ClientError as e:
