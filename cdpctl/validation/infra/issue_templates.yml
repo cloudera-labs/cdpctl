@@ -275,7 +275,6 @@ docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-az-
 id: AZURE_NSG_NOT_FOUND
 summary: "The Azure {0} Network Security Group {1} was not found in the subscription for the {2} Resource Group."
 docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-azure-network-security-groups.html
-
 ---
 id: AZURE_SUBNETS_NOT_COVERED_BY_NSG
 summary: "The Azure {0} Network Security Group {1} does not cover the following subnets:"

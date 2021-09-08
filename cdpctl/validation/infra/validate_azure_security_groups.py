@@ -36,7 +36,7 @@
 # BUSINESS ADVANTAGE OR UNAVAILABILITY, OR LOSS OR CORRUPTION OF
 # DATA.
 #
-# Source File
+# Source File: validate_azure_secutiry_groups.py
 """Azure Network Security Groups Validations."""
 import ipaddress
 from typing import Any, Dict, List
@@ -87,15 +87,13 @@ def azure_vnet_name_fixture(config: Dict[str, Any]):
 
 
 @pytest.fixture(name="azure_vnet_info")
-def azure_vnet_info_fixture(config, azure_network_client):
+def azure_vnet_info_fixture(
+    azure_vnet_name, azure_resource_group_name, azure_network_client
+):
     """Return the vnet info."""
-    vnet_name = get_config_value(config=config, key="infra:vpc:name")
-    resource_group_name = get_config_value(
-        config=config, key="infra:azure:metagroup:name"
-    )
     _load_vnet_info(
-        vnet_name=vnet_name,
-        resource_group_name=resource_group_name,
+        vnet_name=azure_vnet_name,
+        resource_group_name=azure_resource_group_name,
         azure_network_client=azure_network_client,
     )
     return _info["vnet"]
@@ -138,7 +136,7 @@ def azure_default_security_group_exists(
     resource_group_name = get_config_value(
         config=config, key="infra:azure:metagroup:name"
     )
-    nsg_name = get_config_value(config=config, key="env:security_group:default:name")
+    nsg_name = get_config_value(config=config, key="infra:security_group:default:name")
     try:
         _info["default_nsg"] = azure_network_client.network_security_groups.get(
             resource_group_name=resource_group_name,
@@ -174,7 +172,7 @@ def azure_knox_security_group_exists(
     resource_group_name = get_config_value(
         config=config, key="infra:azure:metagroup:name"
     )
-    nsg_name = get_config_value(config=config, key="env:security_group:knox:name")
+    nsg_name = get_config_value(config=config, key="infra:security_group:knox:name")
     try:
         _info["knox_nsg"] = azure_network_client.network_security_groups.get(
             resource_group_name=resource_group_name,

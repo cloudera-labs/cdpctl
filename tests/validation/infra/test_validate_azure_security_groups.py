@@ -36,7 +36,7 @@
 # BUSINESS ADVANTAGE OR UNAVAILABILITY, OR LOSS OR CORRUPTION OF
 # DATA.
 #
-# Source File Name:  test_validate_azure_region.py
+# Source File Name:  test_validate_azure_security_groups.py
 ###
 """Azure Network Security Groups Tests."""
 import dataclasses
@@ -69,20 +69,18 @@ def basic_azure_test_config_fixture() -> Dict[str, Any]:
                 "subscription_id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
                 "metagroup": {"name": "some-resource-group"},
             },
-        },
-        "env": {
             "security_group": {
                 "default": {"name": "default-nsg"},
                 "knox": {"name": "knox-nsg"},
-            }
-        },
+            },
+        }
     }
 
 
 def test_azure_default_security_group_exists_success(basic_azure_test_config):
     NetworkSecurityGroup = dataclasses.make_dataclass("NetworkSecurityGroup", ["name"])
     nsg = NetworkSecurityGroup(
-        basic_azure_test_config["env"]["security_group"]["default"]["name"]
+        basic_azure_test_config["infra"]["security_group"]["default"]["name"]
     )
     mock_network_mgmt_client = Mock(spec=NetworkManagementClient)
     mock_network_mgmt_client.network_security_groups.get.return_value = nsg
@@ -102,7 +100,7 @@ def test_azure_default_security_group_exists_failure(basic_azure_test_config):
 def test_azure_knox_security_group_exists_success(basic_azure_test_config):
     NetworkSecurityGroup = dataclasses.make_dataclass("NetworkSecurityGroup", ["name"])
     nsg = NetworkSecurityGroup(
-        basic_azure_test_config["env"]["security_group"]["knox"]["name"]
+        basic_azure_test_config["infra"]["security_group"]["knox"]["name"]
     )
     mock_network_mgmt_client = Mock(spec=NetworkManagementClient)
     mock_network_mgmt_client.network_security_groups.get.return_value = nsg
