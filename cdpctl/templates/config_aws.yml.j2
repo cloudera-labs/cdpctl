@@ -1,11 +1,11 @@
 ##
-# Cloudera cdpctl config
+# Cloudera cdpctl config for AWS cloud assets
 ##
 
 ## Specifies the Cloud Infrastructure provider.
-# options: aws
+# options: aws, azure
 # example: aws
-infra_type: {{ info['infra_type']|default("", true) }}
+infra_type: aws
 
 ## The network type being targeted
 # options: level0, level1

@@ -45,7 +45,7 @@ import sys
 
 import click
 
-from cdpctl import SUPPORTED_TARGETS
+from cdpctl import SUPPORTED_PLATFORMS, SUPPORTED_TARGETS
 from cdpctl.__version__ import __version__
 from cdpctl.command.config import render_skeleton
 from cdpctl.command.validate import run_validation
@@ -122,9 +122,16 @@ def config() -> None:
     help="The config file to output. Defaults to stdout.",
     type=click.Path(exists=False),
 )
-def skeleton(output_file) -> None:
+@click.option(
+    "-p",
+    "--platform",
+    default="aws",
+    help="The platform (AWS, Azure) for the cloud assets.",
+    type=click.Choice(SUPPORTED_PLATFORMS, case_sensitive=False),
+)
+def skeleton(output_file, platform: str) -> None:
     """Output the skeleton config."""
-    render_skeleton(output_file=output_file)
+    render_skeleton(output_file=output_file, platform=platform.lower())
 
 
 def print_version() -> None:
