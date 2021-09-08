@@ -271,3 +271,22 @@ docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-az-
 id: AZURE_IDENTITY_MISSING_ROLE
 summary: "The identity {0} is missing the {1} role for {2} location."
 docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-az-creating-managed-ids.html
+---
+id: AZURE_NSG_NOT_FOUND
+summary: "The Azure {0} Network Security Group {1} was not found in the subscription for the {2} Resource Group."
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-azure-network-security-groups.html
+---
+id: AZURE_SUBNETS_NOT_COVERED_BY_NSG
+summary: "The Azure {0} Network Security Group {1} does not cover the following subnets:"
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-azure-network-security-groups.html
+render_type: list
+---
+id: AZURE_SUBNETS_NOT_VALID_NSG
+summary: "The Azure {0} Network Security Group {1} does not provide enough access for the following subnets:"
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-azure-network-security-groups.html
+render_type: list
+---
+id: AZURE_CDP_CIDR_ACCESS_NOT_ALLOWED_FOR_PORT
+summary: "The Azure {0} Network Security Group {1} does not allow access to the following CDP CIDRs for {2} port {3}:"
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-azure-network-security-groups.html
+render_type: list
