@@ -15,13 +15,14 @@ The cdpctl Command Line Interface (CLI) provides the ability to check your cloud
     Public subnets have adequate IP range. ❌
 
 ## Supported Public Clouds
-Currently, **cdpctl** only supports AWS.
+Currently, **cdpctl** only supports the AWS and Azure cloud environments.
 
 ## Requirements
 
 **cdpctl** has the following requirements
 * Docker running locally.
 * Access to your ~/.aws directory for your AWS profile and credentials, or have the credenitals set via environment variables.
+* Access to your ~/.azure directory for your Azure credentials, or have the credenitals set via environment variables.
 
 ## Using
 
@@ -31,7 +32,7 @@ The simplest way of using **cdpctl** is to download the wrapper script:
 
 From there you can create a configuration file by running the following command:
 
-`./cdpctl config skeleton -o config.yml`
+`./cdpctl config skeleton --profile=aws -o config.yml`
 
 
 This will give you a basic configuration file to be able to edit and fill with your cloud config you wish to validate for use with CDP.
