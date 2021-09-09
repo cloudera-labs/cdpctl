@@ -20,9 +20,12 @@ RUN cd /tmp/src \
     && echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO main" | tee /etc/apt/sources.list.d/azure-cli.list \
     && apt update \
     && apt-get install azure-cli \
+    && apt clean \
+    && rm -rf /var/lib/apt/lists/* \
     && python3 setup.py install \
     && cd / \
     && rm -rf /tmp/src
+
 # Metadata
 LABEL maintainer="Cloudera Labs <cloudera-labs@cloudera.com>" \
       org.label-schema.url="https://github.com/cloudera-labs/cdpctl/blob/main/README.md" \
