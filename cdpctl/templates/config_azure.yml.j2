@@ -1,0 +1,79 @@
+##
+# Cloudera cdpctl config for Azure cloud assets
+##
+
+## Specifies the Cloud Infrastructure provider.
+# options: aws, azure
+# example: azure
+infra_type: azure
+
+## The network type being targeted
+# options: level0, level1
+# example: level1
+network_type:
+
+## Specify the default region you prefer for your infrastructure provider
+## It must be valid for the selected infra_type
+env:
+  ## Will Cluster Connectivity Manager (CCM) be used.
+  # options: true, false
+  # example: false
+  tunnel:
+
+  azure:
+    role:
+      name:
+        ## The Datalake Admin Identity to be used for the environment
+        # example: azure-cdp-datalakeadmin-identity
+        datalake_admin: {{ info['env:azure:role:name:datalake_admin']|default("", true) }}
+
+        ## The Assumer Identity to be used for the environment
+        # example: azure-cdp-assumer-identity
+        idbroker: {{ info['env:azure:role:name:idbroker']|default("", true) }}
+
+        ## The Logger Identity to be used for the environment
+        # example: azure-cdp-logger-identity
+        log: {{ info['env:azure:role:name:log']|default("", true) }}
+
+        ## The Ranger Audit Identity to be used for the environment
+        # example: azure-cdp-ranger_audit-identity
+        ranger_audit: {{ info['env:azure:role:name:ranger_audit']|default("", true) }}
+    storage:
+      ## The Storage Account used for the environment
+      name: {{ info['env:azure:storage:name']|default("", true) }}
+      path:
+        ## The Storage container path used for the data in the environment
+        # example: abfs://data@cdpstorage.dfs.core.windows.net
+        data:  {{ info['env:azure:storage:path:data']|default("", true) }}
+
+        ## The Storage container path used for the logs in the environment
+        # example: abfs://logs@cdpstorage.dfs.core.windows.net
+        logs: {{ info['env:azure:storage:path:logs']|default("", true) }}
+      suffix:
+
+infra:
+  azure:
+    ## Azure Subscription ID to use
+    subscription_id: {{ info['infra:azure:subscription_id']|default("", true) }}
+
+    ## Azure Region to use
+    # example: West US 2
+    region: {{ info['infra:azure:region']|default("", true) }}
+
+    metagroup:
+      ## Azure resource group to use
+      # example: cdp-rg
+      name: {{ info['infra:azure:metagroup:name']|default("", true) }}
+  vpc:
+    ## Azure VNet to use
+    # example: cdp-vnet
+    name: {{ info['infra:azure:vpc:name']|default("", true) }}
+  security_group:
+    ## Azure default Security Group
+    # example: cdp-default-nsg
+    default:
+      name: {{ info['infra:security_group:default']|default("", true) }}
+    ## Azure Security Group for Knox
+    # example: cdp-knox-nsg
+    knox:
+      name: {{ info['infra:security_group:knox']|default("", true) }}
