@@ -58,7 +58,11 @@
             "module": "cdpctl",
             "args": [
                 "config",
-                "skeleton"
+                "skeleton",
+                "--output_file",
+                "config.yml",
+                "--platform",
+                "aws"
             ]
         },
         {

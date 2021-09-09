@@ -45,15 +45,16 @@ from jinja2 import Environment, PackageLoader, select_autoescape
 
 from cdpctl.utils import smart_open
 
-CONFIG_TEMPLATE_NAME = "config.yml.j2"
+CONFIG_TEMPLATE_NAME = {"aws": "config_aws.yml.j2", "azure": "config_azure.yml.j2"}
 
 
-def render_skeleton(output_file: str):
+def render_skeleton(output_file: str, platform: str):
     """Render the skeleton config."""
     env = Environment(
         loader=PackageLoader(package_name="cdpctl", package_path="templates"),
         autoescape=select_autoescape(),
     )
-    config_template = env.get_template(CONFIG_TEMPLATE_NAME)
+
+    config_template = env.get_template(CONFIG_TEMPLATE_NAME[platform])
     with smart_open(output_file) as f:
         f.write(config_template.render(info={}))

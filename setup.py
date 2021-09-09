@@ -117,10 +117,11 @@ package_data = {
     "cdpctl": [
         "requirements*.txt",
         "validation/validation.ini",
-        "templates/config.yml.j2",
+        "templates/*.j2",
         "validation/renderer/templates/*.j2",
         "validation/**/issue_templates.yml",
         "validation/issue_templates.yml",
+        "validation/resources/*",
     ],
 }
 
