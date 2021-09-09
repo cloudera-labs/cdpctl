@@ -32,7 +32,7 @@ The simplest way of using **cdpctl** is to download the wrapper script:
 
 From there you can create a configuration file by running the following command:
 
-`./cdpctl config skeleton --profile=aws -o config.yml`
+`./cdpctl config skeleton --platform=aws -o config.yml`
 
 
 This will give you a basic configuration file to be able to edit and fill with your cloud config you wish to validate for use with CDP.
