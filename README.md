@@ -26,18 +26,19 @@ Currently, **cdpctl** only supports the AWS and Azure cloud environments.
 
 ## Using
 
-The simplest way of using **cdpctl** is to download the wrapper script:
+The simplest way of using **cdpctl** is to download the wrapper script. The wrapper script will enable you to run any cdpctl commands in a docker image. The retrieval of the docker image for the first time can take a few minutes.
 
-`curl https://raw.githubusercontent.com/cloudera-labs/cdpctl/main/install/cdpctl -o cdpctl && chmod 755 cdpctl`
+`curl https://raw.githubusercontent.com/cloudera-labs/cdpctl/main/install/cdpctl -o cdpctl && chmod 755 cdpctl` 
 
-From there you can create a configuration file by running the following command:
+In order to start validating your cloud assets for CDP, create a skeleton configuration file by running the following command, where
+you can set the platform for your assets:
 
 `./cdpctl config skeleton --platform=aws -o config.yml`
 
 
-This will give you a basic configuration file to be able to edit and fill with your cloud config you wish to validate for use with CDP.
+This will create a basic configuration file in your local folder. Make sure to edit the config file with your cloud assets you wish to validate for use with CDP.
 
-In order to validate the environment you can run the validation command as follows:
+In order to validate your cloud assets with the specific configuration, you can run the validation command as follows:
 
 `./cdpctl validate infra -c config.yml`
 
