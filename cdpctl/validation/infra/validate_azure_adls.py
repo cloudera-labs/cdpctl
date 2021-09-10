@@ -74,7 +74,7 @@ def azure_adls_data_storage_validation(
         data_path: str = get_config_value(
             config,
             "env:azure:storage:path:data",
-            key_value_expected=False,
+            key_value_expected=True,
             data_expected_issue=AZURE_STORAGE_NOT_DEFINED,
         )
         parsed_url = parse_adls_path(data_path)
@@ -102,7 +102,7 @@ def azure_adls_logs_storage_validation(
         logs_path: str = get_config_value(
             config,
             "env:azure:storage:path:logs",
-            key_value_expected=False,
+            key_value_expected=True,
             data_expected_issue=AZURE_STORAGE_NOT_DEFINED,
         )
         parsed_url = parse_adls_path(logs_path)
