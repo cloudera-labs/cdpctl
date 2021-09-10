@@ -1,4 +1,4 @@
-FROM python:3.8.11-slim
+FROM python:3.9.7-slim
 ARG BUILD_DATE
 ARG BUILD_TAG
 ARG BASE_IMAGE_TAG
@@ -6,21 +6,14 @@ ARG APPLICATION_VERSION
 
 ENV CLDR_BUILD_DATE=${BUILD_DATE}
 ENV CLDR_BUILD_VER=${BUILD_TAG}
-ENV CDPCTL_APPLICATION_VERSION=${APPLICATION_VERSION}
 
+ENV CDPCTL_APPLICATION_VERSION=${APPLICATION_VERSION}
 COPY . /tmp/src
 
 RUN cd /tmp/src \
+    && pip3 --no-cache-dir install azure-cli==2.28.0 \
     && echo "\"\"\"Version info.\"\"\"" > cdpctl/__version__.py \
     && echo "__version__ = \"${CDPCTL_APPLICATION_VERSION}\"" >> cdpctl/__version__.py \
-    && apt update \
-    && apt install -y --no-install-recommends ca-certificates curl apt-transport-https lsb-release gnupg \
-    && curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | tee /etc/apt/trusted.gpg.d/microsoft.gpg > /dev/null \
-    && export AZ_REPO=$(lsb_release -cs) \
-    && echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO main" | tee /etc/apt/sources.list.d/azure-cli.list \
-    && apt update \
-    && apt-get install azure-cli \
-    && apt clean \
     && rm -rf /var/lib/apt/lists/* \
     && python3 setup.py install \
     && cd / \
