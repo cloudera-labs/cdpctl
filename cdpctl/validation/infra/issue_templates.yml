@@ -85,7 +85,9 @@ summary: "S3 bucket {0} has forbidden access."
 docs_link: https://docs.cloudera.com/cdp/latest/requirements-aws/topics/mc-iam-policy-definitions.html
 ---
 id: AWS_NON_CCM_DEFAULT_SG_NEEDS_TO_ALLOW_CDP_CIDRS
-summary: "The default security group {0} is missing TCP port 9443 for the following Cloudera CDP CIDRs when not using CCM (env:tunnel = false)."
+summary: >
+  The default security group {0} is missing TCP port 9443 for the following Cloudera CDP
+  CIDRs when not using CCM (env:tunnel = false).
 render_type: list
 docs_link: https://docs.cloudera.com/cdp/latest/requirements-aws/topics/mc-aws-req-security-groups.html
 ---
@@ -149,7 +151,9 @@ docs_link: https://docs.cloudera.com/cdp/latest/requirements-aws/topics/mc-aws-r
 render_type: list
 ---
 id: AWS_SUBNETS_MISSING_K8S_LB_TAG
-summary: "These {0} Subnets do not have the nessesary 'kubernetes.io/role/elb' tags to run the Data Engineering, DataFlow, Data Warehouse, or Machine Learning experiences."
+summary: >
+  These {0} Subnets do not have the nessesary 'kubernetes.io/role/elb' tags to run the
+  Data Engineering, DataFlow, Data Warehouse, or Machine Learning experiences.
 render_type: list
 docs_link: https://docs.cloudera.com/cdp/latest/requirements-aws/topics/mc-aws-req-vpc.html
 ---
@@ -159,13 +163,138 @@ render_type: list
 docs_link: https://docs.cloudera.com/cdp/latest/requirements-aws/topics/mc-aws-req-vpc.html
 ---
 id: AWS_DNS_SUPPORT_NOT_ENABLED_FOR_VPC
-summary: "DNS support is not enabled for VPC id {0}, this is needed to run the Data Engineering, DataFlow, Data Warehouse, or Machine Learning experiences."
+summary: >
+  DNS support is not enabled for VPC id {0}, this is needed to run the Data Engineering,
+  DataFlow, Data Warehouse, or Machine Learning experiences.
 docs_link: https://docs.cloudera.com/cdp/latest/requirements-aws/topics/mc-aws-req-vpc.html
 ---
 id: AWS_VPC_NOT_FOUND_IN_ACCOUNT
 summary: "VPC ID {0} set in infra:aws:vpc:existing:vpc_id was not found in the AWS account."
 docs_link: https://docs.cloudera.com/cdp/latest/requirements-aws/topics/mc-aws-req-vpc.html
 ---
+id: AZURE_REGION_NOT_SUPPORTED
+summary: "The Azure Region ({0}) is not supported by CDP."
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-azure-region.html
+---
+id: AZURE_REGION_FEATURES_NOT_SUPPORTED
+summary: "The following experinces are not supported in the {0} Azure Region"
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-azure-regions.html
+render_type: list
+---
+id: AZURE_VNET_NOT_FOUND
+summary: "The Azure Virtual Network {0} was not found in the subscription for the {1} Resource Group."
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-azure-vnet-and-subnets.html
+---
+id: AZURE_VNET_AT_LEAST_ONE_SUBNET_NEEDED
+summary: "The Azure Virtual Network {0} requires at least one (1) Subnet defined."
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-azure-vnet-and-subnets.html
+---
+id: AZURE_VNET_SHOULD_HAVE_CLASS_B_TOTAL_ADDRESSES
+summary: >
+  The Azure Virtual Network {0} address space only has a total of {1} IP addresses.
+  It Should be a Class B (/16) with at least 65,536 IP addresses.
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-network-planning-azure.html
+---
+id: AZURE_VNET_ADDRESS_SPACE_OVERLAPS_RESERVED
+summary: "The Azure Virtual Network {0} address space overlaps the following reserved networks."
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-network-planning-azure.html
+render_type: list
+---
+id: AZURE_VNET_ADDRESS_SPACE_HAS_PUBLIC_CIDRS
+summary: "The Azure Virtual Network {0} address space contains the following Public IP address range(s)."
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-network-planning-azure.html
+render_type: list
+---
+id: AZURE_VNET_SUBNET_NEEDS_CLASS_C_FOR_DLDH
+summary: >
+  The Azure Virtual Network {0} does not contain a subnet with at least a /24 address
+  range for Data Lake and Data Hub."
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-network-planning-azure.html
+---
+id: AZURE_VNET_SUBNET_NEEDS_CLASS_C_FOR_DLDH
+summary: >
+  The Azure Virtual Network {0} does not contain a subnet with at least a /24 address
+  range for Data Lake and Data Hub.
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-network-planning-azure.html
+---
+id: AZURE_VNET_NOT_ENOUGH_DW_SIZED_SUBNETS
+summary: >
+  The Azure Virtual Network {0} does not contain at least one (1) /20 addresss range
+  subnets to support the Data Warehouse experience.
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-network-planning-azure.html
+---
+id: AZURE_VNET_NOT_ENOUGH_DW_SUBNETS
+summary: >
+  The Azure Virtual Network {0} does not contain enough Subnets to support an environment with
+  a Data Warehouse experience.
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-network-planning-azure.html
+---
+id: AZURE_VNET_NO_SUBNET_WITH_NETAPP_DELEGATION_FOR_ML
+summary: >
+  The Azure Virtual Network {0} does not have a Subnet delegated to the Azure NetApp Files
+  service needed for the Machine Learning experience.
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-network-planning-azure.html
+---
+id: AZURE_VNET_SUBNET_WITH_NETAPP_DELEGATION_NOT_SIZED_FOR_ML
+summary: >
+  The Azure Virtual Network {0} does not have a Subnet delegated to the Azure NetApp Files that
+  has at least a /28 address range needed for the Machine Learning experience.
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-network-planning-azure.html
+---
+id: AZURE_VNET_SUBNET_DOES_NOT_HAVE_SUBNETS_FOR_WORKSPACES_IN_ML
+summary: "The Azure Virtual Network {0} does not appear to have enough Subnets for workspaces when using the Machine Learning experience."
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-network-planning-azure.html
+---
+id: AZURE_VNET_SUBNET_DOES_NOT_HAVE_SUBNETS_FOR_DE
+summary: >
+  The Azure Virtual Network {0} does not appear to have enough Subnets to run a Data Engineering experience.
+  A Data Engineering experience needs at least one (1) dedicated /24 network.
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-network-planning-azure.html
+---
+id: AZURE_VNET_SUBNET_DOES_NOT_HAVE_SERVICE_ENDPOINTS_FOR_DL
+summary: >
+  The Azure Virtual Network {0} does not appear to have a compatible Subnet with SQL service endpoints
+  setup for the Data Lake to access the database.
+  If this is not set up, private endpoints for PostgreSQL will need to be used.
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-set-up-azure-service-endpoints-for-network.html
+---
+id: AZURE_VNET_SUBNET_DOES_NOT_HAVE_SERVICE_ENDPOINTS_FOR_DW
+summary: >
+  The Azure Virtual Network {0} does not appear to have a compatible Subnet with the service
+  endpoints setup for the Data Warehouse experience to access storage.
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-set-up-azure-service-endpoints-for-network.html
+---
+id: AZURE_IDENTITY_NOT_FOUND
+summary: "No identity found with name {0}."
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-az-creating-managed-ids.html
+---
+id: AZURE_IDENTITY_MISSING_ROLE
+summary: "The identity {0} is missing the {1} role for {2} location."
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-az-creating-managed-ids.html
+---
+id: AZURE_NSG_NOT_FOUND
+summary: "The Azure {0} Network Security Group {1} was not found in the subscription for the {2} Resource Group."
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-azure-network-security-groups.html
+---
+id: AZURE_SUBNETS_NOT_COVERED_BY_NSG
+summary: "The Azure {0} Network Security Group {1} does not cover the following subnets:"
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-azure-network-security-groups.html
+render_type: list
+---
+id: AZURE_SUBNETS_NOT_VALID_NSG
+summary: "The Azure {0} Network Security Group {1} does not provide enough access for the following subnets:"
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-azure-network-security-groups.html
+render_type: list
+---
+id: AZURE_CDP_CIDR_ACCESS_NOT_ALLOWED_FOR_PORT
+summary: "The Azure {0} Network Security Group {1} does not allow access to the following CDP CIDRs for {2} port {3}:"
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-azure-network-security-groups.html
+render_type: list
+---
 id: AWS_SUBNETS_WITH_PUBLIC_IPS_ENABLED
 summary: "These {0} Subnets must have 'Auto-assign Public IPs' disabled for a fully-private network configuration."
 render_type: list
+---
+id: AWS_S3_BUCKET_NOT_IN_SAME_REGION_AS_ENVIRONMENT
+summary: "S3 bucket {0} does not exist in the same region as the environment."
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-aws/topics/mc-aws-req-s3.html

@@ -67,13 +67,16 @@ def test_aws_s3_data_bucket_exists(s3_client: S3Client) -> None:
     """Test the check of an existing s3 bucket."""
     config: Dict[str, Any] = {
         "infra": {
-            "aws": {"vpc": {"existing": {"storage": {"data": "s3a://mybucket/data"}}}}
+            "aws": {
+                "region": "us-west-2",
+                "vpc": {"existing": {"storage": {"data": "s3a://mybucket/data"}}},
+            }
         }
     }
     stubber = Stubber(s3_client)
     stubber.add_response(
-        "head_bucket",
-        {"ResponseMetadata": {}},
+        "get_bucket_location",
+        {"LocationConstraint": "us-west-2"},
         expected_params={"Bucket": "mybucket"},
     )
     stubber.activate()
@@ -91,10 +94,9 @@ def test_aws_s3_data_bucket_missing(s3_client: S3Client) -> None:
     }
     stubber = Stubber(s3_client)
     stubber.add_client_error(
-        "head_bucket",
-        service_error_code="404",
-        service_message="Bucket Not Found",
-        http_status_code=404,
+        "get_bucket_location",
+        service_error_code="NoSuchBucket",
+        service_message="The specified bucket does not exist",
         expected_params={"Bucket": "mybucket"},
     )
     stubber.activate()
@@ -123,13 +125,16 @@ def test_aws_s3_logs_bucket_exists(s3_client: S3Client) -> None:
     """Test the check of an existing s3 bucket."""
     config: Dict[str, Any] = {
         "infra": {
-            "aws": {"vpc": {"existing": {"storage": {"logs": "s3a://mybucket/logs"}}}}
+            "aws": {
+                "region": "us-west-2",
+                "vpc": {"existing": {"storage": {"logs": "s3a://mybucket/logs"}}},
+            }
         }
     }
     stubber = Stubber(s3_client)
     stubber.add_response(
-        "head_bucket",
-        {"ResponseMetadata": {}},
+        "get_bucket_location",
+        {"LocationConstraint": "us-west-2"},
         expected_params={"Bucket": "mybucket"},
     )
     stubber.activate()
@@ -147,10 +152,9 @@ def test_aws_s3_logs_bucket_missing(s3_client: S3Client) -> None:
     }
     stubber = Stubber(s3_client)
     stubber.add_client_error(
-        "head_bucket",
-        service_error_code="404",
-        service_message="Bucket Not Found",
-        http_status_code=404,
+        "get_bucket_location",
+        service_error_code="NoSuchBucket",
+        service_message="The specified bucket does not exist",
         expected_params={"Bucket": "mybucket"},
     )
     stubber.activate()
@@ -180,14 +184,15 @@ def test_aws_s3_backup_bucket_exists(s3_client: S3Client) -> None:
     config: Dict[str, Any] = {
         "infra": {
             "aws": {
-                "vpc": {"existing": {"storage": {"backup": "s3a://mybucket/backup"}}}
+                "region": "us-west-2",
+                "vpc": {"existing": {"storage": {"backup": "s3a://mybucket/backup"}}},
             }
         }
     }
     stubber = Stubber(s3_client)
     stubber.add_response(
-        "head_bucket",
-        {"ResponseMetadata": {}},
+        "get_bucket_location",
+        {"LocationConstraint": "us-west-2"},
         expected_params={"Bucket": "mybucket"},
     )
     stubber.activate()
@@ -207,10 +212,9 @@ def test_aws_s3_backup_bucket_missing(s3_client: S3Client) -> None:
     }
     stubber = Stubber(s3_client)
     stubber.add_client_error(
-        "head_bucket",
-        service_error_code="404",
-        service_message="Bucket Not Found",
-        http_status_code=404,
+        "get_bucket_location",
+        service_error_code="NoSuchBucket",
+        service_message="The specified bucket does not exist",
         expected_params={"Bucket": "mybucket"},
     )
     stubber.activate()
