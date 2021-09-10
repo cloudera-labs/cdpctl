@@ -330,6 +330,11 @@ def azure_subnets_accessable_by_default_security_group(
 @pytest.mark.azure
 @pytest.mark.infra
 @pytest.mark.config_value(path="env:tunnel", value=False)
+@pytest.mark.dependency(
+    depends=[
+        "azure_default_security_group_exists_validation",
+    ]
+)
 def azure_default_security_group_allows_tcp_443_to_cdp_cidr_validation(
     azure_default_nsg_info,
     cdp_cidrs: List[str],
@@ -343,6 +348,11 @@ def azure_default_security_group_allows_tcp_443_to_cdp_cidr_validation(
 @pytest.mark.azure
 @pytest.mark.infra
 @pytest.mark.config_value(path="env:tunnel", value=False)
+@pytest.mark.dependency(
+    depends=[
+        "azure_knox_security_group_exists_validation",
+    ]
+)
 def azure_knox_security_group_allows_tcp_443_to_cdp_cidr_validation(
     azure_knox_nsg_info,
     cdp_cidrs: List[str],
@@ -356,6 +366,11 @@ def azure_knox_security_group_allows_tcp_443_to_cdp_cidr_validation(
 @pytest.mark.azure
 @pytest.mark.infra
 @pytest.mark.config_value(path="env:tunnel", value=False)
+@pytest.mark.dependency(
+    depends=[
+        "azure_knox_security_group_exists_validation",
+    ]
+)
 def azure_knox_security_group_allows_tcp_9443_to_cdp_cidr_validation(
     azure_knox_nsg_info,
     cdp_cidrs: List[str],
