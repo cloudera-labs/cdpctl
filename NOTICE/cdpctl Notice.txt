@@ -9,7 +9,7 @@ MOST PERMISSIVE LICENSE APPLIES TO THIRD PARTY SOFTWARE
 Where the Third Party Software contains dual or multiple licensing options, the most permissive license compatible with your Cloudera software license applies.
 
 CONTAINERIZED OPERATING SYSTEM
-The Cloudera software runs on certain operating systems, such as the Linux operating system, which may be delivered to you with a containerized installation of the operating system for your convenience. Cloudera software constitutes a separate and independent work from the operating system, and the provided container is an aggregation of the operating system and the Cloudera software. 
+The Cloudera software runs on certain operating systems, such as the Linux operating system, which may be delivered to you with a containerized installation of the operating system for your convenience. Cloudera software constitutes a separate and independent work from the operating system, and the provided container is an aggregation of the operating system and the Cloudera software.
 
 NO WARRANTY; NO LIABILITY; NO INDEMNIFICATION/HOLD HARMLESS
 Notwithstanding any agreement recipient may have with Cloudera: (A) CLOUDERA PROVIDES THRID PARTY SOFTWARE TO RECIPIENT WITHOUT WARRANTIES OF ANY KIND; (B) CLOUDERA DISCLAIMS ANY AND ALL EXPRESS AND IMPLIED WARRANTIES WITH RESPECT TO THIRD PARTY SOFTWARE, INCLUDING BUT NOT LIMITED TO IMPLIED WARRANTIES OF TITLE, NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE; (C) CLOUDERA IS NOT LIABLE TO RECIPIENT, AND WILL NOT DEFEND, INDEMNIFY, NOR HOLD RECIPIENT HARMLESS FOR ANY CLAIMS ARISING FROM OR RELATED TO THIRD PARTY SOFTWARE; AND (D) WITH RESPECT TO THE THIRD PARTY SOFTWARE, CLOUDERA IS NOT LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, PUNITIVE OR CONSEQUENTIAL DAMAGES INCLUDING, BUT NOT LIMITED TO, DAMAGES RELATED TO LOST REVENUE, LOST PROFITS, LOSS OF INCOME, LOSS OF BUSINESS ADVANTAGE OR UNAVAILABILITY, LOSS OR CORRUPTION OF DATA.
@@ -19,7 +19,7 @@ To the extent required by the licenses associated with the Third Party Software,
 
 Further, to the extent Cloudera delivers a containerized installation of an operating system, such operating system contains open source software constituting Third Party Software, including software licensed under the GNU General Public License (GPL).  Such Third Party Software may or may not be identified separately in the notices below.  To the extent required by the GPL or other licenses associated with the Third Party Software under which you receive only binaries, Cloudera will provide a copy of the Third Party Software’s source code upon request and at a reasonable fee.  All requests for source code should be made in a letter clearly identifying the components for which the source code is requested, typically sent within three (3) years from the date you received the covered binary, and mailed to “Cloudera, Inc., ATTN: Legal Dept., 5470 Great America Pkwy, Santa Clara, CA 95054”.  Your written request should include: (i) the name and version number of the covered binary, (ii) the version number of the Cloudera product containing the covered binary, (iii) your name, (iv) your company or organization name (if applicable), (v) the license under which the source code must be provided, and (vi) your return mailing and email address (if available).
 
-Components: 
+Components:
 
 ACL 2.2.53 : (GNU Lesser General Public License v2.1 or later AND GNU General Public License v2.0 or later)
 adduser 3.118 : GNU General Public License v2.0 or later
@@ -106,7 +106,7 @@ pipdeptree 1.0.0 : MIT License
 progressbar2 3.53.1 : BSD 3-clause "New" or "Revised" License
 ptyprocess 0.7.0 : ISC License
 py 1.10.0 : MIT License
-py3-validators 0.18.2 : 
+py3-validators 0.18.2 :
 Pyparsing 3.0.0b2 : MIT License
 pytest 6.2.4 : MIT License
 Python programming language 3.8.10 : Python Software Foundation License 2.0
@@ -136,7 +136,7 @@ XZ Utils 5.2.4 : (Public Domain AND GNU General Public License v2.0 or later)
 zlib 1.2.11 : zlib License
 zstd 1.3.8 : (BSD 3-clause "New" or "Revised" License AND GNU General Public License v2.0 only)
 
-Licenses: 
+Licenses:
 
 Apache License 2.0
 (ansible-runner 2.0.0, ansible-runner 2.0.0.0b1, boto3 1.13.14, boto3 1.17.95, botocore 1.20.101, botocore 1.20.93, Calico SDN v3.10.2, jmespath 0.10.0, msgpack-python 1.0.1, python-daemon (pypi) 2.3.0, python-s3transfer 0.4.2)
@@ -615,9 +615,9 @@ SUCH DAMAGE
 BSD 3-clause "New" or "Revised" License
 (GNU C Library 2.28)
 
-Copyright (c) 2010, Oracle America, Inc. 
+Copyright (c) 2010, Oracle America, Inc.
 
-   
+
 
 Redistribution and use in source and binary forms, with or without
     modification, are permitted provided that the following conditions are
@@ -838,13 +838,13 @@ modification, are permitted provided that the following conditions are
 met:
 
     (1) Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer. 
+    notice, this list of conditions and the following disclaimer.
 
     (2) Redistributions in binary form must reproduce the above copyright
     notice, this list of conditions and the following disclaimer in
     the documentation and/or other materials provided with the
-    distribution.  
-    
+    distribution.
+
     (3) The name of the author may not be used to
     endorse or promote products derived from this software without
     specific prior written permission.
@@ -7720,12 +7720,12 @@ http://opensource.org/licenses/isc-license.txt
     Copyright (c) 2013-2014, Pexpect development team
     Copyright (c) 2012, Noah Spurrier <noah@noah.org>
 
-   
+
 
 Permission to use, copy, modify, and/or distribute this software for any
     purpose with or without fee is hereby granted, provided that the above
     copyright notice and this permission notice appear in all copies.
-    
+
     THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
     WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
     MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -8095,12 +8095,12 @@ Version 2.0
 
   means
 
-    a. 
+    a.
 
       that the initial Contributor has attached the notice described in Exhibit B
       to the Covered Software; or
 
-    b. 
+    b.
 
       that the Covered Software was made available under the terms of version 1.1
       or earlier of the License, but not also under the terms of a Secondary
@@ -8129,12 +8129,12 @@ Version 2.0
 
   means any of the following:
 
-    a. 
+    a.
 
       any file in Source Code Form that results from an addition to, deletion
       from, or modification of the contents of Covered Software; or
 
-    b. 
+    b.
 
       any new file in Source Code Form that contains any Covered Software.
 
@@ -8176,7 +8176,7 @@ Version 2.0
   Each Contributor hereby grants You a world-wide, royalty-free, non-exclusive
   license:
 
-    a. 
+    a.
 
       under intellectual property rights (other than patent or trademark)
       Licensable by such Contributor to use, reproduce, make available, modify,
@@ -8184,7 +8184,7 @@ Version 2.0
       either on an unmodified basis, with Modifications, or as part of a Larger
       Work; and
 
-    b. 
+    b.
 
       under Patent Claims of such Contributor to make, use, sell, offer for sale,
       have made, import, and otherwise transfer either its Contributions or its
@@ -8205,18 +8205,18 @@ Version 2.0
   or licensing of Covered Software under this License. Notwithstanding
   Section 2.1(b) above, no patent license is granted by a Contributor:
 
-    a. 
+    a.
 
       for any code that a Contributor has removed from Covered Software; or
 
-    b. 
+    b.
 
       for infringements caused by: (i) Your and any other third party's
       modifications of Covered Software, or (ii) the combination of its
       Contributions with other software (except as part of its Contributor
       Version); or
 
-    c. 
+    c.
 
       under Patent Claims infringed by Covered Software in the absence of its
       Contributions.
@@ -8271,7 +8271,7 @@ Version 2.0
 
   If You distribute Covered Software in Executable Form then:
 
-    a. 
+    a.
 
       such Covered Software must also be made available in Source Code Form, as
       described in Section 3.1, and You must inform recipients of the Executable
@@ -8279,7 +8279,7 @@ Version 2.0
       means in a timely manner, at a charge no more than the cost of distribution
       to the recipient; and
 
-    b. 
+    b.
 
       You may distribute such Executable Form under the terms of this License, or
       sublicense it under different terms, provided that the license for the
@@ -9266,4 +9266,3 @@ the following restrictions:
       misrepresented as being the original software.
 
       3. This notice may not be removed or altered from any source distribution.
-
