@@ -323,7 +323,7 @@ def azure_data_required_actions() -> List[str]:
 
 
 @pytest.fixture
-def azure_data_required_dataactions() -> List[str]:
+def azure_data_required_data_actions() -> List[str]:
     """Get the Azure data actions needed for the data identity."""
     return [
         "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/runAsSuperUser/action",  # noqa: E501
@@ -349,7 +349,7 @@ def azure_ranger_audit_required_actions() -> List[str]:
 
 
 @pytest.fixture
-def azure_ranger_audit_required_dataactions() -> List[str]:
+def azure_ranger_audit_required_data_actions() -> List[str]:
     """Get the Azure data actions needed for the ranger audit identity."""
     return ["Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write"]
 
@@ -358,12 +358,11 @@ def azure_ranger_audit_required_dataactions() -> List[str]:
 def azure_logger_required_actions() -> List[str]:
     """Get the Azure actions needed for the logger identity."""
     return [
-        "Microsoft.Storage/storageAccounts/blobServices/write",
         "Microsoft.Storage/storageAccounts/blobServices/containers/write",
     ]
 
 
 @pytest.fixture
-def azure_logger_required_dataactions() -> List[str]:
+def azure_logger_required_data_actions() -> List[str]:
     """Get the Azure data actions needed for the logger identity."""
     return ["Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write"]

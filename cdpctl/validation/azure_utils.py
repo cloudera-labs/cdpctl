@@ -42,8 +42,9 @@
 """Azure Specific Utils."""
 import csv
 import os
+import re
 from enum import Enum
-from typing import Iterable, Optional, Tuple
+from typing import Iterable, List, Optional, Tuple
 
 from azure.core.exceptions import ResourceNotFoundError
 from azure.identity import AzureCliCredential
@@ -78,8 +79,9 @@ def get_client(client_type: str, config, url=None):
 
     if client_type == "auth":
         return AuthorizationManagementClient(
-            credential,
-            subscription_id,
+            credential=credential,
+            subscription_id=subscription_id,
+            api_version="2018-01-01-preview",
         )
 
     if client_type == "datalake":
@@ -207,13 +209,58 @@ def check_for_role(
 
     for role_assignment in role_assigments:
         definition = auth_client.role_definitions.get_by_id(
-            role_assignment.properties.role_definition_id
+            role_assignment.role_definition_id
         )
 
         if (
             definition.role_name == proper_role
-            and role_assignment.properties.scope == proper_scope
+            and role_assignment.scope == proper_scope
         ):
             found_role = True
 
     return found_role
+
+
+def check_for_actions(
+    auth_client: AuthorizationManagementClient,
+    role_assigments: Iterable[RoleAssignmentListResult],
+    proper_scope: str,
+    required_actions: List[str],
+    required_data_actions: List[str],
+):
+    """Check if the role assignments passed have all the required actions."""
+    found_required_actions = []
+    found_required_data_actions = []
+
+    for role_assignment in role_assigments:
+        if role_assignment.scope == proper_scope:
+            role_definition = auth_client.role_definitions.get_by_id(
+                role_assignment.role_definition_id
+            )
+            for permissions in role_definition.permissions:
+                for action in permissions.actions:
+                    ar = re.compile(action.replace(".", r"\."))  # noqa: W605
+                    for matched_action in list(filter(ar.match, required_actions)):
+                        found_required_actions.append(matched_action)
+
+                for not_action in permissions.not_actions:
+                    if not_action in found_required_actions:
+                        found_required_actions.remove(not_action)
+
+                for data_action in permissions.data_actions:
+                    dar = re.compile(data_action.replace(".", r"\."))  # noqa: W605
+                    for matched_data_action in list(
+                        filter(dar.match, required_data_actions)
+                    ):
+                        found_required_data_actions.append(matched_data_action)
+
+                for not_data_action in permissions.not_data_actions:
+                    if not_data_action in found_required_data_actions:
+                        found_required_data_actions.remove(not_data_action)
+
+    missing_actions = list(sorted(set(required_actions) - set(found_required_actions)))
+    missing_data_actions = list(
+        sorted(set(required_data_actions) - set(found_required_data_actions))
+    )
+
+    return missing_actions, missing_data_actions
