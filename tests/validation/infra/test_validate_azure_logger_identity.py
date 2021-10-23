@@ -47,7 +47,8 @@ from azure.mgmt.authorization import AuthorizationManagementClient
 from azure.mgmt.resource import ResourceManagementClient
 
 from cdpctl.validation.infra.validate_azure_logger_identity import (
-    _azure_logger_blob_permissions,
+    _azure_logger_container_actions_check,
+    _azure_logger_container_data_actions_check,
 )
 from tests.validation import expect_validation_failure, expect_validation_success
 
@@ -120,7 +121,7 @@ def setup_mocks(
     )
 
 
-def test_azure_logger_blob_permissions_success() -> None:
+def test_azure_logger_container_actions_check_success() -> None:
     identity_name = "logger"
     scope = "/subscriptions/test_id/resourceGroups/rg_name/providers/Microsoft.Storage/storageAccounts/storage_name/blobServices/default/containers/logs"
 
@@ -134,23 +135,47 @@ def test_azure_logger_blob_permissions_success() -> None:
         scope=scope,
         actions=["Microsoft.Storage/storageAccounts/blobServices/containers/write"],
         not_actions=[],
-        data_actions=[
-            "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write"
-        ],
+        data_actions=[],
         not_data_actions=[],
     )
 
-    func = expect_validation_success(_azure_logger_blob_permissions)
+    func = expect_validation_success(_azure_logger_container_actions_check)
     func(
         get_config("success"),
         auth_client,
         resource_client,
         ["Microsoft.Storage/storageAccounts/blobServices/containers/write"],
-        ["Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write"],
     )
 
 
-def test_azure_logger_blob_permissions_fail_missing_actions() -> None:
+def test_azure_logger_container_actions_check_fail() -> None:
+    identity_name = "logger"
+    scope = "/subscriptions/test_id/resourceGroups/rg_name/providers/Microsoft.Storage/storageAccounts/storage_name/blobServices/default/containers/logs"
+
+    resource_client = Mock(spec=ResourceManagementClient)
+    auth_client = Mock(spec=AuthorizationManagementClient)
+
+    setup_mocks(
+        resource_client=resource_client,
+        auth_client=auth_client,
+        identity_name=identity_name,
+        scope=scope,
+        actions=[],
+        not_actions=[],
+        data_actions=[],
+        not_data_actions=[],
+    )
+
+    func = expect_validation_failure(_azure_logger_container_actions_check)
+    func(
+        get_config("fail"),
+        auth_client,
+        resource_client,
+        ["Microsoft.Storage/storageAccounts/blobServices/containers/write"],
+    )
+
+
+def test_azure_logger_container_data_actions_check_success() -> None:
     identity_name = "logger"
     scope = "/subscriptions/test_id/resourceGroups/rg_name/providers/Microsoft.Storage/storageAccounts/storage_name/blobServices/default/containers/logs"
 
@@ -170,17 +195,16 @@ def test_azure_logger_blob_permissions_fail_missing_actions() -> None:
         not_data_actions=[],
     )
 
-    func = expect_validation_failure(_azure_logger_blob_permissions)
+    func = expect_validation_success(_azure_logger_container_data_actions_check)
     func(
-        get_config("fail"),
+        get_config("success"),
         auth_client,
         resource_client,
-        ["Microsoft.Storage/storageAccounts/blobServices/containers/write"],
         ["Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write"],
     )
 
 
-def test_azure_logger_blob_permissions_fail_missing_data_actions() -> None:
+def test_logger_container_data_actions_check_fail() -> None:
     identity_name = "logger"
     scope = "/subscriptions/test_id/resourceGroups/rg_name/providers/Microsoft.Storage/storageAccounts/storage_name/blobServices/default/containers/logs"
 
@@ -198,11 +222,10 @@ def test_azure_logger_blob_permissions_fail_missing_data_actions() -> None:
         not_data_actions=[],
     )
 
-    func = expect_validation_failure(_azure_logger_blob_permissions)
+    func = expect_validation_failure(_azure_logger_container_data_actions_check)
     func(
         get_config("fail"),
         auth_client,
         resource_client,
-        ["Microsoft.Storage/storageAccounts/blobServices/containers/write"],
         ["Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write"],
     )
