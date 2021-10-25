@@ -343,7 +343,6 @@ def azure_data_required_data_actions() -> List[str]:
 def azure_ranger_audit_required_actions() -> List[str]:
     """Get the Azure actions needed for the ranger audit identity."""
     return [
-        "Microsoft.Storage/storageAccounts/blobServices/write",
         "Microsoft.Storage/storageAccounts/blobServices/containers/write",
     ]
 
