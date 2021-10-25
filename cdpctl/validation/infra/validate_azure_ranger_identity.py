@@ -120,7 +120,7 @@ def _azure_ranger_audit_container_actions_check(
         sub_id, rg_name, storage_name, container_name
     )
 
-    missing_actions, missing_data_actions = check_for_actions(
+    missing_actions, _ = check_for_actions(
         auth_client=auth_client,
         role_assigments=role_assignments,
         proper_scope=proper_scope,
@@ -131,15 +131,6 @@ def _azure_ranger_audit_container_actions_check(
     if missing_actions:
         fail(
             AZURE_IDENTITY_MISSING_ACTIONS_FOR_LOCATION,
-            subjects=[
-                ident_name,
-                f"storageAccounts/{storage_name}/blobServices/default/containers/{container_name}",  # noqa: E501
-            ],
-            resources=missing_actions,
-        )
-    if missing_data_actions:
-        fail(
-            AZURE_IDENTITY_MISSING_DATA_ACTIONS_FOR_LOCATION,
             subjects=[
                 ident_name,
                 f"storageAccounts/{storage_name}/blobServices/default/containers/{container_name}",  # noqa: E501
@@ -196,7 +187,7 @@ def _azure_ranger_audit_container_data_actions_check(
         sub_id, rg_name, storage_name, container_name
     )
 
-    missing_actions, missing_data_actions = check_for_actions(
+    _, missing_data_actions = check_for_actions(
         auth_client=auth_client,
         role_assigments=role_assignments,
         proper_scope=proper_scope,
@@ -211,5 +202,5 @@ def _azure_ranger_audit_container_data_actions_check(
                 ident_name,
                 f"storageAccounts/{storage_name}/blobServices/default/containers/{container_name}",  # noqa: E501
             ],
-            resources=missing_actions,
+            resources=missing_data_actions,
         )
