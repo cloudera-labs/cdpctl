@@ -88,11 +88,8 @@ def setup_mocks(
     AuthListResponseProperties = dataclasses.make_dataclass(
         "AuthListResponseProperties", [("role_definition_id", str), ("scope", str)]
     )
-    AuthListResponse = dataclasses.make_dataclass(
-        "AuthListResponse", [("properties", AuthListResponseProperties)]
-    )
     auth_client.role_assignments.list.return_value = [
-        AuthListResponse(AuthListResponseProperties(identity_name, scope))
+        AuthListResponseProperties(identity_name, scope)
     ]
 
     AuthGetByIdResponse = dataclasses.make_dataclass(

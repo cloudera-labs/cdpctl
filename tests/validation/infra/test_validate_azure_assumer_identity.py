@@ -100,11 +100,8 @@ def setup_mocks(
     AuthListResponseProperties = dataclasses.make_dataclass(
         "AuthListResponseProperties", [("role_definition_id", str), ("scope", str)]
     )
-    AuthListResponse = dataclasses.make_dataclass(
-        "AuthListResponse", [("properties", AuthListResponseProperties)]
-    )
     auth_client.role_assignments.list.return_value = [
-        AuthListResponse(AuthListResponseProperties(identity_name, scope))
+        AuthListResponseProperties(identity_name, scope)
     ]
 
     AuthGetByIdResponse = dataclasses.make_dataclass(
@@ -114,9 +111,7 @@ def setup_mocks(
         azure_role
     )
 
-    assumer_info["assignments"] = [
-        AuthListResponse(AuthListResponseProperties(identity_name, scope))
-    ]
+    assumer_info["assignments"] = [AuthListResponseProperties(identity_name, scope)]
     assumer_info["name"] = identity_name
     assumer_info["sub_id"] = "test_id"
     assumer_info["rg_name"] = "rg_name"
