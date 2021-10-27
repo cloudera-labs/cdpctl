@@ -239,24 +239,38 @@ def check_for_actions(
             )
             for permissions in role_definition.permissions:
                 for action in permissions.actions:
-                    ar = re.compile(action.replace(".", r"\."))  # noqa: W605
+                    ar = re.compile(
+                        action.replace(".", r"\.").replace("*", r".*")
+                    )  # noqa: W605
                     for matched_action in list(filter(ar.match, required_actions)):
                         found_required_actions.append(matched_action)
 
                 for not_action in permissions.not_actions:
-                    if not_action in found_required_actions:
-                        found_required_actions.remove(not_action)
+                    nar = re.compile(
+                        not_action.replace(".", r"\.").replace("*", r".*")
+                    )  # noqa: W605
+                    for matched_not_action in list(
+                        filter(nar.match, found_required_actions)
+                    ):
+                        found_required_actions.remove(matched_not_action)
 
                 for data_action in permissions.data_actions:
-                    dar = re.compile(data_action.replace(".", r"\."))  # noqa: W605
+                    dar = re.compile(
+                        data_action.replace(".", r"\.").replace("*", r".*")
+                    )  # noqa: W605
                     for matched_data_action in list(
                         filter(dar.match, required_data_actions)
                     ):
                         found_required_data_actions.append(matched_data_action)
 
                 for not_data_action in permissions.not_data_actions:
-                    if not_data_action in found_required_data_actions:
-                        found_required_data_actions.remove(not_data_action)
+                    ndar = re.compile(
+                        not_data_action.replace(".", r"\.").replace("*", r".*")
+                    )  # noqa: W605
+                    for matched_not_data_action in list(
+                        filter(ndar.match, found_required_data_actions)
+                    ):
+                        found_required_data_actions.remove(matched_not_data_action)
 
     missing_actions = list(sorted(set(required_actions) - set(found_required_actions)))
     missing_data_actions = list(
