@@ -38,17 +38,17 @@
 #
 # Source File Name:  test_validate_azure_dladmin_identity.py
 ###
-"""Azure Validate Datalake Admin Identity Tests."""
+"""Azure Validate Datalake Admin Identity Actions Tests."""
 import dataclasses
-from typing import Dict
+from typing import Dict, List
 from unittest.mock import Mock
 
 from azure.mgmt.authorization import AuthorizationManagementClient
 from azure.mgmt.resource import ResourceManagementClient
 
 from cdpctl.validation.infra.validate_azure_dladmin_identity import (
-    azure_dladmin_data_owner_validation,
-    azure_dladmin_logs_owner_validation,
+    _azure_dladmin_data_storage_actions_check,
+    _azure_dladmin_logs_storage_actions_check,
 )
 from tests.validation import expect_validation_failure, expect_validation_success
 
@@ -77,8 +77,11 @@ def setup_mocks(
     resource_client: ResourceManagementClient,
     auth_client: AuthorizationManagementClient,
     identity_name: str,
-    azure_role: str,
     scope: str,
+    actions,
+    not_actions,
+    data_actions,
+    not_data_actions,
 ):
     ResourceGetbyidResponse = dataclasses.make_dataclass(
         "ResourceGetbyidResponse", [("properties", Dict)]
@@ -87,61 +90,44 @@ def setup_mocks(
         {"principalId": identity_name}
     )
 
-    AuthListResponseProperties = dataclasses.make_dataclass(
-        "AuthListResponseProperties", [("role_definition_id", str), ("scope", str)]
+    RoleAssignment = dataclasses.make_dataclass(
+        "RoleAssignment", [("role_definition_id", str), ("scope", str)]
     )
     auth_client.role_assignments.list.return_value = [
-        AuthListResponseProperties(identity_name, scope)
+        RoleAssignment(identity_name, scope)
     ]
 
-    AuthGetByIdResponse = dataclasses.make_dataclass(
-        "AuthGetByIdResponse", [("role_name", str)]
-    )
-    auth_client.role_definitions.get_by_id.return_value = AuthGetByIdResponse(
-        azure_role
-    )
-
-
-def test_azure_dladmin_data_owner_validation_success():
-    identity_name = "datalake_admin"
-    scope = "/subscriptions/test_id/resourceGroups/rg_name/providers/Microsoft.Storage/storageAccounts/storage_name/blobServices/default/containers/data"
-
-    resource_client = Mock(spec=ResourceManagementClient)
-    auth_client = Mock(spec=AuthorizationManagementClient)
-
-    setup_mocks(
-        resource_client=resource_client,
-        auth_client=auth_client,
-        identity_name="datalake_admin",
-        azure_role="Storage Blob Data Owner",
-        scope=scope,
+    Permission = dataclasses.make_dataclass(
+        "Permission",
+        [
+            "actions",
+            "not_actions",
+            "data_actions",
+            "not_data_actions",
+        ],
     )
 
-    func = expect_validation_success(azure_dladmin_data_owner_validation)
-    func(get_config(identity_name), auth_client, resource_client)
-
-
-def test_azure_dladmin_data_owner_validation_fail():
-    identity_name = "datalake_admin"
-    scope = "/subscriptions/test_id/resourceGroups/rg_name/providers/Microsoft.Storage/storageAccounts/storage_name/blobServices/default/containers/data"
-
-    resource_client = Mock(spec=ResourceManagementClient)
-    auth_client = Mock(spec=AuthorizationManagementClient)
-
-    setup_mocks(
-        resource_client=resource_client,
-        auth_client=auth_client,
-        identity_name="datalake_admin",
-        azure_role="Failing Azure Role",
-        scope=scope,
+    RoleDefinition = dataclasses.make_dataclass(
+        "RoleDefinition", ["role_name", "permissions"]
     )
 
-    func = expect_validation_failure(azure_dladmin_data_owner_validation)
-    func(get_config(identity_name), auth_client, resource_client)
+    auth_client.role_definitions.get_by_id.return_value = RoleDefinition(
+        "test",
+        [
+            Permission(
+                actions=actions,
+                not_actions=not_actions,
+                data_actions=data_actions,
+                not_data_actions=not_data_actions,
+            )
+        ],
+    )
 
 
-def test_azure_dladmin_logs_owner_validation_success():
-    identity_name = "datalake_admin"
+def test_azure_dladmin_logs_actions_check_success(
+    azure_data_required_actions: List[str],
+) -> None:
+    identity_name = "dladmin"
     scope = "/subscriptions/test_id/resourceGroups/rg_name/providers/Microsoft.Storage/storageAccounts/storage_name/blobServices/default/containers/logs"
 
     resource_client = Mock(spec=ResourceManagementClient)
@@ -150,17 +136,27 @@ def test_azure_dladmin_logs_owner_validation_success():
     setup_mocks(
         resource_client=resource_client,
         auth_client=auth_client,
-        identity_name="datalake_admin",
-        azure_role="Storage Blob Data Owner",
+        identity_name=identity_name,
         scope=scope,
+        actions=azure_data_required_actions,
+        not_actions=[],
+        data_actions=[],
+        not_data_actions=[],
     )
 
-    func = expect_validation_success(azure_dladmin_logs_owner_validation)
-    func(get_config(identity_name), auth_client, resource_client)
+    func = expect_validation_success(_azure_dladmin_logs_storage_actions_check)
+    func(
+        get_config("success"),
+        auth_client,
+        resource_client,
+        azure_data_required_actions,
+    )
 
 
-def test_azure_dladmin_logs_owner_validation_fail():
-    identity_name = "datalake_admin"
+def test_azure_dladmin_logs_actions_check_fail(
+    azure_data_required_actions: List[str],
+) -> None:
+    identity_name = "dladmin"
     scope = "/subscriptions/test_id/resourceGroups/rg_name/providers/Microsoft.Storage/storageAccounts/storage_name/blobServices/default/containers/logs"
 
     resource_client = Mock(spec=ResourceManagementClient)
@@ -169,10 +165,75 @@ def test_azure_dladmin_logs_owner_validation_fail():
     setup_mocks(
         resource_client=resource_client,
         auth_client=auth_client,
-        identity_name="datalake_admin",
-        azure_role="Failing Azure Role",
+        identity_name=identity_name,
         scope=scope,
+        actions=[],
+        not_actions=[],
+        data_actions=[],
+        not_data_actions=[],
     )
 
-    func = expect_validation_failure(azure_dladmin_logs_owner_validation)
-    func(get_config(identity_name), auth_client, resource_client)
+    func = expect_validation_failure(_azure_dladmin_logs_storage_actions_check)
+    func(
+        get_config("fail"),
+        auth_client,
+        resource_client,
+        azure_data_required_actions,
+    )
+
+
+def test_azure_dladmin_data_actions_check_success(
+    azure_data_required_data_actions: List[str],
+) -> None:
+    identity_name = "dladmin"
+    scope = "/subscriptions/test_id/resourceGroups/rg_name/providers/Microsoft.Storage/storageAccounts/storage_name/blobServices/default/containers/logs"
+
+    resource_client = Mock(spec=ResourceManagementClient)
+    auth_client = Mock(spec=AuthorizationManagementClient)
+    setup_mocks(
+        resource_client=resource_client,
+        auth_client=auth_client,
+        identity_name=identity_name,
+        scope=scope,
+        actions=[],
+        not_actions=[],
+        data_actions=azure_data_required_data_actions,
+        not_data_actions=[],
+    )
+
+    func = expect_validation_success(_azure_dladmin_data_storage_actions_check)
+    func(
+        get_config("success"),
+        auth_client,
+        resource_client,
+        azure_data_required_data_actions,
+    )
+
+
+def test_azure_dladmin_data_actions_check_fail(
+    azure_data_required_data_actions: List[str],
+) -> None:
+    identity_name = "dladmin"
+    scope = "/subscriptions/test_id/resourceGroups/rg_name/providers/Microsoft.Storage/storageAccounts/storage_name/blobServices/default/containers/logs"
+
+    resource_client = Mock(spec=ResourceManagementClient)
+    auth_client = Mock(spec=AuthorizationManagementClient)
+
+    setup_mocks(
+        resource_client=resource_client,
+        auth_client=auth_client,
+        identity_name=identity_name,
+        scope=scope,
+        actions=[],
+        not_actions=[],
+        data_actions=[],
+        not_data_actions=[],
+    )
+
+    func = expect_validation_failure(_azure_dladmin_data_storage_actions_check)
+    func(
+        get_config("fail"),
+        auth_client,
+        resource_client,
+        azure_data_required_data_actions,
+    )
