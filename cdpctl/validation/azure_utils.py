@@ -198,29 +198,6 @@ def get_role_assignments(
     return list(role_assignments)
 
 
-def check_for_role(
-    auth_client: AuthorizationManagementClient,
-    role_assigments: Iterable[RoleAssignmentListResult],
-    proper_role: str,
-    proper_scope: str,
-):
-    """Check if Azure role assigments have the proper role and scope."""
-    found_role = False
-
-    for role_assignment in role_assigments:
-        definition = auth_client.role_definitions.get_by_id(
-            role_assignment.role_definition_id
-        )
-
-        if (
-            definition.role_name == proper_role
-            and role_assignment.scope == proper_scope
-        ):
-            found_role = True
-
-    return found_role
-
-
 def check_for_actions(
     auth_client: AuthorizationManagementClient,
     role_assigments: Iterable[RoleAssignmentListResult],
