@@ -49,6 +49,10 @@ env:
         ## The Storage container path used for the logs in the environment
         # example: abfs://logs@cdpstorage.dfs.core.windows.net
         logs: {{ info['env:azure:storage:path:logs']|default("", true) }}
+
+        ## The Storage container path used for the backup in the environment
+        # example: abfs://backup@cdpstorage.dfs.core.windows.net
+        backup: {{ info['env:azure:storage:path:backup']|default(info['env:azure:storage:path:logs'], true) }}
       suffix:
 
 infra:
