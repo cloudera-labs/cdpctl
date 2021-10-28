@@ -281,7 +281,7 @@ def azure_ranger_audit_backup_storage_data_actions_validation(
     resource_client: ResourceManagementClient,
     azure_ranger_audit_required_data_actions: List[str],
 ) -> None:  # pragma: no cover
-    """Ranger Audit Identity has all required Data Actions on backup storage location."""
+    """Ranger Audit Identity has all required Data Actions on backup storage location."""  # noqa: E501
     _azure_ranger_audit_backup_storage_data_actions_check(
         config=config,
         auth_client=auth_client,

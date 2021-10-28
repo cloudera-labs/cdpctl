@@ -47,10 +47,10 @@ from azure.mgmt.authorization import AuthorizationManagementClient
 from azure.mgmt.resource import ResourceManagementClient
 
 from cdpctl.validation.infra.validate_azure_ranger_identity import (
-    _azure_ranger_audit_container_actions_check,
-    _azure_ranger_audit_container_data_actions_check,
     _azure_ranger_audit_backup_storage_actions_check,
     _azure_ranger_audit_backup_storage_data_actions_check,
+    _azure_ranger_audit_container_actions_check,
+    _azure_ranger_audit_container_data_actions_check,
 )
 from tests.validation import expect_validation_failure, expect_validation_success
 
