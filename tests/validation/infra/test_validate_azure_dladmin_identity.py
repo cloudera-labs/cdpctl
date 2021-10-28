@@ -47,6 +47,8 @@ from azure.mgmt.authorization import AuthorizationManagementClient
 from azure.mgmt.resource import ResourceManagementClient
 
 from cdpctl.validation.infra.validate_azure_dladmin_identity import (
+    _azure_dladmin_backup_storage_actions_check,
+    _azure_dladmin_backup_storage_data_actions_check,
     _azure_dladmin_data_storage_actions_check,
     _azure_dladmin_data_storage_data_actions_check,
     _azure_dladmin_logs_storage_actions_check,
@@ -67,6 +69,7 @@ def get_config(role_name):
                     "name": "storage_name",
                     "path": {
                         "logs": "abfs://logs@storage_name.dfs.core.windows.net",
+                        "backup": "abfs://backup@storage_name.dfs.core.windows.net",
                         "data": "abfs://data@storage_name.dfs.core.windows.net",
                     },
                 },
@@ -348,6 +351,120 @@ def test_azure_dladmin_data_storage_data_actions_check_fail(
     )
 
     func = expect_validation_failure(_azure_dladmin_data_storage_data_actions_check)
+    func(
+        get_config("fail"),
+        auth_client,
+        resource_client,
+        azure_data_required_data_actions,
+    )
+
+
+def test_azure_dladmin_backup_storage_actions_check_success(
+    azure_data_required_actions: List[str],
+) -> None:
+    identity_name = "dladmin"
+    scope = "/subscriptions/test_id/resourceGroups/rg_name/providers/Microsoft.Storage/storageAccounts/storage_name/blobServices/default/containers/backup"
+
+    resource_client = Mock(spec=ResourceManagementClient)
+    auth_client = Mock(spec=AuthorizationManagementClient)
+    setup_mocks(
+        resource_client=resource_client,
+        auth_client=auth_client,
+        identity_name=identity_name,
+        scope=scope,
+        actions=azure_data_required_actions,
+        not_actions=[],
+        data_actions=[],
+        not_data_actions=[],
+    )
+
+    func = expect_validation_success(_azure_dladmin_backup_storage_actions_check)
+    func(
+        get_config("success"),
+        auth_client,
+        resource_client,
+        azure_data_required_actions,
+    )
+
+
+def test_azure_dladmin_backup_storage_actions_check_fail(
+    azure_data_required_actions: List[str],
+) -> None:
+    identity_name = "dladmin"
+    scope = "/subscriptions/test_id/resourceGroups/rg_name/providers/Microsoft.Storage/storageAccounts/storage_name/blobServices/default/containers/backup"
+
+    resource_client = Mock(spec=ResourceManagementClient)
+    auth_client = Mock(spec=AuthorizationManagementClient)
+
+    setup_mocks(
+        resource_client=resource_client,
+        auth_client=auth_client,
+        identity_name=identity_name,
+        scope=scope,
+        actions=[],
+        not_actions=[],
+        data_actions=[],
+        not_data_actions=[],
+    )
+
+    func = expect_validation_failure(_azure_dladmin_backup_storage_actions_check)
+    func(
+        get_config("fail"),
+        auth_client,
+        resource_client,
+        azure_data_required_actions,
+    )
+
+
+def test_azure_dladmin_backup_storage_data_actions_check_success(
+    azure_data_required_data_actions: List[str],
+) -> None:
+    identity_name = "dladmin"
+    scope = "/subscriptions/test_id/resourceGroups/rg_name/providers/Microsoft.Storage/storageAccounts/storage_name/blobServices/default/containers/backup"
+
+    resource_client = Mock(spec=ResourceManagementClient)
+    auth_client = Mock(spec=AuthorizationManagementClient)
+    setup_mocks(
+        resource_client=resource_client,
+        auth_client=auth_client,
+        identity_name=identity_name,
+        scope=scope,
+        actions=[],
+        not_actions=[],
+        data_actions=azure_data_required_data_actions,
+        not_data_actions=[],
+    )
+
+    func = expect_validation_success(_azure_dladmin_backup_storage_data_actions_check)
+    func(
+        get_config("success"),
+        auth_client,
+        resource_client,
+        azure_data_required_data_actions,
+    )
+
+
+def test_azure_dladmin_backup_storage_data_actions_check_fail(
+    azure_data_required_data_actions: List[str],
+) -> None:
+    identity_name = "dladmin"
+    scope = "/subscriptions/test_id/resourceGroups/rg_name/providers/Microsoft.Storage/storageAccounts/storage_name/blobServices/default/containers/backup"
+
+    resource_client = Mock(spec=ResourceManagementClient)
+    auth_client = Mock(spec=AuthorizationManagementClient)
+
+    setup_mocks(
+        resource_client=resource_client,
+        auth_client=auth_client,
+        identity_name=identity_name,
+        scope=scope,
+        actions=[],
+        not_actions=[],
+        data_actions=[],
+        not_data_actions=[],
+    )
+
+    func = expect_validation_failure(_azure_dladmin_backup_storage_data_actions_check)
     func(
         get_config("fail"),
         auth_client,

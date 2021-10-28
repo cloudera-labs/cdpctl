@@ -47,6 +47,8 @@ from azure.mgmt.authorization import AuthorizationManagementClient
 from azure.mgmt.resource import ResourceManagementClient
 
 from cdpctl.validation.infra.validate_azure_ranger_identity import (
+    _azure_ranger_audit_backup_storage_actions_check,
+    _azure_ranger_audit_backup_storage_data_actions_check,
     _azure_ranger_audit_container_actions_check,
     _azure_ranger_audit_container_data_actions_check,
 )
@@ -65,6 +67,7 @@ def get_config(role_name):
                     "name": "storage_name",
                     "path": {
                         "data": "abfs://data@storage_name.dfs.core.windows.net",
+                        "backup": "abfs://backup@storage_name.dfs.core.windows.net",
                     },
                 },
             }
@@ -225,6 +228,120 @@ def test_azure_ranger_audit_container_data_actions_check_fail() -> None:
     )
 
     func = expect_validation_failure(_azure_ranger_audit_container_data_actions_check)
+    func(
+        get_config("fail"),
+        auth_client,
+        resource_client,
+        ["Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write"],
+    )
+
+
+def test_azure_ranger_audit_backup_storage_actions_check_success() -> None:
+    identity_name = "ranger_audit"
+    scope = "/subscriptions/test_id/resourceGroups/rg_name/providers/Microsoft.Storage/storageAccounts/storage_name/blobServices/default/containers/backup"
+
+    resource_client = Mock(spec=ResourceManagementClient)
+    auth_client = Mock(spec=AuthorizationManagementClient)
+
+    setup_mocks(
+        resource_client=resource_client,
+        auth_client=auth_client,
+        identity_name=identity_name,
+        scope=scope,
+        actions=["Microsoft.Storage/storageAccounts/blobServices/containers/write"],
+        not_actions=[],
+        data_actions=[],
+        not_data_actions=[],
+    )
+
+    func = expect_validation_success(_azure_ranger_audit_backup_storage_actions_check)
+    func(
+        get_config("success"),
+        auth_client,
+        resource_client,
+        ["Microsoft.Storage/storageAccounts/blobServices/containers/write"],
+    )
+
+
+def test_azure_ranger_audit_backup_storage_actions_check_fail() -> None:
+    identity_name = "ranger_audit"
+    scope = "/subscriptions/test_id/resourceGroups/rg_name/providers/Microsoft.Storage/storageAccounts/storage_name/blobServices/default/containers/backup"
+
+    resource_client = Mock(spec=ResourceManagementClient)
+    auth_client = Mock(spec=AuthorizationManagementClient)
+
+    setup_mocks(
+        resource_client=resource_client,
+        auth_client=auth_client,
+        identity_name=identity_name,
+        scope=scope,
+        actions=[],
+        not_actions=[],
+        data_actions=[],
+        not_data_actions=[],
+    )
+
+    func = expect_validation_failure(_azure_ranger_audit_backup_storage_actions_check)
+    func(
+        get_config("fail"),
+        auth_client,
+        resource_client,
+        ["Microsoft.Storage/storageAccounts/blobServices/containers/write"],
+    )
+
+
+def test_azure_ranger_audit_backup_storage_data_actions_check_success() -> None:
+    identity_name = "ranger_audit"
+    scope = "/subscriptions/test_id/resourceGroups/rg_name/providers/Microsoft.Storage/storageAccounts/storage_name/blobServices/default/containers/backup"
+
+    resource_client = Mock(spec=ResourceManagementClient)
+    auth_client = Mock(spec=AuthorizationManagementClient)
+
+    setup_mocks(
+        resource_client=resource_client,
+        auth_client=auth_client,
+        identity_name=identity_name,
+        scope=scope,
+        actions=[],
+        not_actions=[],
+        data_actions=[
+            "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write"
+        ],
+        not_data_actions=[],
+    )
+
+    func = expect_validation_success(
+        _azure_ranger_audit_backup_storage_data_actions_check
+    )
+    func(
+        get_config("success"),
+        auth_client,
+        resource_client,
+        ["Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write"],
+    )
+
+
+def test_azure_ranger_audit_backup_storage_data_actions_check_fail() -> None:
+    identity_name = "ranger_audit"
+    scope = "/subscriptions/test_id/resourceGroups/rg_name/providers/Microsoft.Storage/storageAccounts/storage_name/blobServices/default/containers/backup"
+
+    resource_client = Mock(spec=ResourceManagementClient)
+    auth_client = Mock(spec=AuthorizationManagementClient)
+
+    setup_mocks(
+        resource_client=resource_client,
+        auth_client=auth_client,
+        identity_name=identity_name,
+        scope=scope,
+        actions=["Microsoft.Storage/storageAccounts/blobServices/containers/write"],
+        not_actions=[],
+        data_actions=[],
+        not_data_actions=[],
+    )
+
+    func = expect_validation_failure(
+        _azure_ranger_audit_backup_storage_data_actions_check
+    )
     func(
         get_config("fail"),
         auth_client,
