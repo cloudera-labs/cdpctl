@@ -39,9 +39,16 @@
 # Source File Name:  test_validate_azure_logger_identity.py
 ###
 """Azure Validate Logger Identity Tests."""
+import dataclasses
+from typing import Dict
+from unittest.mock import Mock
+
+from azure.mgmt.authorization import AuthorizationManagementClient
+from azure.mgmt.resource import ResourceManagementClient
 
 from cdpctl.validation.infra.validate_azure_logger_identity import (
-    azure_logger_blob_role_validation,
+    _azure_logger_container_actions_check,
+    _azure_logger_container_data_actions_check,
 )
 from tests.validation import expect_validation_failure, expect_validation_success
 
@@ -63,86 +70,162 @@ def get_config(role_name):
     }
 
 
-class PropertiesType:
-    """Mock for AuthResponseType.Properties."""
+def setup_mocks(
+    resource_client: ResourceManagementClient,
+    auth_client: AuthorizationManagementClient,
+    identity_name: str,
+    scope: str,
+    actions,
+    not_actions,
+    data_actions,
+    not_data_actions,
+):
+    ResourceGetbyidResponse = dataclasses.make_dataclass(
+        "ResourceGetbyidResponse", [("properties", Dict)]
+    )
+    resource_client.resources.get_by_id.return_value = ResourceGetbyidResponse(
+        {"principalId": identity_name}
+    )
 
-    role_definition_id = "success"
+    RoleAssignment = dataclasses.make_dataclass(
+        "RoleAssignment", [("role_definition_id", str), ("scope", str)]
+    )
+    auth_client.role_assignments.list.return_value = [
+        RoleAssignment(identity_name, scope)
+    ]
+
+    Permission = dataclasses.make_dataclass(
+        "Permission",
+        [
+            "actions",
+            "not_actions",
+            "data_actions",
+            "not_data_actions",
+        ],
+    )
+
+    RoleDefinition = dataclasses.make_dataclass(
+        "RoleDefinition", ["role_name", "permissions"]
+    )
+
+    auth_client.role_definitions.get_by_id.return_value = RoleDefinition(
+        "test",
+        [
+            Permission(
+                actions=actions,
+                not_actions=not_actions,
+                data_actions=data_actions,
+                not_data_actions=not_data_actions,
+            )
+        ],
+    )
+
+
+def test_azure_logger_container_actions_check_success() -> None:
+    identity_name = "logger"
     scope = "/subscriptions/test_id/resourceGroups/rg_name/providers/Microsoft.Storage/storageAccounts/storage_name/blobServices/default/containers/logs"
 
+    resource_client = Mock(spec=ResourceManagementClient)
+    auth_client = Mock(spec=AuthorizationManagementClient)
 
-class AuthResponseType:
-    """Mock return type for AuthorizationManagementClient."""
+    setup_mocks(
+        resource_client=resource_client,
+        auth_client=auth_client,
+        identity_name=identity_name,
+        scope=scope,
+        actions=["Microsoft.Storage/storageAccounts/blobServices/containers/write"],
+        not_actions=[],
+        data_actions=[],
+        not_data_actions=[],
+    )
 
-    properties = PropertiesType
-    role_name = "Storage Blob Data Contributor"
-
-
-class ResourceResponseType:
-    """Mock return type for ResourceManagementClient."""
-
-    properties = {"principalId": "success"}
-
-
-class ResourceManagementClientHelper:
-    """Mock ResourceManagementClient Interface."""
-
-    def get_by_id(
-        resource_id, api_version
-    ):  # pylint: disable=no-self-argument,unused-argument
-        """Mock get_by_id."""
-        resource = ResourceResponseType
-        if (
-            resource_id
-            == "/subscriptions/test_id/resourcegroups/rg_name/providers/Microsoft.ManagedIdentity/userAssignedIdentities/fail"
-        ):
-            resource.properties["principalId"] = "fail"
-        return resource
+    func = expect_validation_success(_azure_logger_container_actions_check)
+    func(
+        get_config("success"),
+        auth_client,
+        resource_client,
+        ["Microsoft.Storage/storageAccounts/blobServices/containers/write"],
+    )
 
 
-class AuthorizationManagementClientHelper:
-    """Mock Auth Interface."""
+def test_azure_logger_container_actions_check_fail() -> None:
+    identity_name = "logger"
+    scope = "/subscriptions/test_id/resourceGroups/rg_name/providers/Microsoft.Storage/storageAccounts/storage_name/blobServices/default/containers/logs"
 
-    def get_by_id(resource_id):  # pylint: disable=no-self-argument
-        """Mock get_by_id."""
-        resource = AuthResponseType
-        if resource_id == "fail":
-            resource.role_name = "fail"
-        return resource
+    resource_client = Mock(spec=ResourceManagementClient)
+    auth_client = Mock(spec=AuthorizationManagementClient)
 
-    def list(filter):  # pylint: disable=no-self-argument,redefined-builtin
-        """Mock list function."""
-        response = AuthResponseType
-        if filter == "principalId eq 'fail'":
-            response.properties.role_definition_id = "fail"
-        return [response]
+    setup_mocks(
+        resource_client=resource_client,
+        auth_client=auth_client,
+        identity_name=identity_name,
+        scope=scope,
+        actions=[],
+        not_actions=[],
+        data_actions=[],
+        not_data_actions=[],
+    )
 
-
-class ResourceManagementClient:
-    """Mock ResourceManagementClient interface."""
-
-    resources = ResourceManagementClientHelper
-
-
-class AuthorizationManagementClient:
-    """Mock AuthorizationManagementClient interface."""
-
-    role_assignments = AuthorizationManagementClientHelper
-    role_definitions = AuthorizationManagementClientHelper
+    func = expect_validation_failure(_azure_logger_container_actions_check)
+    func(
+        get_config("fail"),
+        auth_client,
+        resource_client,
+        ["Microsoft.Storage/storageAccounts/blobServices/containers/write"],
+    )
 
 
-def test_azure_logger_blob_role_validation_success() -> None:
+def test_azure_logger_container_data_actions_check_success() -> None:
+    identity_name = "logger"
+    scope = "/subscriptions/test_id/resourceGroups/rg_name/providers/Microsoft.Storage/storageAccounts/storage_name/blobServices/default/containers/logs"
 
-    auth_client = AuthorizationManagementClient()
-    resource_client = ResourceManagementClient
+    resource_client = Mock(spec=ResourceManagementClient)
+    auth_client = Mock(spec=AuthorizationManagementClient)
 
-    func = expect_validation_success(azure_logger_blob_role_validation)
-    func(get_config("success"), auth_client, resource_client)
+    setup_mocks(
+        resource_client=resource_client,
+        auth_client=auth_client,
+        identity_name=identity_name,
+        scope=scope,
+        actions=[],
+        not_actions=[],
+        data_actions=[
+            "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write"
+        ],
+        not_data_actions=[],
+    )
+
+    func = expect_validation_success(_azure_logger_container_data_actions_check)
+    func(
+        get_config("success"),
+        auth_client,
+        resource_client,
+        ["Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write"],
+    )
 
 
-def test_azure_logger_blob_role_validation_fail() -> None:
+def test_logger_container_data_actions_check_fail() -> None:
+    identity_name = "logger"
+    scope = "/subscriptions/test_id/resourceGroups/rg_name/providers/Microsoft.Storage/storageAccounts/storage_name/blobServices/default/containers/logs"
 
-    auth_client = AuthorizationManagementClient
-    resource_client = ResourceManagementClient
+    resource_client = Mock(spec=ResourceManagementClient)
+    auth_client = Mock(spec=AuthorizationManagementClient)
 
-    func = expect_validation_failure(azure_logger_blob_role_validation)
-    func(get_config("fail"), auth_client, resource_client)
+    setup_mocks(
+        resource_client=resource_client,
+        auth_client=auth_client,
+        identity_name=identity_name,
+        scope=scope,
+        actions=["Microsoft.Storage/storageAccounts/blobServices/containers/write"],
+        not_actions=[],
+        data_actions=[],
+        not_data_actions=[],
+    )
+
+    func = expect_validation_failure(_azure_logger_container_data_actions_check)
+    func(
+        get_config("fail"),
+        auth_client,
+        resource_client,
+        ["Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write"],
+    )

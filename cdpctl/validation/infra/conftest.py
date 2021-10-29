@@ -310,3 +310,133 @@ def azure_supported_region_experiences() -> Dict[str, bool]:
     """Get the Azure regions supported by CDP."""
     _, region_features = read_azure_supported_regions()
     return region_features
+
+
+@pytest.fixture
+def azure_data_required_actions() -> List[str]:
+    """Get the Azure actions needed for the data identity."""
+    return [
+        "Microsoft.Storage/storageAccounts/blobServices/containers/read",
+        "Microsoft.Storage/storageAccounts/blobServices/containers/delete",
+        "Microsoft.Storage/storageAccounts/blobServices/containers/write",
+    ]
+
+
+@pytest.fixture
+def azure_data_required_data_actions() -> List[str]:
+    """Get the Azure data actions needed for the data identity."""
+    return [
+        "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/runAsSuperUser/action",  # noqa: E501
+        "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/modifyPermissions/action",  # noqa: E501
+        "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/manageOwnership/action",  # noqa: E501
+        "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/move/action",
+        "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/filter/action",
+        "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/add/action",
+        "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/deleteBlobVersion/action",  # noqa: E501
+        "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/delete",
+        "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write",
+        "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/read",
+    ]
+
+
+@pytest.fixture
+def azure_ranger_audit_required_actions() -> List[str]:
+    """Get the Azure actions needed for the ranger audit identity."""
+    return [
+        "Microsoft.Storage/storageAccounts/blobServices/write",
+        "Microsoft.Storage/storageAccounts/blobServices/containers/write",
+    ]
+
+
+@pytest.fixture
+def azure_ranger_audit_required_data_actions() -> List[str]:
+    """Get the Azure data actions needed for the ranger audit identity."""
+    return ["Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write"]
+
+
+@pytest.fixture
+def azure_logger_required_actions() -> List[str]:
+    """Get the Azure actions needed for the logger identity."""
+    return [
+        "Microsoft.Storage/storageAccounts/blobServices/write",
+        "Microsoft.Storage/storageAccounts/blobServices/containers/write",
+    ]
+
+
+@pytest.fixture
+def azure_logger_required_data_actions() -> List[str]:
+    """Get the Azure data actions needed for the logger identity."""
+    return ["Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write"]
+
+
+@pytest.fixture
+def azure_assumer_required_logs_actions() -> List[str]:
+    """Get the Azure actions needed for the assumer identity for logs."""
+    return [
+        "Microsoft.Storage/storageAccounts/blobServices/write",
+        "Microsoft.Storage/storageAccounts/blobServices/containers/write",
+    ]
+
+
+@pytest.fixture
+def azure_assumer_required_logs_data_actions() -> List[str]:
+    """Get the Azure data actions needed for the assumer identity for logs."""
+    return ["Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write"]
+
+
+@pytest.fixture
+def azure_assumer_required_resource_group_actions() -> List[str]:
+    """Get the Azure actions needed for the assumer identity for logs."""
+    return [
+        "Microsoft.ManagedIdentity/userAssignedIdentities/*/read",
+        "Microsoft.ManagedIdentity/userAssignedIdentities/*/assign/action",
+        "Microsoft.Authorization/classicAdministrators/read",
+        "Microsoft.Authorization/roleAssignments/read",
+        "Microsoft.Authorization/permissions/read",
+        "Microsoft.Authorization/locks/read",
+        "Microsoft.Authorization/roleDefinitions/read",
+        "Microsoft.Authorization/providerOperations/read",
+        "Microsoft.Authorization/policySetDefinitions/read",
+        "Microsoft.Authorization/policyDefinitions/read",
+        "Microsoft.Authorization/policyAssignments/read",
+        "Microsoft.Authorization/operations/read",
+        "Microsoft.Authorization/classicAdministrators/operationstatuses/read",
+        "Microsoft.Authorization/denyAssignments/read",
+        "Microsoft.Authorization/policyAssignments/resourceManagementPrivateLinks/read",
+        "Microsoft.Authorization/policyAssignments/resourceManagementPrivateLinks/privateEndpointConnectionProxies/read",  # noqa: E501
+        "Microsoft.Authorization/policyAssignments/resourceManagementPrivateLinks/privateEndpointConnections/read",  # noqa: E501
+        "Microsoft.Authorization/policyAssignments/privateLinkAssociations/read",
+        "Microsoft.Authorization/policyExemptions/read",
+        "Microsoft.Authorization/roleAssignmentScheduleRequests/read",
+        "Microsoft.Authorization/roleEligibilityScheduleRequests/read",
+        "Microsoft.Authorization/roleAssignmentSchedules/read",
+        "Microsoft.Authorization/roleEligibilitySchedules/read",
+        "Microsoft.Authorization/roleAssignmentScheduleInstances/read",
+        "Microsoft.Authorization/roleEligibilityScheduleInstances/read",
+        "Microsoft.Authorization/roleManagementPolicies/read",
+        "Microsoft.Authorization/roleManagementPolicyAssignments/read",
+        "Microsoft.Insights/alertRules/Write",
+        "Microsoft.Insights/alertRules/Delete",
+        "Microsoft.Insights/alertRules/Read",
+        "Microsoft.Insights/alertRules/Activated/Action",
+        "Microsoft.Insights/alertRules/Resolved/Action",
+        "Microsoft.Insights/alertRules/Throttled/Action",
+        "Microsoft.Insights/alertRules/Incidents/Read",
+        "Microsoft.Resources/subscriptions/resourceGroups/read",
+        "Microsoft.Resources/deployments/read",
+        "Microsoft.Resources/deployments/write",
+        "Microsoft.Resources/deployments/delete",
+        "Microsoft.Resources/deployments/cancel/action",
+        "Microsoft.Resources/deployments/validate/action",
+        "Microsoft.Resources/deployments/whatIf/action",
+        "Microsoft.Resources/deployments/exportTemplate/action",
+        "Microsoft.Resources/deployments/operations/read",
+        "Microsoft.Resources/deployments/operationstatuses/read",
+        "Microsoft.Support/supportTickets/read",
+        "Microsoft.Support/supportTickets/write",
+        "Microsoft.Support/services/read",
+        "Microsoft.Support/services/problemClassifications/read",
+        "Microsoft.Support/operationresults/read",
+        "Microsoft.Support/operationsstatus/read",
+        "Microsoft.Support/operations/read",
+    ]

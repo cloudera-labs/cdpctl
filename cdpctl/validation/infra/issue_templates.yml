@@ -298,3 +298,13 @@ render_type: list
 id: AWS_S3_BUCKET_NOT_IN_SAME_REGION_AS_ENVIRONMENT
 summary: "S3 bucket {0} does not exist in the same region as the environment."
 docs_link: https://docs.cloudera.com/cdp/latest/requirements-aws/topics/mc-aws-req-s3.html
+---
+id: AZURE_IDENTITY_MISSING_ACTIONS_FOR_LOCATION
+summary: "The identity {0} is missing the following IAM Permission Actions for the {1} location:"
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-az-minimal-setup-for-cloud-storage.html
+render_type: list
+---
+id: AZURE_IDENTITY_MISSING_DATA_ACTIONS_FOR_LOCATION
+summary: "The identity {0} is missing the following IAM Permission Data Actions for the {1} location:"
+docs_link: https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-az-minimal-setup-for-cloud-storage.html
+render_type: list
