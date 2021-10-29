@@ -305,3 +305,57 @@ def aws_datalake_admin_role_has_s3_policy(
         subjects=[datalake_admin_role_name, data_location],
         missing_actions_issue=AWS_ROLE_FOR_DATA_BUCKET_MISSING_ACTIONS,
     )
+
+
+@pytest.mark.aws
+@pytest.mark.infra
+@pytest.mark.dependency(
+    depends=[
+        "infra/validate_aws_s3_locations.py::aws_s3_backup_bucket_exists_validation",
+    ],
+    scope="session",
+)
+def aws_datalake_admin_role_has_backup_bucket_access_policy_validation(
+    config: Dict[str, Any],
+    iam_client: IAMClient,
+    bucket_access_policy_actions: List[str],
+) -> None:  # pragma: no cover
+    """Datalake Admin role has the needed access to the S3 backup bucket."""  # noqa: D401,E501
+    aws_datalake_admin_role_has_backup_bucket_access_policy(
+        config, iam_client, bucket_access_policy_actions
+    )
+
+
+@validator
+def aws_datalake_admin_role_has_backup_bucket_access_policy(
+    config: Dict[str, Any],
+    iam_client: IAMClient,
+    bucket_access_policy_actions: List[str],
+) -> None:
+    """Validate datalake_admin role has the needed access to the S3 backup bucket."""
+
+    datalake_admin_role_name: str = get_config_value(
+        config,
+        "env:aws:role:name:datalake_admin",
+    )
+
+    data_location: str = get_config_value(
+        config,
+        "infra:aws:vpc:existing:storage:backup",
+    )
+
+    data_location_arn = convert_s3a_to_arn(data_location)
+    bucket_name = parse_arn(data_location_arn)["resource_type"]
+    bucket_arn = convert_s3a_to_arn(f"s3a://{bucket_name}")
+
+    datalake_admin_role = get_role(iam_client, datalake_admin_role_name)
+    datalake_admin_role_arn = datalake_admin_role["Role"]["Arn"]
+
+    simulate_policy(
+        iam_client=iam_client,
+        policy_source_arn=datalake_admin_role_arn,
+        resource_arns=[bucket_arn, f"{bucket_arn}/*"],
+        needed_actions=bucket_access_policy_actions,
+        subjects=[datalake_admin_role_name, bucket_name],
+        missing_actions_issue=AWS_ROLE_FOR_DL_BUCKET_MISSING_ACTIONS,
+    )
