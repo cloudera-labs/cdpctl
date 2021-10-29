@@ -39,11 +39,16 @@
 # Source File Name:  test_azure_utils.py
 ###
 """Azure Utils Test."""
+import dataclasses
+from unittest.mock import Mock
+
 import pytest
+from azure.mgmt.authorization import AuthorizationManagementClient
 from azure.storage.filedatalake import DataLakeServiceClient
 
 from cdpctl.validation.azure_utils import (
     AzureSupportedRegionFeatures,
+    check_for_actions,
     get_client,
     parse_adls_path,
     read_azure_supported_regions,
@@ -103,3 +108,107 @@ def test_parse_adls_path_invalid_container():
     """Test parse adls path with invalid container value."""
     with pytest.raises(ValueError):
         parse_adls_path("abfs://test.dfs.core.windows.net")
+
+
+def test_check_for_actions_success():
+    auth_client = Mock(spec=AuthorizationManagementClient)
+
+    RoleAssignment = dataclasses.make_dataclass(
+        "RoleAssignment", [("role_definition_id", str), ("scope", str)]
+    )
+    auth_client.role_assignments.list.return_value = [RoleAssignment("check", "check")]
+
+    Permission = dataclasses.make_dataclass(
+        "Permission",
+        [
+            "actions",
+            "not_actions",
+            "data_actions",
+            "not_data_actions",
+        ],
+    )
+
+    RoleDefinition = dataclasses.make_dataclass(
+        "RoleDefinition", ["role_name", "permissions"]
+    )
+
+    auth_client.role_definitions.get_by_id.return_value = RoleDefinition(
+        "check",
+        [
+            Permission(
+                actions=["foo.bar/car/read", "foo.bar/car/write", "foo.bar/car/delete"],
+                not_actions=["foo.bar/*/delete"],
+                data_actions=[
+                    "foo.bar/car/read",
+                    "foo.bar/car/write",
+                    "foo.bar/car/delete",
+                ],
+                not_data_actions=["foo.bar/*/delete"],
+            )
+        ],
+    )
+
+    missing_actions, missing_data_actions = check_for_actions(
+        auth_client=auth_client,
+        role_assigments=[RoleAssignment("check", "check")],
+        proper_scope="check",
+        required_actions=["foo.bar/car/read", "foo.bar/car/write"],
+        required_data_actions=["foo.bar/car/read", "foo.bar/car/write"],
+    )
+
+    assert missing_actions == []
+    assert missing_data_actions == []
+
+
+def test_check_for_actions_failure():
+    auth_client = Mock(spec=AuthorizationManagementClient)
+
+    RoleAssignment = dataclasses.make_dataclass(
+        "RoleAssignment", [("role_definition_id", str), ("scope", str)]
+    )
+    auth_client.role_assignments.list.return_value = [RoleAssignment("check", "check")]
+
+    Permission = dataclasses.make_dataclass(
+        "Permission",
+        [
+            "actions",
+            "not_actions",
+            "data_actions",
+            "not_data_actions",
+        ],
+    )
+
+    RoleDefinition = dataclasses.make_dataclass(
+        "RoleDefinition", ["role_name", "permissions"]
+    )
+
+    auth_client.role_definitions.get_by_id.return_value = RoleDefinition(
+        "check",
+        [
+            Permission(
+                actions=["foo.bar/car/read", "foo.bar/car/delete"],
+                not_actions=["foo.bar/*/delete"],
+                data_actions=[
+                    "foo.bar/car/read",
+                    "foo.bar/car/write",
+                    "foo.bar/car/delete",
+                ],
+                not_data_actions=["foo.bar/*/delete"],
+            )
+        ],
+    )
+
+    missing_actions, missing_data_actions = check_for_actions(
+        auth_client=auth_client,
+        role_assigments=[RoleAssignment("check", "check")],
+        proper_scope="check",
+        required_actions=["foo.bar/car/read", "foo.bar/car/write"],
+        required_data_actions=[
+            "foo.bar/car/read",
+            "foo.bar/car/write",
+            "foo.bar/car/delete",
+        ],
+    )
+
+    assert missing_actions == ["foo.bar/car/write"]
+    assert missing_data_actions == ["foo.bar/car/delete"]

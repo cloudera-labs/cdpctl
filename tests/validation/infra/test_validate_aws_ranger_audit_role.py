@@ -47,6 +47,7 @@ from botocore.stub import Stubber
 
 from cdpctl.validation.aws_utils import get_client
 from cdpctl.validation.infra.validate_aws_ranger_audit_role import (
+    aws_ranger_audit_backup_location_needed_actions_validation,
     aws_ranger_audit_cdp_s3_needed_actions_validation,
     aws_ranger_audit_data_location_needed_actions_validation,
     aws_ranger_audit_location_needed_actions_validation,
@@ -308,5 +309,59 @@ def test_aws_ranger_audit_data_location_needed_actions_validation_failure(
     with stubber:
         func = expect_validation_failure(
             aws_ranger_audit_data_location_needed_actions_validation
+        )
+        func(data_location_needed_actions, iam_client)
+
+
+def test_aws_ranger_audit_backup_location_needed_actions_validation_success(
+    data_location_needed_actions: List[str],
+    iam_client: IAMClient,
+) -> None:
+    """Unit test Ranger role audit backup location needed actions validation success."""
+    ranger_audit_data["role_arn"] = "arn:aws:iam::1234:role/ranger_audit_role"
+    ranger_audit_data["backup_location_arn"] = "arn:aws:s3:::backup-new-bucket'"
+
+    stubber = Stubber(iam_client)
+
+    add_simulate_policy_response(
+        stubber=stubber,
+        role_arn=ranger_audit_data["role_arn"],
+        resource_arns=[
+            ranger_audit_data["backup_location_arn"],
+            ranger_audit_data["backup_location_arn"] + "/*",
+        ],
+        actions=data_location_needed_actions,
+        failSimulatePolicy=False,
+    )
+    with stubber:
+        func = expect_validation_success(
+            aws_ranger_audit_backup_location_needed_actions_validation
+        )
+        func(data_location_needed_actions, iam_client)
+
+
+def test_aws_ranger_audit_backup_location_needed_actions_validation_failure(
+    data_location_needed_actions: List[str],
+    iam_client: IAMClient,
+) -> None:
+    """Unit test Ranger role audit backup location needed actions validation failure."""
+    ranger_audit_data["role_arn"] = "arn:aws:iam::1234:role/ranger_audit_role"
+    ranger_audit_data["backup_location_arn"] = "arn:aws:s3:::backup-new-bucket'"
+
+    stubber = Stubber(iam_client)
+
+    add_simulate_policy_response(
+        stubber=stubber,
+        role_arn=ranger_audit_data["role_arn"],
+        resource_arns=[
+            ranger_audit_data["backup_location_arn"],
+            ranger_audit_data["backup_location_arn"] + "/*",
+        ],
+        actions=data_location_needed_actions,
+        failSimulatePolicy=True,
+    )
+    with stubber:
+        func = expect_validation_failure(
+            aws_ranger_audit_backup_location_needed_actions_validation
         )
         func(data_location_needed_actions, iam_client)

@@ -40,7 +40,7 @@
 ###
 """Azure Validate Assumer Identity Tests."""
 import dataclasses
-from typing import Dict
+from typing import Dict, List
 from unittest.mock import Mock
 
 from azure.core.exceptions import ResourceNotFoundError
@@ -53,9 +53,9 @@ from cdpctl.validation.azure_utils import (
 )
 from cdpctl.validation.infra.validate_azure_assumer_identity import (
     azure_assumer_identity_exists_validation,
-    azure_assumer_logs_contributor_validation,
-    azure_assumer_managed_identity_operator_validation,
-    azure_assumer_virtual_machine_contributor_validation,
+    azure_assumer_logs_actions_validation,
+    azure_assumer_logs_data_actions_validation,
+    azure_assumer_rg_actions_validation,
 )
 from tests.validation import expect_validation_failure, expect_validation_success
 
@@ -86,6 +86,8 @@ def setup_mocks(
     azure_role: str,
     scope: str,
     assumer_info: Dict,
+    actions: List,
+    data_actions: List,
 ):
     ResourceGetbyidResponse = dataclasses.make_dataclass(
         "ResourceGetbyidResponse", [("properties", Dict)]
@@ -100,23 +102,37 @@ def setup_mocks(
     AuthListResponseProperties = dataclasses.make_dataclass(
         "AuthListResponseProperties", [("role_definition_id", str), ("scope", str)]
     )
-    AuthListResponse = dataclasses.make_dataclass(
-        "AuthListResponse", [("properties", AuthListResponseProperties)]
-    )
     auth_client.role_assignments.list.return_value = [
-        AuthListResponse(AuthListResponseProperties(identity_name, scope))
+        AuthListResponseProperties(identity_name, scope)
     ]
 
-    AuthGetByIdResponse = dataclasses.make_dataclass(
-        "AuthGetByIdResponse", [("role_name", str)]
-    )
-    auth_client.role_definitions.get_by_id.return_value = AuthGetByIdResponse(
-        azure_role
+    Permission = dataclasses.make_dataclass(
+        "Permission",
+        [
+            "actions",
+            "not_actions",
+            "data_actions",
+            "not_data_actions",
+        ],
     )
 
-    assumer_info["assignments"] = [
-        AuthListResponse(AuthListResponseProperties(identity_name, scope))
-    ]
+    RoleDefinition = dataclasses.make_dataclass(
+        "RoleDefinition", ["role_name", "permissions"]
+    )
+
+    auth_client.role_definitions.get_by_id.return_value = RoleDefinition(
+        azure_role,
+        [
+            Permission(
+                actions=actions,
+                not_actions=[],
+                data_actions=data_actions,
+                not_data_actions=[],
+            )
+        ],
+    )
+
+    assumer_info["assignments"] = [AuthListResponseProperties(identity_name, scope)]
     assumer_info["name"] = identity_name
     assumer_info["sub_id"] = "test_id"
     assumer_info["rg_name"] = "rg_name"
@@ -137,6 +153,8 @@ def test_azure_assumer_identity_exists_validation_success():
         azure_role="Virtual Machine Contributor",
         scope=scope,
         assumer_info=assumer_info,
+        actions=[],
+        data_actions=[],
     )
 
     func = expect_validation_success(azure_assumer_identity_exists_validation)
@@ -158,13 +176,15 @@ def test_azure_assumer_identity_exists_validation_fail():
         azure_role="Virtual Machine Contributor",
         scope=scope,
         assumer_info=assumer_info,
+        actions=[],
+        data_actions=[],
     )
 
     func = expect_validation_failure(azure_assumer_identity_exists_validation)
     func(get_config("assumer"), auth_client, resource_client)
 
 
-def test_azure_assumer_logs_contributor_validation_success():
+def test_azure_assumer_logs_actions_validation_success():
     identity_name = "assumer"
     scope = get_storage_container_scope("test_id", "rg_name", "storage_name", "logs")
     resource_client = Mock(spec=ResourceManagementClient)
@@ -175,20 +195,26 @@ def test_azure_assumer_logs_contributor_validation_success():
     setup_mocks(
         resource_client=resource_client,
         auth_client=auth_client,
-        identity_name="assumer",
+        identity_name=identity_name,
         azure_role="Storage Blob Data Contributor",
         scope=scope,
         assumer_info=assumer_info,
+        actions=["Microsoft.Storage/storageAccounts/blobServices/write"],
+        data_actions=[],
     )
 
-    func = expect_validation_success(azure_assumer_logs_contributor_validation)
-    func(get_config(identity_name), auth_client, assumer_info)
+    func = expect_validation_success(azure_assumer_logs_actions_validation)
+    func(
+        get_config(identity_name),
+        auth_client,
+        ["Microsoft.Storage/storageAccounts/blobServices/write"],
+        assumer_info,
+    )
 
 
-def test_azure_assumer_logs_contributor_validation_fail():
-    identity_name = "datalake_admin"
+def test_azure_assumer_logs_actions_validation_fail():
+    identity_name = "assumer"
     scope = get_storage_container_scope("test_id", "rg_name", "storage_name", "logs")
-
     resource_client = Mock(spec=ResourceManagementClient)
     auth_client = Mock(spec=AuthorizationManagementClient)
 
@@ -197,19 +223,86 @@ def test_azure_assumer_logs_contributor_validation_fail():
     setup_mocks(
         resource_client=resource_client,
         auth_client=auth_client,
-        identity_name="datalake_admin",
-        azure_role="Failing Azure Role",
+        identity_name=identity_name,
+        azure_role="Storage Blob Data Contributor",
         scope=scope,
         assumer_info=assumer_info,
+        actions=["Microsoft.Storage/storageAccounts/blobServices/read"],
+        data_actions=[],
     )
 
-    func = expect_validation_failure(azure_assumer_logs_contributor_validation)
-    func(get_config(identity_name), auth_client, assumer_info)
+    func = expect_validation_failure(azure_assumer_logs_actions_validation)
+    func(
+        get_config(identity_name),
+        auth_client,
+        ["Microsoft.Storage/storageAccounts/blobServices/write"],
+        assumer_info,
+    )
 
 
-def test_azure_assumer_managed_identity_operator_validation_success():
+def test_azure_assumer_logs_data_actions_validation_success():
+    identity_name = "assumer"
+    scope = get_storage_container_scope("test_id", "rg_name", "storage_name", "logs")
+    resource_client = Mock(spec=ResourceManagementClient)
+    auth_client = Mock(spec=AuthorizationManagementClient)
+
+    assumer_info = {}
+
+    setup_mocks(
+        resource_client=resource_client,
+        auth_client=auth_client,
+        identity_name=identity_name,
+        azure_role="Storage Blob Data Contributor",
+        scope=scope,
+        assumer_info=assumer_info,
+        actions=[],
+        data_actions=[
+            "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write"
+        ],
+    )
+
+    func = expect_validation_success(azure_assumer_logs_data_actions_validation)
+    func(
+        get_config(identity_name),
+        auth_client,
+        ["Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write"],
+        assumer_info,
+    )
+
+
+def test_azure_assumer_logs_data_actions_validation_fail():
+    identity_name = "assumer"
+    scope = get_storage_container_scope("test_id", "rg_name", "storage_name", "logs")
+    resource_client = Mock(spec=ResourceManagementClient)
+    auth_client = Mock(spec=AuthorizationManagementClient)
+
+    assumer_info = {}
+
+    setup_mocks(
+        resource_client=resource_client,
+        auth_client=auth_client,
+        identity_name=identity_name,
+        azure_role="Storage Blob Data Contributor",
+        scope=scope,
+        assumer_info=assumer_info,
+        actions=[],
+        data_actions=[
+            "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/failwrite"
+        ],
+    )
+
+    func = expect_validation_failure(azure_assumer_logs_data_actions_validation)
+    func(
+        get_config(identity_name),
+        auth_client,
+        ["Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write"],
+        assumer_info,
+    )
+
+
+def test_azure_assumer_rg_actions_validation_success():
+    identity_name = "assumer"
     scope = get_resource_group_scope("test_id", "rg_name")
-
     resource_client = Mock(spec=ResourceManagementClient)
     auth_client = Mock(spec=AuthorizationManagementClient)
 
@@ -218,19 +311,25 @@ def test_azure_assumer_managed_identity_operator_validation_success():
     setup_mocks(
         resource_client=resource_client,
         auth_client=auth_client,
-        identity_name="assumer",
-        azure_role="Managed Identity Operator",
+        identity_name=identity_name,
+        azure_role="Storage Blob Data Contributor",
         scope=scope,
         assumer_info=assumer_info,
+        actions=["Microsoft.ManagedIdentity/userAssignedIdentities/read"],
+        data_actions=[],
     )
 
-    func = expect_validation_success(azure_assumer_managed_identity_operator_validation)
-    func(auth_client, assumer_info)
+    func = expect_validation_success(azure_assumer_rg_actions_validation)
+    func(
+        auth_client,
+        ["Microsoft.ManagedIdentity/userAssignedIdentities/read"],
+        assumer_info,
+    )
 
 
-def test_azure_assumer_managed_identity_operator_validation_fails():
+def test_azure_assumer_rg_actions_validation_fail():
+    identity_name = "assumer"
     scope = get_resource_group_scope("test_id", "rg_name")
-
     resource_client = Mock(spec=ResourceManagementClient)
     auth_client = Mock(spec=AuthorizationManagementClient)
 
@@ -239,57 +338,17 @@ def test_azure_assumer_managed_identity_operator_validation_fails():
     setup_mocks(
         resource_client=resource_client,
         auth_client=auth_client,
-        identity_name="assumer",
-        azure_role="Managed Identity Operator Fails",
+        identity_name=identity_name,
+        azure_role="Storage Blob Data Contributor",
         scope=scope,
         assumer_info=assumer_info,
+        actions=["Microsoft.ManagedIdentity/userAssignedIdentities/failread"],
+        data_actions=[],
     )
 
-    func = expect_validation_failure(azure_assumer_managed_identity_operator_validation)
-    func(auth_client, assumer_info)
-
-
-def test_azure_assumer_virtual_machine_contributor_validation_success():
-    scope = get_resource_group_scope("test_id", "rg_name")
-
-    resource_client = Mock(spec=ResourceManagementClient)
-    auth_client = Mock(spec=AuthorizationManagementClient)
-
-    assumer_info = {}
-
-    setup_mocks(
-        resource_client=resource_client,
-        auth_client=auth_client,
-        identity_name="assumer",
-        azure_role="Virtual Machine Contributor",
-        scope=scope,
-        assumer_info=assumer_info,
+    func = expect_validation_failure(azure_assumer_rg_actions_validation)
+    func(
+        auth_client,
+        ["Microsoft.ManagedIdentity/userAssignedIdentities/read"],
+        assumer_info,
     )
-
-    func = expect_validation_success(
-        azure_assumer_virtual_machine_contributor_validation
-    )
-    func(auth_client, assumer_info)
-
-
-def test_azure_assumer_virtual_machine_contributor_validation_fails():
-    scope = get_resource_group_scope("test_id", "rg_name")
-
-    resource_client = Mock(spec=ResourceManagementClient)
-    auth_client = Mock(spec=AuthorizationManagementClient)
-
-    assumer_info = {}
-
-    setup_mocks(
-        resource_client=resource_client,
-        auth_client=auth_client,
-        identity_name="assumer",
-        azure_role="Virtual Machine Contributor Fails",
-        scope=scope,
-        assumer_info=assumer_info,
-    )
-
-    func = expect_validation_failure(
-        azure_assumer_virtual_machine_contributor_validation
-    )
-    func(auth_client, assumer_info)
