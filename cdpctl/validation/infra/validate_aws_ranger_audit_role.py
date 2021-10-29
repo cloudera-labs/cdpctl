@@ -252,7 +252,7 @@ def aws_ranger_audit_data_location_needed_actions_validation(
 def aws_ranger_audit_backup_location_needed_actions_validation(
     data_location_needed_actions: List[str], iam_client: IAMClient
 ) -> None:
-    """Ranger audit role has needed actions for the data location."""  # noqa: D401
+    """Ranger audit role has needed actions for the backup location."""  # noqa: D401
     try:
         simulate_policy(
             iam_client=iam_client,
