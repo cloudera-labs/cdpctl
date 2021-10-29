@@ -332,7 +332,7 @@ def aws_datalake_admin_role_has_backup_bucket_access_policy(
     iam_client: IAMClient,
     bucket_access_policy_actions: List[str],
 ) -> None:
-    """Validate datalake_admin role has the needed access to the S3 data bucket."""
+    """Validate datalake_admin role has the needed access to the S3 backup bucket."""
 
     datalake_admin_role_name: str = get_config_value(
         config,

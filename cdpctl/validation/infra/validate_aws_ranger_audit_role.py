@@ -114,7 +114,7 @@ def aws_ranger_audit_role_backup_location_exist_validation(
         config,
         "infra:aws:vpc:existing:storage:backup",
     )
-    # data access s3 bucket arn
+    # backup access s3 bucket arn
     backup_location_arn = convert_s3a_to_arn(backup_location)
 
     ranger_audit_data["backup_location"] = backup_location
