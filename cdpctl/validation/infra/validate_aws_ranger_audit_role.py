@@ -106,6 +106,23 @@ def aws_ranger_audit_role_data_location_exist_validation(
 
 @pytest.mark.aws
 @pytest.mark.infra
+def aws_ranger_audit_role_backup_location_exist_validation(
+    config: Dict[str, Any]
+) -> None:  # pragma: no cover
+    """Ranger backup location exists."""  # noqa: D401
+    backup_location: str = get_config_value(
+        config,
+        "infra:aws:vpc:existing:storage:backup",
+    )
+    # data access s3 bucket arn
+    backup_location_arn = convert_s3a_to_arn(backup_location)
+
+    ranger_audit_data["backup_location"] = backup_location
+    ranger_audit_data["backup_location_arn"] = backup_location_arn
+
+
+@pytest.mark.aws
+@pytest.mark.infra
 def aws_ranger_audit_role_audit_location_exist_validation(
     config: Dict[str, Any]
 ) -> None:  # pragma: no cover
@@ -217,6 +234,37 @@ def aws_ranger_audit_data_location_needed_actions_validation(
             subjects=[
                 ranger_audit_data["ranger_audit_role"],
                 ranger_audit_data["data_location_arn"] + "/*",
+            ],
+            missing_actions_issue=AWS_ROLE_FOR_DATA_BUCKET_MISSING_ACTIONS,
+        )
+    except KeyError as e:
+        fail(AWS_REQUIRED_DATA_MISSING, e.args[0])
+
+
+@pytest.mark.aws
+@pytest.mark.infra
+@pytest.mark.dependency(
+    depends=[
+        "aws_ranger_audit_role_exists_validation",
+        "aws_ranger_audit_role_backup_location_exist_validation",
+    ]
+)
+def aws_ranger_audit_backup_location_needed_actions_validation(
+    data_location_needed_actions: List[str], iam_client: IAMClient
+) -> None:
+    """Ranger audit role has needed actions for the data location."""  # noqa: D401
+    try:
+        simulate_policy(
+            iam_client=iam_client,
+            policy_source_arn=ranger_audit_data["role_arn"],
+            resource_arns=[
+                ranger_audit_data["backup_location_arn"],
+                ranger_audit_data["backup_location_arn"] + "/*",
+            ],
+            needed_actions=data_location_needed_actions,
+            subjects=[
+                ranger_audit_data["ranger_audit_role"],
+                ranger_audit_data["backup_location_arn"] + "/*",
             ],
             missing_actions_issue=AWS_ROLE_FOR_DATA_BUCKET_MISSING_ACTIONS,
         )
