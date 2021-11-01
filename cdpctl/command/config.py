@@ -39,8 +39,9 @@
 #
 # Source File Name:  config.py
 ###
-
 """Config Commands Implementation."""
+from typing import Any, Dict
+
 from jinja2 import Environment, PackageLoader, select_autoescape
 
 from cdpctl.utils import smart_open
@@ -58,3 +59,13 @@ def render_skeleton(output_file: str, platform: str):
     config_template = env.get_template(CONFIG_TEMPLATE_NAME[platform])
     with smart_open(output_file) as f:
         f.write(config_template.render(info={}))
+
+
+def render_generated(generation_info: Dict[str, Any], output_file: str):
+    env = Environment(
+        loader=PackageLoader(package_name="cdpctl", package_path="templates"),
+        autoescape=select_autoescape(),
+    )
+    config_template = env.get_template(CONFIG_TEMPLATE_NAME)
+    with smart_open(output_file) as f:
+        f.write(config_template.render(info=generation_info))

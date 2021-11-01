@@ -40,15 +40,16 @@
 # Source File Name:  cli.py
 ###
 """CDP Control."""
-
 import sys
+from typing import Any, Dict
 
 import click
 
 from cdpctl import SUPPORTED_PLATFORMS, SUPPORTED_TARGETS
 from cdpctl.__version__ import __version__
-from cdpctl.command.config import render_skeleton
+from cdpctl.command.config import render_generated, render_skeleton
 from cdpctl.command.validate import run_validation
+from cdpctl.config.infra.aws_generation import prompt_for_aws_config
 
 SUPPORTED_OUTPUT_TYPES = ["text", "json"]
 
@@ -134,6 +135,25 @@ def skeleton(output_file, platform: str) -> None:
     render_skeleton(output_file=output_file, platform=platform.lower())
 
 
+@click.command()
+@click.option(
+    "-o",
+    "--output_file",
+    default="-",
+    help="The config file to output. Defaults to stdout.",
+    type=click.Path(exists=False),
+)
+def generate(output_file: str) -> None:
+    config_generation_info: Dict[str, Any] = {}
+    config_generation_info["infra_type"] = click.prompt(
+        "What cloud provider will you be using?",
+        type=click.Choice(["aws"], case_sensitive=True),
+        default="aws",
+    )
+    generation_info = prompt_for_aws_config(config_generation_info)
+    render_generated(generation_info=generation_info, output_file=output_file)
+
+
 def print_version() -> None:
     """Print the cdpctl version."""
     click.echo(__version__)
@@ -141,6 +161,7 @@ def print_version() -> None:
 
 
 config.add_command(skeleton)
+config.add_command(generate)
 _cli.add_command(validate)
 _cli.add_command(config)
 

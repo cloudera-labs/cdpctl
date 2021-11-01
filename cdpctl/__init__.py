@@ -44,6 +44,8 @@
 SUPPORTED_TARGETS = ["infra"]
 SUPPORTED_PLATFORMS = ["aws", "azure"]
 
+SUPPPOTED_NETWORK_TYPES = ["level0", "level1", "level2"]
+
 
 class Command:
     """Base command class."""

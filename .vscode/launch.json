@@ -72,6 +72,16 @@
             "program": "scripts/update_issue_templates.py",
             "console": "integratedTerminal"
         }
-
+        ,
+        {
+            "name": "cdpctl config generate",
+            "type": "python",
+            "request": "launch",
+            "module": "cdpctl",
+            "args": [
+                "config",
+                "generate"
+            ]
+        }
     ]
 }
