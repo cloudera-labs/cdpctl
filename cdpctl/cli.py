@@ -48,8 +48,8 @@ import click
 from cdpctl import SUPPORTED_PLATFORMS, SUPPORTED_TARGETS
 from cdpctl.__version__ import __version__
 from cdpctl.command.config import render_skeleton
-from cdpctl.command.validate import run_validation
 from cdpctl.command.provision import run_provision
+from cdpctl.command.validate import run_validation
 
 SUPPORTED_OUTPUT_TYPES = ["text", "json"]
 

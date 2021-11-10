@@ -70,7 +70,10 @@ def run_provision(
 
 
 class EventHandler:
+    """Anisible event handler."""
+
     def __init__(self) -> None:
+        """Event handler progressbar setup."""
         self.progress_bar = progressbar.ProgressBar(
             max_value=progressbar.UnknownLength, redirect_stdout=True
         )
