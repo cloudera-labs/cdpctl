@@ -163,7 +163,7 @@ def skeleton(output_file, platform: str) -> None:
 def provision(
     ctx, target: str, config_file, output_file, output_format
 ) -> None:  # pylint: disable=unused-argument
-    """Run validation checks on provided section."""
+    """Run provision on provided section."""
     run_provision(
         target=target,
         config_file=config_file,
