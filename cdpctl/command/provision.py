@@ -46,29 +46,37 @@ from typing import Any, Dict
 import ansible_runner
 import progressbar
 
-from cdpctl import Command
+from cdpctl.validation import get_issues
+from cdpctl.validation.renderer import get_renderer
 
 
-class ProvisionCommand(Command):
-    """The provision command."""
+def run_provision(
+    target: str, config_file: str, debug: bool, output_format: str, output_file: str
+) -> None:
+    """Run the povision."""
+    print(f"provisioning {target} with {str(config_file)}")
+    status_updater = EventHandler().status_updater
+    t, _ = ansible_runner.run_async(
+        private_data_dir=os.path.join(os.getcwd(), "example"),
+        playbook="test.yaml",
+        quiet=True,
+        event_handler=status_updater,
+        debug=debug,
+        logfile=output_file,
+    )
+    t.join()
+    renderer = get_renderer(output_format=output_format)
+    renderer.render(get_issues(), output_file)
+
+
+class EventHandler:
+    """Anisible event handler."""
 
     def __init__(self) -> None:
-        """Set up the Command."""
-        super().__init__()
+        """Event handler progressbar setup."""
         self.progress_bar = progressbar.ProgressBar(
             max_value=progressbar.UnknownLength, redirect_stdout=True
         )
-
-    def run(self, target: str, config_file: str) -> None:
-        """Run the povision."""
-        print(f"provisioning {target} with {str(config_file)}")
-        t, _ = ansible_runner.run_async(
-            private_data_dir=os.path.join(os.getcwd(), "example"),
-            playbook="test.yaml",
-            quiet=True,
-            event_handler=self.status_updater,
-        )
-        t.join()
 
     def status_updater(self, event: Dict[str, Any]) -> None:
         """Update the status of the provision."""

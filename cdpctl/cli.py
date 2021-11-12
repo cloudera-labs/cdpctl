@@ -48,6 +48,7 @@ import click
 from cdpctl import SUPPORTED_PLATFORMS, SUPPORTED_TARGETS
 from cdpctl.__version__ import __version__
 from cdpctl.command.config import render_skeleton
+from cdpctl.command.provision import run_provision
 from cdpctl.command.validate import run_validation
 
 SUPPORTED_OUTPUT_TYPES = ["text", "json"]
@@ -134,6 +135,44 @@ def skeleton(output_file, platform: str) -> None:
     render_skeleton(output_file=output_file, platform=platform.lower())
 
 
+@click.command()
+@click.pass_context
+@click.argument("target", type=click.Choice(SUPPORTED_TARGETS, case_sensitive=False))
+@click.option(
+    "-c",
+    "--config_file",
+    "config_file",
+    default="config.yml",
+    help="The config file to use. Defaults to config.yml.",
+    type=click.Path(exists=False),
+)
+@click.option(
+    "-o",
+    "--output_file",
+    default="-",
+    help="The file to output the results to. Defaults to stdout.",
+    type=click.Path(exists=False),
+)
+@click.option(
+    "-f",
+    "--output_format",
+    default="text",
+    help="The format to output the results as.",
+    type=click.Choice(SUPPORTED_OUTPUT_TYPES, case_sensitive=False),
+)
+def provision(
+    ctx, target: str, config_file, output_file, output_format
+) -> None:  # pylint: disable=unused-argument
+    """Run provision on provided section."""
+    run_provision(
+        target=target,
+        config_file=config_file,
+        debug=ctx.obj["DEBUG"],
+        output_format=output_format,
+        output_file=output_file,
+    )
+
+
 def print_version() -> None:
     """Print the cdpctl version."""
     click.echo(__version__)
@@ -142,6 +181,7 @@ def print_version() -> None:
 
 config.add_command(skeleton)
 _cli.add_command(validate)
+_cli.add_command(provision)
 _cli.add_command(config)
 
 
