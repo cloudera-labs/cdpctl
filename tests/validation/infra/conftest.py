@@ -46,6 +46,8 @@ from cdpctl.validation.infra.conftest import (
     autoscaling_resources_needed_actions,
     azure_data_required_actions,
     azure_data_required_data_actions,
+    azure_cross_account_required_resource_group_actions,
+    azure_cross_account_required_resource_group_data_actions,
     cdp_cidrs,
     cdp_environment_resources_needed_actions,
     cloud_formation_needed_actions,
