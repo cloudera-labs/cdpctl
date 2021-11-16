@@ -52,8 +52,6 @@ from cdpctl.validation.azure_utils import (
     get_client,
     get_resource_group_scope,
     get_role_assignments,
-    get_storage_container_scope,
-    parse_adls_path,
 )
 from cdpctl.validation.infra.issues import (
     AZURE_IDENTITY_MISSING_ACTIONS_FOR_LOCATION,
