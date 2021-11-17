@@ -40,6 +40,10 @@
 # Source File Name:  validate_azure_cross_account_identity.py
 ###
 """Validation of Azure Cross Account Identity."""
+# "Cross Account Identity" is equivalent to "Cloudera Management Console Operator Identity" # noqa: D401,E501
+# Customer facing text changed to "Cloudera Management Console Operator Identity" to
+# match the documentation
+
 from typing import Any, Dict, List
 
 import pytest
@@ -86,7 +90,7 @@ def azure_cross_account_identity_exists_validation(
     auth_client: AuthorizationManagementClient,
     resource_client: ResourceManagementClient,
 ) -> None:  # pragma: no cover
-    """Azure Cross Account Identity exists."""
+    """Azure Cloudera Management Console Operator Identity exists."""
 
     _cross_account_info["sub_id"] = get_config_value(
         config=config, key="infra:azure:subscription_id"
@@ -115,7 +119,7 @@ def azure_cross_account_rg_actions_validation(
     azure_cross_account_required_resource_group_actions: List[str],
     cross_account_info,
 ) -> None:  # pragma: no cover
-    """Cross Account Identity has the necessary actions on the resource group."""  # noqa: D401,E501
+    """Cloudera Management Console Operator Identity has the necessary actions on the resource group."""  # noqa: D401,E501
 
     proper_scope = get_resource_group_scope(
         subscription_id=cross_account_info["sub_id"],
@@ -149,7 +153,7 @@ def azure_cross_account_rg_data_actions_validation(
     azure_cross_account_required_resource_group_data_actions: List[str],
     cross_account_info,
 ) -> None:  # pragma: no cover
-    """Cross Account Identity has the necessary data actions on the resource group."""  # noqa: D401,E501
+    """Cloudera Management Console Operator Identity has the necessary data actions on the resource group."""  # noqa: D401,E501
 
     proper_scope = get_resource_group_scope(
         subscription_id=cross_account_info["sub_id"],

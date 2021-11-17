@@ -39,7 +39,7 @@ env:
         # example: azure-cdp-ranger_audit-identity
         ranger_audit: {{ info['env:azure:role:name:ranger_audit']|default("", true) }}
 
-        ## The cross-account Identity to be used for the environment
+        ## The Cloudera Management Console Operator Identity to be used for the environment
         # example: azure-cdp-cross_account-identity
         cross_account: {{ info['env:azure:role:name:cross_account']|default("", true) }}
     storage:
